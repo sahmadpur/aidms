@@ -26,7 +26,7 @@ services:
     labels:
       - traefik.enable=true
       - traefik.docker.network=n8n-compose_default
-      - traefik.http.routers.dms-api.rule=Host(`api.dms.ahmadpur.org`)
+      - traefik.http.routers.dms-api.rule=Host(`dms-api.ahmadpur.org`)
       - traefik.http.routers.dms-api.entrypoints=websecure
       - traefik.http.routers.dms-api.tls=true
       - traefik.http.services.dms-api.loadbalancer.server.port=8000
@@ -38,9 +38,9 @@ services:
   frontend:
     build:
       args:
-        NEXT_PUBLIC_API_URL: https://api.dms.ahmadpur.org
+        NEXT_PUBLIC_API_URL: https://dms-api.ahmadpur.org
     environment:
-      NEXT_PUBLIC_API_URL: https://api.dms.ahmadpur.org
+      NEXT_PUBLIC_API_URL: https://dms-api.ahmadpur.org
       HOSTNAME: 0.0.0.0
     ports: !reset []
     networks:

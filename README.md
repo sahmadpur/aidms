@@ -91,7 +91,9 @@ docker compose exec postgres psql -U aidms -d aidms \
 The server at `173.249.38.125` fronts every service with Traefik + Cloudflare Tunnel (`/home/n8n-compose/`). The tunnel has two public hostnames pointing at this box:
 
 - `dms.ahmadpur.org` → frontend
-- `api.dms.ahmadpur.org` → backend
+- `dms-api.ahmadpur.org` → backend
+
+> The backend lives at `dms-api.ahmadpur.org`, not `api.dms.ahmadpur.org`, because Cloudflare's Universal SSL cert only covers one level of wildcard (`*.ahmadpur.org`). Multi-level subdomains like `api.dms.ahmadpur.org` would require a paid Advanced Certificate or Total TLS.
 
 Traefik joins the services on the existing `n8n-compose_default` Docker network; TLS is terminated at Cloudflare, so Traefik only does host-based routing inside the box. The override file `docker-compose.prod.yml` wires this up.
 
@@ -117,7 +119,7 @@ docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d --build
 docker compose -f docker-compose.yml -f docker-compose.prod.yml exec api python -m scripts.seed_phase2
 ```
 
-Then register your first user via `https://api.dms.ahmadpur.org/docs` → `POST /auth/register`, and promote to admin:
+Then register your first user via `https://dms-api.ahmadpur.org/docs` → `POST /auth/register`, and promote to admin:
 
 ```bash
 docker compose -f docker-compose.yml -f docker-compose.prod.yml exec postgres \

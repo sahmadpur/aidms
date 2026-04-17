@@ -5,6 +5,9 @@ from typing import Optional
 from pydantic import BaseModel, field_validator
 
 
+DOC_TYPES = {"contract", "invoice", "report", "letter", "permit", "other"}
+
+
 class CategoryResponse(BaseModel):
     id: uuid.UUID
     name_az: str
@@ -30,6 +33,7 @@ class CategoryCreate(BaseModel):
 
 class DocumentUploadResponse(BaseModel):
     id: uuid.UUID
+    display_id: Optional[str]
     title: str
     ocr_status: str
     file_size_bytes: int
@@ -40,9 +44,14 @@ class DocumentUploadResponse(BaseModel):
 
 class DocumentResponse(BaseModel):
     id: uuid.UUID
+    display_id: Optional[str]
     user_id: uuid.UUID
     title: str
     category_id: Optional[uuid.UUID]
+    folder_id: Optional[uuid.UUID]
+    department_id: Optional[uuid.UUID]
+    doc_type: Optional[str]
+    physical_location: Optional[str]
     tags: list[str]
     language: Optional[str]
     description: Optional[str]
@@ -68,6 +77,10 @@ class DocumentListResponse(BaseModel):
 class DocumentUpdateRequest(BaseModel):
     title: Optional[str] = None
     category_id: Optional[uuid.UUID] = None
+    folder_id: Optional[uuid.UUID] = None
+    department_id: Optional[uuid.UUID] = None
+    doc_type: Optional[str] = None
+    physical_location: Optional[str] = None
     tags: Optional[list[str]] = None
     language: Optional[str] = None
     description: Optional[str] = None
@@ -87,4 +100,11 @@ class DocumentUpdateRequest(BaseModel):
     def valid_language(cls, v: Optional[str]) -> Optional[str]:
         if v is not None and v not in ("az", "ru", "en"):
             raise ValueError("Language must be one of: az, ru, en")
+        return v
+
+    @field_validator("doc_type")
+    @classmethod
+    def valid_doc_type(cls, v: Optional[str]) -> Optional[str]:
+        if v is not None and v not in DOC_TYPES:
+            raise ValueError(f"doc_type must be one of: {', '.join(sorted(DOC_TYPES))}")
         return v

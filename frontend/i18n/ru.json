@@ -1,10 +1,28 @@
 {
   "nav": {
+    "library": "Библиотека",
+    "manage": "Управление",
+    "account": "Аккаунт",
+    "allDocuments": "Все документы",
+    "folders": "Папки",
+    "fullTextSearch": "Полнотекстовый поиск",
+    "recentUploads": "Недавние загрузки",
+    "aiChat": "ИИ Чат",
+    "usersRoles": "Пользователи и роли",
+    "categories": "Категории",
+    "departments": "Отделы",
+    "reports": "Отчёты",
+    "auditLog": "Журнал аудита",
+    "settings": "Настройки",
+    "logout": "Выйти",
     "documents": "Документы",
     "search": "Поиск",
     "chat": "ИИ Чат",
+    "admin": "Администратор"
+  },
+  "roles": {
     "admin": "Администратор",
-    "logout": "Выйти"
+    "user": "Пользователь"
   },
   "auth": {
     "login": "Войти",
@@ -31,15 +49,30 @@
   "ocr": {
     "status": "Статус OCR",
     "pending": "Ожидает",
-    "processing": "Обрабатывается...",
-    "completed": "Готово",
+    "processing": "Обрабатывается",
+    "completed": "Проиндексирован",
     "failed": "Ошибка"
   },
+  "docType": {
+    "contract": "Контракт",
+    "invoice": "Счёт",
+    "report": "Отчёт",
+    "letter": "Письмо",
+    "permit": "Разрешение",
+    "other": "Прочее"
+  },
   "documents": {
-    "title": "Мои документы",
+    "title": "Все документы",
     "noDocuments": "Документов пока нет. Загрузите первый PDF.",
-    "uploadDate": "Загружено",
+    "uploadDate": "Создан",
     "category": "Категория",
+    "type": "Тип",
+    "folder": "Папка",
+    "department": "Отдел",
+    "physicalLocation": "Физическое расположение",
+    "virtualPath": "Виртуальный путь",
+    "docId": "ID документа",
+    "uploader": "Загрузил",
     "tags": "Теги",
     "language": "Язык",
     "edit": "Редактировать метаданные",
@@ -48,7 +81,21 @@
     "viewOcr": "Просмотр текста OCR",
     "reprocess": "Повторная обработка",
     "confirmDelete": "Вы уверены, что хотите удалить этот документ?",
-    "searchPlaceholder": "Поиск по названию или содержимому..."
+    "searchPlaceholder": "Поиск по названию, содержимому или ключевому слову…",
+    "showing": "Показано {shown} из {total} документов",
+    "indexed": "{count} проиндексировано",
+    "pendingOcr": "{count} в очереди OCR"
+  },
+  "filters": {
+    "type": "Тип",
+    "year": "Год",
+    "allYears": "Все годы",
+    "department": "Отдел",
+    "allDepartments": "Все отделы",
+    "ocrStatus": "Статус OCR",
+    "all": "Все",
+    "folder": "Папка",
+    "allFolders": "Все папки"
   },
   "search": {
     "title": "Поиск документов",
@@ -67,6 +114,55 @@
     "thinking": "Думает...",
     "sources": "Источники",
     "deleteSession": "Удалить разговор"
+  },
+  "folders": {
+    "title": "Папки",
+    "newFolder": "Новая папка",
+    "rename": "Переименовать",
+    "move": "Переместить",
+    "delete": "Удалить",
+    "empty": "Эта папка пуста.",
+    "root": "Корень",
+    "parent": "Родительская папка",
+    "none": "Без родителя"
+  },
+  "departments": {
+    "title": "Отделы",
+    "newDepartment": "Новый отдел"
+  },
+  "reports": {
+    "title": "Отчёты",
+    "totalDocs": "Всего документов",
+    "indexed": "Проиндексировано",
+    "pending": "В очереди",
+    "processing": "Обрабатывается",
+    "failed": "Ошибка",
+    "byDocType": "По типу",
+    "byDepartment": "По отделу",
+    "uploadsLast30d": "Загрузки (30 дней)",
+    "topUploaders": "Топ загрузчики"
+  },
+  "auditLog": {
+    "title": "Журнал аудита",
+    "user": "Пользователь",
+    "action": "Действие",
+    "entity": "Объект",
+    "when": "Когда",
+    "ip": "IP",
+    "noLogs": "Записей аудита нет."
+  },
+  "settings": {
+    "title": "Настройки",
+    "profile": "Профиль",
+    "fullName": "Полное имя",
+    "language": "Язык интерфейса",
+    "password": "Пароль",
+    "currentPassword": "Текущий пароль",
+    "newPassword": "Новый пароль",
+    "updateProfile": "Обновить профиль",
+    "changePassword": "Сменить пароль",
+    "profileUpdated": "Профиль обновлён",
+    "passwordChanged": "Пароль изменён"
   },
   "admin": {
     "users": "Пользователи",
@@ -97,6 +193,15 @@
     "edit": "Редактировать",
     "close": "Закрыть",
     "confirm": "Подтвердить",
-    "language": "Язык"
+    "language": "Язык",
+    "export": "Экспорт",
+    "filter": "Фильтр",
+    "uploadDoc": "Загрузить",
+    "open": "Открыть",
+    "prev": "Назад",
+    "next": "Вперёд",
+    "search": "Поиск",
+    "yes": "Да",
+    "no": "Нет"
   }
 }

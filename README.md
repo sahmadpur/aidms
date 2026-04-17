@@ -1,6 +1,16 @@
-# AI-Powered Multilingual DMS
+# DocArchive AI — Multilingual Document Management
 
-An AI-powered document management system supporting Azerbaijani, Russian, and English. Upload PDFs, run OCR, and ask questions about your documents via a streaming AI chat interface.
+An AI-powered, organization-wide document archive supporting Azerbaijani, Russian, and English. Upload PDFs, run OCR, organise them by folders / type / department / physical shelf location, search them semantically, and ask Claude about them via streaming RAG chat.
+
+**Phase 2 additions** (see `docs/REQUIREMENTS.md` for the full spec):
+- Hierarchical **folders** alongside the flat taxonomy (categories).
+- **Physical location** tracking (e.g. `Shelf B-3, Box 12`) for paper archives.
+- First-class **document type** (contract / invoice / report / letter / permit / other) and **department** fields.
+- Human-friendly **display ID** (`DOC-000001`) assigned by a Postgres trigger.
+- **Org-wide visibility** — every authenticated user sees every document; only the uploader or an admin can mutate.
+- New admin screens: **Reports** (stats + 30-day chart), **Audit Log**, **Departments**, **Folders** CRUD.
+- User-facing **Settings** (profile + password change).
+- Client-side **CSV export** of the filtered Documents view.
 
 ## Prerequisites
 
@@ -55,7 +65,17 @@ This starts all services in the correct order:
 
 The `migrate` service runs `alembic upgrade head` automatically before the API starts. The `worker` service handles OCR + embedding jobs in the background.
 
-## 3. Create Admin User
+## 3. Seed starter folders + departments
+
+After the first boot, populate the starter tree so the UI isn't empty:
+
+```bash
+docker compose exec api python -m scripts.seed_phase2
+```
+
+Idempotent — re-run any time; existing rows are skipped.
+
+## 4. Create Admin User
 
 1. Open `http://localhost:8000/docs`
 2. Use `POST /auth/register` to create your first user

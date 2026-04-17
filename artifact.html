@@ -1,0 +1,771 @@
+<!DOCTYPE html>
+<!-- saved from url=(0012)about:srcdoc -->
+<html lang="en"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html-to-image/1.11.13/html-to-image.min.js" integrity="sha512-iZ2ORl595Wx6miw+GuadDet4WQbdSWS3JLMoNfY8cRGoEFy6oT3G9IbcrBeL6AfkgpA51ETt/faX6yLV+/gFJg==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <script>
+      (function() {
+        const originalConsole = window.console;
+        window.console = {
+          log: (...args) => {
+            originalConsole.log(...args);
+            window.parent.postMessage({ type: 'console', message: args.join(' ') }, '*');
+          },
+          error: (...args) => {
+            originalConsole.error(...args);
+            window.parent.postMessage({ type: 'console', message: 'Error: ' + args.join(' ') }, '*');
+          },
+          warn: (...args) => {
+            originalConsole.warn(...args);
+            window.parent.postMessage({ type: 'console', message: 'Warning: ' + args.join(' ') }, '*');
+          }
+        };
+
+        let requestId = 0;
+        let callbacksMap = new Map();
+        let streamControllers = new Map();
+        
+        window.claude = {
+          complete: (prompt) => {
+            return new Promise((resolve, reject) => {
+              const id = requestId++;
+              callbacksMap.set(id, { resolve, reject });
+              window.parent.postMessage({ type: 'claudeComplete', id, prompt }, '*');
+            });
+          }
+        };
+
+        window.storage = {
+          get: (key, shared = false) => {
+            return new Promise((resolve, reject) => {
+              const id = requestId++;
+              callbacksMap.set(id, { resolve, reject });
+              window.parent.postMessage({ type: 'storageGet', id, key, shared }, '*');
+            });
+          },
+          set: (key, value, shared = false) => {
+            return new Promise((resolve, reject) => {
+              const id = requestId++;
+              callbacksMap.set(id, { resolve, reject });
+              window.parent.postMessage({ type: 'storageSet', id, key, value, shared }, '*');
+            });
+          },
+          delete: (key, shared = false) => {
+            return new Promise((resolve, reject) => {
+              const id = requestId++;
+              callbacksMap.set(id, { resolve, reject });
+              window.parent.postMessage({ type: 'storageDelete', id, key, shared }, '*');
+            });
+          },
+          list: (prefix, shared = false) => {
+            return new Promise((resolve, reject) => {
+              const id = requestId++;
+              callbacksMap.set(id, { resolve, reject });
+              window.parent.postMessage({ type: 'storageList', id, prefix, shared }, '*');
+            });
+          }
+        };
+
+        let pendingBlobs = new Map();
+        URL.createObjectURL = (blob) => {
+          // Store the blob and create an ID and URL for it
+          const blobId = `blob-${Date.now()}-${Math.random()}`;
+          pendingBlobs.set(blobId, blob);
+          return `blob-request://${blobId}`;
+        };
+
+        URL.revokeObjectURL = (url) => {
+          // Remove the blob from our store
+          const blobId = url.replace("blob-request://", "");
+          pendingBlobs.delete(blobId);
+        };
+
+        const getBlobFromURL = (url) => {
+          const blobId = url.replace("blob-request://", "");
+          return pendingBlobs.get(blobId);
+        };
+
+        // Override global fetch with streaming support
+        window.fetch = (url, init = {}) => {
+          return new Promise((resolve, reject) => {
+            const id = requestId++;
+            const channelId = `fetch-${id}-${Date.now()}`;
+            
+            callbacksMap.set(id, { 
+              resolve: (response) => {
+                // Create a ReadableStream for the response body
+                const stream = new ReadableStream({
+                  start(controller) {
+                    streamControllers.set(channelId, controller);
+                  },
+                  cancel() {
+                    streamControllers.delete(channelId);
+                  }
+                });
+                
+                // Create and return the Response with the stream
+                resolve(new Response(stream, {
+                  status: response.status,
+                  statusText: response.statusText,
+                  headers: response.headers
+                }));
+              },
+              reject,
+              channelId
+            });
+            
+            window.parent.postMessage({
+              type: 'proxyFetch',
+              id,
+              url,
+              init,
+              channelId
+            }, '*');
+          });
+        };
+
+        window.addEventListener('message', async (event) => {
+          if (event.data.type === 'takeScreenshot') {
+            const rootElement = document.getElementById('artifacts-component-root-html');
+            if (!rootElement) {
+              window.parent.postMessage({
+                type: 'screenshotError',
+                error: new Error('Root element not found'),
+              }, '*');
+            }
+            const screenshot = await htmlToImage.toPng(rootElement, {
+              imagePlaceholder:
+                "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAAAXNSR0IArs4c6QAAAA1JREFUGFdjePDgwX8ACOQDoNsk0PMAAAAASUVORK5CYII=",
+            });
+            window.parent.postMessage({
+              type: 'screenshotData',
+              data: screenshot,
+            }, '*');
+          } else if (event.data.type === 'claudeComplete') {
+            const callback = callbacksMap.get(event.data.id);
+            if (event.data.error) {
+              callback.reject(new Error(event.data.error));
+            } else {
+              callback.resolve(event.data.completion);
+            }
+            callbacksMap.delete(event.data.id);
+          } else if (event.data.type === 'proxyFetchResponse') {
+            const callback = callbacksMap.get(event.data.id);
+            if (event.data.error) {
+              callback.reject(new Error(event.data.error));
+              callbacksMap.delete(event.data.id);
+            } else {
+              // Initial response with headers, status, etc.
+              callback.resolve({
+                status: event.data.status,
+                statusText: event.data.statusText,
+                headers: event.data.headers
+              });
+              // Don't delete the callback yet if streaming
+              if (!event.data.body) {
+                callbacksMap.delete(event.data.id);
+              }
+            }
+          } else if (event.data.type === 'proxyFetchStream') {
+            // Handle streaming data chunks
+            const controller = streamControllers.get(event.data.channelId);
+            if (controller) {
+              if (event.data.error) {
+                controller.error(new Error(event.data.error));
+                streamControllers.delete(event.data.channelId);
+              } else if (event.data.done) {
+                controller.close();
+                streamControllers.delete(event.data.channelId);
+                // Clean up the callback
+                const callback = Array.from(callbacksMap.entries()).find(
+                  ([_, value]) => value.channelId === event.data.channelId
+                );
+                if (callback) {
+                  callbacksMap.delete(callback[0]);
+                }
+              } else if (event.data.chunk) {
+                controller.enqueue(new Uint8Array(event.data.chunk));
+              }
+            }
+          } else if (event.data.type === 'storageGet') {
+            const callback = callbacksMap.get(event.data.id);
+            if (event.data.error) {
+              callback.reject(new Error(event.data.error));
+            } else {
+              callback.resolve(event.data.result);
+            }
+            callbacksMap.delete(event.data.id);
+          } else if (event.data.type === 'storageSet') {
+            const callback = callbacksMap.get(event.data.id);
+            if (event.data.error) {
+              callback.reject(new Error(event.data.error));
+            } else {
+              callback.resolve(event.data.result);
+            }
+            callbacksMap.delete(event.data.id);
+          } else if (event.data.type === 'storageDelete') {
+            const callback = callbacksMap.get(event.data.id);
+            if (event.data.error) {
+              callback.reject(new Error(event.data.error));
+            } else {
+              callback.resolve(event.data.result);
+            }
+            callbacksMap.delete(event.data.id);
+          } else if (event.data.type === 'storageList') {
+            const callback = callbacksMap.get(event.data.id);
+            if (event.data.error) {
+              callback.reject(new Error(event.data.error));
+            } else {
+              callback.resolve(event.data.result);
+            }
+            callbacksMap.delete(event.data.id);
+          }
+        });
+
+        window.addEventListener('click', (event) => {
+          const isEl = event.target instanceof HTMLElement;
+          if (!isEl) return;
+    
+          // find ancestor links
+          const linkEl = event.target.closest("a");
+          if (!linkEl || !linkEl.href) return;
+    
+          event.preventDefault();
+          event.stopImmediatePropagation();
+    
+          if (linkEl.href.startsWith("blob-request:")) {
+            const blob = getBlobFromURL(linkEl.href);
+            if (!blob) return;
+            void blob.arrayBuffer().then((data) => {
+              window.parent.postMessage({
+                type: "downloadFile",
+                filename: linkEl.download,
+                data,
+                mimeType: blob.type || "application/octet-stream",
+              });
+            });
+          } else if (linkEl.href.startsWith("data:")) {
+            const [header, base64Data] = linkEl.href.split(",");
+            const mimeMatch = header.match(/data:([^;]+)/);
+            const mimeType = mimeMatch ? mimeMatch[1] : "application/octet-stream";
+            const binaryString = atob(base64Data);
+            const data = Uint8Array.from(binaryString, (c) =>
+              c.charCodeAt(0),
+            ).buffer;
+            window.parent.postMessage({
+              type: "downloadFile",
+              filename: linkEl.download,
+              data,
+              mimeType,
+            });
+          } else {
+            let linkUrl;
+            try {
+              linkUrl = new URL(linkEl.href);
+            } catch (error) {
+              return;
+            }
+    
+            if (linkUrl.hostname === window.location.hostname) return;
+      
+            window.parent.postMessage({
+              type: 'openExternal',
+              href: linkEl.href,
+            }, '*');
+          }
+      });
+
+        const originalOpen = window.open;
+        window.open = function (url) {
+          window.parent.postMessage({
+            type: "openExternal",
+            href: url,
+          }, "*");
+        };
+
+        window.addEventListener('error', (event) => {
+          window.parent.postMessage({ type: 'console', message: 'Uncaught Error: ' + event.message }, '*');
+        });
+      })();
+    </script>
+  
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DocArchive AI — Document Management</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { height: 100%; font-family: 'Calibri', 'Aptos', 'Segoe UI', Arial, sans-serif; background: #f4f6f3; color: #1a1a1a; font-size: 14px; }
+
+  .app { display: flex; height: 100vh; min-height: 600px; }
+
+  /* ── SIDEBAR ── */
+  .sidebar {
+    width: 210px; min-width: 210px;
+    background: #2d5016;
+    display: flex; flex-direction: column;
+  }
+  .sidebar-logo {
+    padding: 20px 18px 16px;
+    border-bottom: 1px solid rgba(255,255,255,0.1);
+  }
+  .sidebar-logo .name { font-size: 16px; font-weight: 600; color: #e8f5d0; letter-spacing: 0.3px; }
+  .sidebar-logo .tag  { font-size: 10px; color: #9ecf60; margin-left: 3px; vertical-align: super; }
+  .sidebar-nav { flex: 1; padding: 8px 0; overflow-y: auto; }
+  .nav-section {
+    padding: 14px 18px 4px;
+    font-size: 10px; color: #7db542;
+    text-transform: uppercase; letter-spacing: 0.9px;
+  }
+  .nav-item {
+    display: flex; align-items: center; gap: 10px;
+    padding: 9px 18px;
+    cursor: pointer; color: #c5e49a; font-size: 13px;
+    border-left: 3px solid transparent;
+    transition: background 0.15s;
+    user-select: none;
+  }
+  .nav-item:hover { background: rgba(255,255,255,0.07); }
+  .nav-item.active { background: rgba(255,255,255,0.13); color: #e8f5d0; border-left-color: #7db542; }
+  .nav-item svg { flex-shrink: 0; opacity: 0.85; }
+  .sidebar-footer {
+    padding: 14px 18px;
+    border-top: 1px solid rgba(255,255,255,0.1);
+  }
+  .user-chip { display: flex; align-items: center; gap: 9px; }
+  .user-avatar {
+    width: 30px; height: 30px; border-radius: 50%;
+    background: #4a8c1c;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 11px; font-weight: 600; color: #d4f0a0; flex-shrink: 0;
+  }
+  .user-name  { font-size: 12px; color: #c5e49a; font-weight: 500; }
+  .user-role  { font-size: 10px; color: #7db542; margin-top: 1px; }
+
+  /* ── MAIN ── */
+  .main { flex: 1; display: flex; flex-direction: column; overflow: hidden; background: #f4f6f3; }
+
+  /* TOP BAR */
+  .topbar {
+    background: #fff;
+    border-bottom: 1px solid #dde8d0;
+    padding: 11px 22px;
+    display: flex; align-items: center; gap: 10px;
+  }
+  .topbar-title { font-size: 15px; font-weight: 600; color: #1a1a1a; margin-right: 6px; white-space: nowrap; }
+  .search-wrap { flex: 1; max-width: 340px; position: relative; }
+  .search-wrap svg { position: absolute; left: 10px; top: 50%; transform: translateY(-50%); color: #888; pointer-events: none; }
+  .search-input {
+    width: 100%; padding: 7px 10px 7px 32px;
+    border: 1px solid #c8ddb0; border-radius: 6px;
+    font-size: 13px; background: #f7fbf0; color: #1a1a1a;
+    font-family: inherit; outline: none;
+    transition: border-color 0.15s;
+  }
+  .search-input:focus { border-color: #4a8c1c; background: #fff; }
+  .search-input::placeholder { color: #aaa; }
+
+  .btn {
+    padding: 7px 14px; border-radius: 6px;
+    border: 1px solid #c8ddb0; background: #fff;
+    font-size: 12px; cursor: pointer; color: #2d5016;
+    font-family: inherit; display: flex; align-items: center; gap: 5px;
+    white-space: nowrap; transition: background 0.12s;
+  }
+  .btn:hover { background: #f0f7e6; }
+  .btn-primary { background: #2d5016; color: #e8f5d0; border-color: #2d5016; }
+  .btn-primary:hover { background: #3a6b1e; }
+
+  /* FILTER ROW */
+  .filters {
+    background: #fff;
+    border-bottom: 1px solid #dde8d0;
+    padding: 8px 22px;
+    display: flex; align-items: center; gap: 7px; flex-wrap: wrap;
+  }
+  .filter-label { font-size: 11px; color: #666; white-space: nowrap; }
+  .filter-select {
+    padding: 4px 8px; border: 1px solid #c8ddb0;
+    border-radius: 5px; font-size: 12px;
+    background: #f7fbf0; color: #1a1a1a;
+    font-family: inherit; cursor: pointer; outline: none;
+  }
+  .tag {
+    display: inline-flex; align-items: center;
+    padding: 3px 10px; border-radius: 20px; font-size: 11px;
+    cursor: pointer; border: 1px solid transparent; white-space: nowrap;
+    transition: all 0.12s;
+  }
+  .tag.active  { background: #eaf3de; color: #3b6d11; border-color: #b8d98a; }
+  .tag.inactive { background: #f4f6f3; color: #666; border-color: #ddd; }
+  .tag:hover { border-color: #9ecf60; }
+  .divider { width: 1px; height: 20px; background: #dde8d0; margin: 0 3px; }
+
+  /* TABLE WRAP */
+  .table-wrap { flex: 1; overflow: auto; padding: 18px 22px; }
+
+  table {
+    width: 100%; border-collapse: collapse;
+    background: #fff;
+    border-radius: 10px;
+    overflow: hidden;
+    border: 1px solid #dde8d0;
+    table-layout: fixed;
+    min-width: 900px;
+  }
+  thead { background: #f0f7e8; }
+  th {
+    padding: 10px 13px; text-align: left;
+    font-size: 11px; font-weight: 600; color: #3b6d11;
+    border-bottom: 1px solid #c8ddb0;
+    white-space: nowrap; cursor: pointer; user-select: none;
+  }
+  th:hover { background: #e4f0d6; }
+  td {
+    padding: 10px 13px; font-size: 12.5px; color: #1a1a1a;
+    border-bottom: 1px solid #eef3e8;
+    vertical-align: middle;
+    overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  }
+  tr:last-child td { border-bottom: none; }
+  tr:hover td { background: #f7fbf0; }
+
+  .col-id     { width: 95px; }
+  .col-title  { width: auto; }
+  .col-type   { width: 105px; }
+  .col-date   { width: 100px; }
+  .col-loc    { width: 145px; }
+  .col-vloc   { width: 145px; }
+  .col-status { width: 105px; }
+  .col-action { width: 65px; text-align: center; }
+
+  .doc-id { font-family: 'Courier New', monospace; font-size: 11px; color: #777; }
+  .doc-title { color: #2d5016; font-weight: 500; cursor: pointer; }
+  .doc-title:hover { text-decoration: underline; }
+
+  .badge {
+    display: inline-block; padding: 2px 9px;
+    border-radius: 10px; font-size: 10px; font-weight: 600;
+  }
+  .badge-contract { background: #e6f1fb; color: #185fa5; }
+  .badge-invoice  { background: #faeeda; color: #854f0b; }
+  .badge-report   { background: #eaf3de; color: #3b6d11; }
+  .badge-letter   { background: #fbeaf0; color: #993556; }
+  .badge-permit   { background: #eeedfe; color: #534ab7; }
+
+  .status-dot { display: inline-flex; align-items: center; gap: 6px; }
+  .dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
+  .dot-done     { background: #639922; }
+  .dot-progress { background: #ef9f27; }
+  .dot-pending  { background: #aaa; }
+
+  .loc-pill { font-size: 11.5px; color: #555; }
+
+  .action-btn {
+    padding: 3px 9px; border-radius: 4px;
+    border: 1px solid #c8ddb0; background: transparent;
+    font-size: 11px; cursor: pointer; color: #3b6d11;
+    font-family: inherit; transition: background 0.12s;
+  }
+  .action-btn:hover { background: #eaf3de; }
+
+  /* STATUS BAR */
+  .statusbar {
+    background: #fff; border-top: 1px solid #dde8d0;
+    padding: 7px 22px;
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .statusbar-left { font-size: 11px; color: #777; }
+  .statusbar-right { display: flex; align-items: center; gap: 6px; }
+  .page-btn {
+    padding: 3px 9px; border: 1px solid #c8ddb0;
+    border-radius: 4px; font-size: 11px; background: transparent;
+    cursor: pointer; color: #3b6d11; font-family: inherit;
+    transition: background 0.12s;
+  }
+  .page-btn:hover { background: #eaf3de; }
+  .page-btn.cur { background: #2d5016; color: #e8f5d0; border-color: #2d5016; }
+
+  /* Print hint */
+  .print-hint {
+    position: fixed; bottom: 16px; right: 20px;
+    background: #2d5016; color: #e8f5d0;
+    padding: 8px 16px; border-radius: 6px;
+    font-size: 12px; cursor: pointer; opacity: 0.9;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+    display: flex; align-items: center; gap: 7px;
+    z-index: 999;
+  }
+  .print-hint:hover { opacity: 1; }
+
+  @media print {
+    .print-hint { display: none; }
+    .app { height: auto; }
+    .main { overflow: visible; }
+    .table-wrap { overflow: visible; padding: 10px 16px; }
+  }
+</style>
+</head>
+<body id="artifacts-component-root-html">
+
+<div class="app">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div class="sidebar-logo">
+      <span class="name">DocArchive</span><span class="tag">AI</span>
+    </div>
+    <nav class="sidebar-nav">
+      <div class="nav-section">Library</div>
+      <div class="nav-item active">
+        <svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4"><rect x="2" y="2" width="12" height="12" rx="2"></rect><line x1="5" y1="6" x2="11" y2="6"></line><line x1="5" y1="9" x2="9" y2="9"></line></svg>
+        All Documents
+      </div>
+      <div class="nav-item">
+        <svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M2 4h12v9a1 1 0 01-1 1H3a1 1 0 01-1-1V4z"></path><path d="M5 4V2h6v2"></path></svg>
+        Folders
+      </div>
+      <div class="nav-item">
+        <svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4"><circle cx="7" cy="7" r="4"></circle><line x1="10.5" y1="10.5" x2="14" y2="14"></line></svg>
+        Full-text Search
+      </div>
+      <div class="nav-item">
+        <svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M3 3h10v3L8 10 3 6V3z"></path></svg>
+        Recent Uploads
+      </div>
+      <div class="nav-section">Manage</div>
+      <div class="nav-item">
+        <svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4"><circle cx="6" cy="5" r="2.5"></circle><path d="M1 13c0-2.76 2.24-5 5-5s5 2.24 5 5"></path><circle cx="12" cy="6" r="2"></circle><path d="M15 13c0-1.66-1.34-3-3-3"></path></svg>
+        Users &amp; Roles
+      </div>
+      <div class="nav-item">
+        <svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4"><rect x="2" y="8" width="3" height="6" rx="1"></rect><rect x="6.5" y="5" width="3" height="9" rx="1"></rect><rect x="11" y="2" width="3" height="12" rx="1"></rect></svg>
+        Reports
+      </div>
+      <div class="nav-item">
+        <svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4"><circle cx="8" cy="8" r="6"></circle><path d="M8 5v3l2 2"></path></svg>
+        Audit Log
+      </div>
+      <div class="nav-item">
+        <svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4"><circle cx="8" cy="8" r="3"></circle><path d="M8 1v2M8 13v2M1 8h2M13 8h2M3.22 3.22l1.42 1.42M11.36 11.36l1.42 1.42M3.22 12.78l1.42-1.42M11.36 4.64l1.42-1.42"></path></svg>
+        Settings
+      </div>
+      <div class="nav-section">Account</div>
+      <div class="nav-item">
+        <svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M10 8H2M6 5l-3 3 3 3M14 3v10"></path></svg>
+        Log Out
+      </div>
+    </nav>
+    <div class="sidebar-footer">
+      <div class="user-chip">
+        <div class="user-avatar">TM</div>
+        <div>
+          <div class="user-name">Toghrul M.</div>
+          <div class="user-role">Administrator</div>
+        </div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- MAIN CONTENT -->
+  <main class="main">
+
+    <!-- TOP BAR -->
+    <div class="topbar">
+      <span class="topbar-title">All Documents</span>
+      <div class="search-wrap">
+        <svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="7" cy="7" r="4.5"></circle><line x1="10.5" y1="10.5" x2="14" y2="14"></line></svg>
+        <input class="search-input" type="text" placeholder="Search by title, content, keyword…">
+      </div>
+      <button class="btn">
+        <svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><line x1="3" y1="5" x2="13" y2="5"></line><line x1="5" y1="8" x2="11" y2="8"></line><line x1="7" y1="11" x2="9" y2="11"></line></svg>
+        Filter
+      </button>
+      <button class="btn">Export</button>
+      <button class="btn btn-primary">
+        <svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8"><line x1="8" y1="3" x2="8" y2="13"></line><line x1="3" y1="8" x2="13" y2="8"></line></svg>
+        Upload Doc
+      </button>
+    </div>
+
+    <!-- FILTER ROW -->
+    <div class="filters">
+      <span class="filter-label">Type:</span>
+      <span class="tag active">All</span>
+      <span class="tag inactive">Contract</span>
+      <span class="tag inactive">Invoice</span>
+      <span class="tag inactive">Report</span>
+      <span class="tag inactive">Letter</span>
+      <span class="tag inactive">Permit</span>
+      <div class="divider"></div>
+      <span class="filter-label">Year:</span>
+      <select class="filter-select">
+        <option>All years</option>
+        <option>2024</option><option>2023</option><option>2022</option><option>2021</option><option>2020</option>
+      </select>
+      <span class="filter-label" style="margin-left:4px;">Department:</span>
+      <select class="filter-select">
+        <option>All departments</option>
+        <option>Finance</option><option>Legal</option><option>Operations</option><option>HR</option>
+      </select>
+      <span class="filter-label" style="margin-left:4px;">OCR status:</span>
+      <select class="filter-select">
+        <option>All</option><option>Indexed</option><option>Processing</option><option>Pending</option>
+      </select>
+    </div>
+
+    <!-- TABLE -->
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th class="col-id">Doc ID ↕</th>
+            <th class="col-title">Title ↕</th>
+            <th class="col-type">Type</th>
+            <th class="col-date">Created ↕</th>
+            <th class="col-loc">Physical Location</th>
+            <th class="col-vloc">Virtual Path</th>
+            <th class="col-status">OCR Status</th>
+            <th class="col-action"></th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="doc-id">DOC-00142</td>
+            <td><span class="doc-title">Supply Agreement – AzərGold 2021</span></td>
+            <td><span class="badge badge-contract">Contract</span></td>
+            <td>14 Mar 2021</td>
+            <td><span class="loc-pill">📦 Shelf B-3, Box 12</span></td>
+            <td><span class="loc-pill">Legal / Contracts / 2021</span></td>
+            <td><span class="status-dot"><span class="dot dot-done"></span> Indexed</span></td>
+            <td class="col-action"><button class="action-btn">Open</button></td>
+          </tr>
+          <tr>
+            <td class="doc-id">DOC-00138</td>
+            <td><span class="doc-title">Q4 2022 Financial Report</span></td>
+            <td><span class="badge badge-report">Report</span></td>
+            <td>02 Jan 2023</td>
+            <td><span class="loc-pill">📦 Shelf A-1, Box 4</span></td>
+            <td><span class="loc-pill">Finance / Reports / Q4-2022</span></td>
+            <td><span class="status-dot"><span class="dot dot-done"></span> Indexed</span></td>
+            <td class="col-action"><button class="action-btn">Open</button></td>
+          </tr>
+          <tr>
+            <td class="doc-id">DOC-00151</td>
+            <td><span class="doc-title">Construction Permit – Baku North Zone</span></td>
+            <td><span class="badge badge-permit">Permit</span></td>
+            <td>07 Jun 2019</td>
+            <td><span class="loc-pill">📦 Archive 2, Row 5</span></td>
+            <td><span class="loc-pill">Legal / Permits / 2019</span></td>
+            <td><span class="status-dot"><span class="dot dot-progress"></span> Processing</span></td>
+            <td class="col-action"><button class="action-btn">Open</button></td>
+          </tr>
+          <tr>
+            <td class="doc-id">DOC-00159</td>
+            <td><span class="doc-title">Invoice #4471 – Office Supplies</span></td>
+            <td><span class="badge badge-invoice">Invoice</span></td>
+            <td>22 Nov 2023</td>
+            <td><span class="loc-pill">📦 Shelf C-2, Box 7</span></td>
+            <td><span class="loc-pill">Finance / Invoices / 2023</span></td>
+            <td><span class="status-dot"><span class="dot dot-done"></span> Indexed</span></td>
+            <td class="col-action"><button class="action-btn">Open</button></td>
+          </tr>
+          <tr>
+            <td class="doc-id">DOC-00163</td>
+            <td><span class="doc-title">Letter to Ministry of Economy – Jan 2024</span></td>
+            <td><span class="badge badge-letter">Letter</span></td>
+            <td>11 Jan 2024</td>
+            <td><span class="loc-pill">📦 Shelf D-1, Box 2</span></td>
+            <td><span class="loc-pill">Correspondence / Gov / 2024</span></td>
+            <td><span class="status-dot"><span class="dot dot-pending"></span> Pending</span></td>
+            <td class="col-action"><button class="action-btn">Open</button></td>
+          </tr>
+          <tr>
+            <td class="doc-id">DOC-00164</td>
+            <td><span class="doc-title">HR Policy – Remote Work Guidelines</span></td>
+            <td><span class="badge badge-report">Report</span></td>
+            <td>03 Feb 2024</td>
+            <td><span class="loc-pill">📦 Shelf A-2, Box 1</span></td>
+            <td><span class="loc-pill">HR / Policies / 2024</span></td>
+            <td><span class="status-dot"><span class="dot dot-done"></span> Indexed</span></td>
+            <td class="col-action"><button class="action-btn">Open</button></td>
+          </tr>
+          <tr>
+            <td class="doc-id">DOC-00167</td>
+            <td><span class="doc-title">Lease Agreement – Narimanov Office</span></td>
+            <td><span class="badge badge-contract">Contract</span></td>
+            <td>18 Apr 2022</td>
+            <td><span class="loc-pill">📦 Shelf B-1, Box 9</span></td>
+            <td><span class="loc-pill">Legal / Contracts / 2022</span></td>
+            <td><span class="status-dot"><span class="dot dot-done"></span> Indexed</span></td>
+            <td class="col-action"><button class="action-btn">Open</button></td>
+          </tr>
+          <tr>
+            <td class="doc-id">DOC-00170</td>
+            <td><span class="doc-title">Tender Docs – Road Construction 2020</span></td>
+            <td><span class="badge badge-permit">Permit</span></td>
+            <td>29 Aug 2020</td>
+            <td><span class="loc-pill">📦 Archive 1, Row 2</span></td>
+            <td><span class="loc-pill">Operations / Tenders / 2020</span></td>
+            <td><span class="status-dot"><span class="dot dot-done"></span> Indexed</span></td>
+            <td class="col-action"><button class="action-btn">Open</button></td>
+          </tr>
+          <tr>
+            <td class="doc-id">DOC-00173</td>
+            <td><span class="doc-title">Invoice #5012 – IT Equipment Q1</span></td>
+            <td><span class="badge badge-invoice">Invoice</span></td>
+            <td>15 Mar 2024</td>
+            <td><span class="loc-pill">📦 Shelf C-3, Box 1</span></td>
+            <td><span class="loc-pill">Finance / Invoices / 2024</span></td>
+            <td><span class="status-dot"><span class="dot dot-pending"></span> Pending</span></td>
+            <td class="col-action"><button class="action-btn">Open</button></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- STATUS BAR -->
+    <div class="statusbar">
+      <span class="statusbar-left">Showing 9 of 2,841 documents &nbsp;·&nbsp; 2,104 indexed &nbsp;·&nbsp; 737 pending OCR</span>
+      <div class="statusbar-right">
+        <button class="page-btn">‹ Prev</button>
+        <button class="page-btn cur">1</button>
+        <button class="page-btn">2</button>
+        <button class="page-btn">3</button>
+        <button class="page-btn">…</button>
+        <button class="page-btn">316</button>
+        <button class="page-btn">Next ›</button>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<!-- Print / Save hint -->
+<div class="print-hint" onclick="window.print()">
+  <svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="1" width="10" height="10" rx="1"></rect><path d="M3 11H1v3h14v-3h-2"></path><line x1="5" y1="13" x2="11" y2="13"></line></svg>
+  Save as PDF
+</div>
+
+<script>
+  document.querySelectorAll('.tag').forEach(tag => {
+    tag.addEventListener('click', function() {
+      document.querySelectorAll('.tag').forEach(t => { t.className = 'tag inactive'; });
+      this.className = 'tag active';
+    });
+  });
+  document.querySelectorAll('.nav-item').forEach(item => {
+    item.addEventListener('click', function() {
+      document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
+      this.classList.add('active');
+    });
+  });
+  document.querySelectorAll('.page-btn').forEach(btn => {
+    btn.addEventListener('click', function() {
+      if (this.textContent === '‹ Prev' || this.textContent === 'Next ›' || this.textContent === '…') return;
+      document.querySelectorAll('.page-btn').forEach(b => b.classList.remove('cur'));
+      this.classList.add('cur');
+    });
+  });
+</script>
+
+
+</body></html>

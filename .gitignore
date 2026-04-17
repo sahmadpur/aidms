@@ -5,6 +5,7 @@ Thumbs.db
 # Secrets / local config
 .env
 .env.local
+comments.env
 *.pem
 # GCP service account keys (anything matching Google's default naming)
 *service-account*.json

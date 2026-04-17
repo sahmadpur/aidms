@@ -3,65 +3,150 @@
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
-import { FileText, Search, MessageSquare, Settings, LogOut } from "lucide-react";
-import { clearTokens } from "@/lib/auth";
+import {
+  FileText,
+  Folder,
+  Search,
+  Clock,
+  MessageSquare,
+  Users,
+  Building2,
+  Tag,
+  BarChart3,
+  ClipboardList,
+  Settings,
+  LogOut,
+} from "lucide-react";
 import { clsx } from "clsx";
+import { clearTokens } from "@/lib/auth";
+import { useMe, initials } from "@/lib/useMe";
 
-const navItems = [
-  { href: "/documents", icon: FileText, key: "documents" as const },
-  { href: "/search", icon: Search, key: "search" as const },
-  { href: "/chat", icon: MessageSquare, key: "chat" as const },
+type NavItem = {
+  href: string;
+  icon: React.ComponentType<{ className?: string }>;
+  labelKey: string;
+  match?: (pathname: string) => boolean;
+};
+
+const libraryNav: NavItem[] = [
+  { href: "/documents", icon: FileText, labelKey: "allDocuments", match: (p) => p === "/documents" || p.startsWith("/documents/") },
+  { href: "/folders", icon: Folder, labelKey: "folders" },
+  { href: "/search", icon: Search, labelKey: "fullTextSearch" },
+  { href: "/recent-uploads", icon: Clock, labelKey: "recentUploads" },
+  { href: "/chat", icon: MessageSquare, labelKey: "aiChat" },
 ];
+
+const manageNav: NavItem[] = [
+  { href: "/admin/users", icon: Users, labelKey: "usersRoles" },
+  { href: "/admin/folders", icon: Folder, labelKey: "folders" },
+  { href: "/admin/departments", icon: Building2, labelKey: "departments" },
+  { href: "/admin/categories", icon: Tag, labelKey: "categories" },
+  { href: "/admin/reports", icon: BarChart3, labelKey: "reports" },
+  { href: "/admin/audit-log", icon: ClipboardList, labelKey: "auditLog" },
+];
+
+const accountNav: NavItem[] = [
+  { href: "/settings", icon: Settings, labelKey: "settings" },
+];
+
+function isActive(pathname: string, item: NavItem): boolean {
+  if (item.match) return item.match(pathname);
+  return pathname === item.href || pathname.startsWith(item.href + "/");
+}
+
+function NavLink({ item, active, label }: { item: NavItem; active: boolean; label: string }) {
+  const Icon = item.icon;
+  return (
+    <Link
+      href={item.href}
+      className={clsx(
+        "flex items-center gap-2.5 py-2.5 px-[18px] text-[13px] border-l-[3px] transition-colors select-none",
+        active
+          ? "bg-white/[0.13] text-brand-pale border-brand-accent"
+          : "text-brand-light border-transparent hover:bg-white/[0.07]"
+      )}
+    >
+      <Icon className="w-[15px] h-[15px] opacity-85 flex-shrink-0" />
+      <span className="truncate">{label}</span>
+    </Link>
+  );
+}
+
+function SectionHeader({ children }: { children: React.ReactNode }) {
+  return (
+    <div className="px-[18px] pt-3.5 pb-1 text-[10px] text-brand-accent uppercase tracking-[0.9px]">
+      {children}
+    </div>
+  );
+}
 
 export default function Sidebar() {
   const t = useTranslations("nav");
+  const tRoles = useTranslations("roles");
   const pathname = usePathname();
   const router = useRouter();
+  const { data: me } = useMe();
 
   function handleLogout() {
     clearTokens();
     router.push("/login");
   }
 
+  const isAdmin = me?.role === "admin";
+
   return (
-    <aside className="w-60 flex-shrink-0 bg-white border-r border-gray-200 flex flex-col h-screen sticky top-0">
-      <div className="p-5 border-b border-gray-200">
-        <h1 className="text-lg font-bold text-gray-900">AI DMS</h1>
+    <aside className="w-[210px] min-w-[210px] flex-shrink-0 bg-brand flex flex-col h-screen sticky top-0">
+      <div className="px-[18px] py-5 border-b border-white/10">
+        <span className="text-base font-semibold text-brand-pale tracking-[0.3px]">
+          DocArchive
+        </span>
+        <sup className="text-[10px] text-brand-accent ml-[3px]">AI</sup>
       </div>
 
-      <nav className="flex-1 p-3 space-y-1">
-        {navItems.map(({ href, icon: Icon, key }) => (
-          <Link
-            key={href}
-            href={href}
-            className={clsx(
-              "flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors",
-              pathname.startsWith(href)
-                ? "bg-primary-50 text-primary-700"
-                : "text-gray-600 hover:bg-gray-100"
-            )}
-          >
-            <Icon className="w-4 h-4" />
-            {t(key)}
-          </Link>
+      <nav className="flex-1 py-2 overflow-y-auto">
+        <SectionHeader>{t("library")}</SectionHeader>
+        {libraryNav.map((item) => (
+          <NavLink key={item.href} item={item} active={isActive(pathname, item)} label={t(item.labelKey)} />
         ))}
-      </nav>
 
-      <div className="p-3 border-t border-gray-200 space-y-1">
-        <Link
-          href="/admin/categories"
-          className="flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium text-gray-600 hover:bg-gray-100"
-        >
-          <Settings className="w-4 h-4" />
-          {t("admin")}
-        </Link>
+        {isAdmin && (
+          <>
+            <SectionHeader>{t("manage")}</SectionHeader>
+            {manageNav.map((item) => (
+              <NavLink key={item.href} item={item} active={isActive(pathname, item)} label={t(item.labelKey)} />
+            ))}
+          </>
+        )}
+
+        <SectionHeader>{t("account")}</SectionHeader>
+        {accountNav.map((item) => (
+          <NavLink key={item.href} item={item} active={isActive(pathname, item)} label={t(item.labelKey)} />
+        ))}
         <button
           onClick={handleLogout}
-          className="flex w-full items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium text-gray-600 hover:bg-gray-100"
+          className="w-full flex items-center gap-2.5 py-2.5 px-[18px] text-[13px] border-l-[3px] border-transparent text-brand-light hover:bg-white/[0.07] transition-colors text-left"
         >
-          <LogOut className="w-4 h-4" />
-          {t("logout")}
+          <LogOut className="w-[15px] h-[15px] opacity-85 flex-shrink-0" />
+          <span className="truncate">{t("logout")}</span>
         </button>
+      </nav>
+
+      <div className="px-[18px] py-3.5 border-t border-white/10">
+        {me ? (
+          <div className="flex items-center gap-2.5">
+            <div className="w-[30px] h-[30px] rounded-full bg-brand-chip flex items-center justify-center text-[11px] font-semibold text-brand-pale flex-shrink-0">
+              {initials(me.full_name)}
+            </div>
+            <div className="min-w-0">
+              <div className="text-[12px] text-brand-light font-medium truncate">{me.full_name}</div>
+              <div className="text-[10px] text-brand-accent mt-[1px] truncate">
+                {tRoles(me.role)}
+              </div>
+            </div>
+          </div>
+        ) : (
+          <div className="h-[30px]" />
+        )}
       </div>
     </aside>
   );

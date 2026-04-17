@@ -18,9 +18,11 @@ RRF_K = 60  # RRF constant — controls how steeply top ranks are rewarded
 
 async def hybrid_search(
     db: AsyncSession,
-    user_id: uuid.UUID,
     query: str,
     category_id: Optional[uuid.UUID] = None,
+    folder_id: Optional[uuid.UUID] = None,
+    department_id: Optional[uuid.UUID] = None,
+    doc_type: Optional[str] = None,
     tags: Optional[list[str]] = None,
     language: Optional[str] = None,
     date_from: Optional[date] = None,
@@ -32,13 +34,22 @@ async def hybrid_search(
     [query_embedding] = await embed_texts([query])
     embedding_str = "[" + ",".join(str(x) for x in query_embedding) + "]"
 
-    # Build optional filter clauses
-    filters = ["d.user_id = :user_id", "d.ocr_status = 'completed'"]
-    params: dict = {"user_id": str(user_id), "query": query}
+    # Build optional filter clauses — org-wide visibility, no user_id gate
+    filters = ["d.ocr_status = 'completed'"]
+    params: dict = {"query": query}
 
     if category_id:
         filters.append("d.category_id = :category_id")
         params["category_id"] = str(category_id)
+    if folder_id:
+        filters.append("d.folder_id = :folder_id")
+        params["folder_id"] = str(folder_id)
+    if department_id:
+        filters.append("d.department_id = :department_id")
+        params["department_id"] = str(department_id)
+    if doc_type:
+        filters.append("d.doc_type = :doc_type")
+        params["doc_type"] = doc_type
     if language:
         filters.append("d.language = :language")
         params["language"] = language

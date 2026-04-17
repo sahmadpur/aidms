@@ -18,13 +18,18 @@ from app.core.security import (
 )
 from app.models.user import User
 from app.schemas.auth import RegisterRequest, LoginRequest, TokenResponse, RefreshRequest
+from app.services import audit
 
 router = APIRouter()
 
 
 @router.post("/register", response_model=TokenResponse, status_code=status.HTTP_201_CREATED)
-async def register(request: RegisterRequest, db: AsyncSession = Depends(get_db)):
-    existing = await db.scalar(select(User).where(User.email == request.email))
+async def register(
+    body: RegisterRequest,
+    request: Request,
+    db: AsyncSession = Depends(get_db),
+):
+    existing = await db.scalar(select(User).where(User.email == body.email))
     if existing:
         raise HTTPException(
             status_code=status.HTTP_409_CONFLICT,
@@ -33,12 +38,22 @@ async def register(request: RegisterRequest, db: AsyncSession = Depends(get_db))
 
     user = User(
         id=uuid.uuid4(),
-        email=request.email,
-        password_hash=hash_password(request.password),
-        full_name=request.full_name,
-        language_preference=request.language_preference,
+        email=body.email,
+        password_hash=hash_password(body.password),
+        full_name=body.full_name,
+        language_preference=body.language_preference,
     )
     db.add(user)
+    await db.flush()  # ensure FK target exists before audit row references it
+    await audit.log(
+        db,
+        user_id=user.id,
+        action="user.register",
+        entity_type="user",
+        entity_id=user.id,
+        metadata={"email": user.email},
+        request=request,
+    )
     await db.commit()
     await db.refresh(user)
 
@@ -57,6 +72,16 @@ async def login(request: Request, body: LoginRequest, db: AsyncSession = Depends
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Invalid email or password",
         )
+
+    await audit.log(
+        db,
+        user_id=user.id,
+        action="user.login",
+        entity_type="user",
+        entity_id=user.id,
+        request=request,
+    )
+    await db.commit()
 
     return TokenResponse(
         access_token=create_access_token(str(user.id)),

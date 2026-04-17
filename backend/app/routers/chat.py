@@ -40,7 +40,7 @@ async def send_message(
     await db.commit()
 
     async def event_generator():
-        async for chunk in stream_chat_response(db, current_user.id, session.id, request.content):
+        async for chunk in stream_chat_response(db, session.id, request.content):
             yield chunk
 
     return StreamingResponse(

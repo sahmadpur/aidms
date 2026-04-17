@@ -1,10 +1,28 @@
 {
   "nav": {
+    "library": "Library",
+    "manage": "Manage",
+    "account": "Account",
+    "allDocuments": "All Documents",
+    "folders": "Folders",
+    "fullTextSearch": "Full-text Search",
+    "recentUploads": "Recent Uploads",
+    "aiChat": "AI Chat",
+    "usersRoles": "Users & Roles",
+    "categories": "Categories",
+    "departments": "Departments",
+    "reports": "Reports",
+    "auditLog": "Audit Log",
+    "settings": "Settings",
+    "logout": "Log Out",
     "documents": "Documents",
     "search": "Search",
     "chat": "AI Chat",
-    "admin": "Admin",
-    "logout": "Log out"
+    "admin": "Admin"
+  },
+  "roles": {
+    "admin": "Administrator",
+    "user": "User"
   },
   "auth": {
     "login": "Sign In",
@@ -31,15 +49,30 @@
   "ocr": {
     "status": "OCR Status",
     "pending": "Pending",
-    "processing": "Processing...",
-    "completed": "Processed",
+    "processing": "Processing",
+    "completed": "Indexed",
     "failed": "Failed"
   },
+  "docType": {
+    "contract": "Contract",
+    "invoice": "Invoice",
+    "report": "Report",
+    "letter": "Letter",
+    "permit": "Permit",
+    "other": "Other"
+  },
   "documents": {
-    "title": "My Documents",
+    "title": "All Documents",
     "noDocuments": "No documents yet. Upload your first PDF.",
-    "uploadDate": "Uploaded",
+    "uploadDate": "Created",
     "category": "Category",
+    "type": "Type",
+    "folder": "Folder",
+    "department": "Department",
+    "physicalLocation": "Physical Location",
+    "virtualPath": "Virtual Path",
+    "docId": "Doc ID",
+    "uploader": "Uploader",
     "tags": "Tags",
     "language": "Language",
     "edit": "Edit metadata",
@@ -48,7 +81,21 @@
     "viewOcr": "View OCR Text",
     "reprocess": "Reprocess",
     "confirmDelete": "Are you sure you want to delete this document?",
-    "searchPlaceholder": "Search by name or content..."
+    "searchPlaceholder": "Search by title, content, keyword…",
+    "showing": "Showing {shown} of {total} documents",
+    "indexed": "{count} indexed",
+    "pendingOcr": "{count} pending OCR"
+  },
+  "filters": {
+    "type": "Type",
+    "year": "Year",
+    "allYears": "All years",
+    "department": "Department",
+    "allDepartments": "All departments",
+    "ocrStatus": "OCR status",
+    "all": "All",
+    "folder": "Folder",
+    "allFolders": "All folders"
   },
   "search": {
     "title": "Search Documents",
@@ -67,6 +114,55 @@
     "thinking": "Thinking...",
     "sources": "Sources",
     "deleteSession": "Delete conversation"
+  },
+  "folders": {
+    "title": "Folders",
+    "newFolder": "New Folder",
+    "rename": "Rename",
+    "move": "Move",
+    "delete": "Delete",
+    "empty": "This folder is empty.",
+    "root": "Root",
+    "parent": "Parent folder",
+    "none": "No parent"
+  },
+  "departments": {
+    "title": "Departments",
+    "newDepartment": "New Department"
+  },
+  "reports": {
+    "title": "Reports",
+    "totalDocs": "Total documents",
+    "indexed": "Indexed",
+    "pending": "Pending",
+    "processing": "Processing",
+    "failed": "Failed",
+    "byDocType": "By type",
+    "byDepartment": "By department",
+    "uploadsLast30d": "Uploads (last 30 days)",
+    "topUploaders": "Top uploaders"
+  },
+  "auditLog": {
+    "title": "Audit Log",
+    "user": "User",
+    "action": "Action",
+    "entity": "Entity",
+    "when": "When",
+    "ip": "IP",
+    "noLogs": "No audit events."
+  },
+  "settings": {
+    "title": "Settings",
+    "profile": "Profile",
+    "fullName": "Full name",
+    "language": "Interface language",
+    "password": "Password",
+    "currentPassword": "Current password",
+    "newPassword": "New password",
+    "updateProfile": "Update profile",
+    "changePassword": "Change password",
+    "profileUpdated": "Profile updated",
+    "passwordChanged": "Password changed"
   },
   "admin": {
     "users": "Users",
@@ -97,6 +193,15 @@
     "edit": "Edit",
     "close": "Close",
     "confirm": "Confirm",
-    "language": "Language"
+    "language": "Language",
+    "export": "Export",
+    "filter": "Filter",
+    "uploadDoc": "Upload Doc",
+    "open": "Open",
+    "prev": "Prev",
+    "next": "Next",
+    "search": "Search",
+    "yes": "Yes",
+    "no": "No"
   }
 }

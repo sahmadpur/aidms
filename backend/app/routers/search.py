@@ -14,13 +14,15 @@ router = APIRouter()
 async def search(
     request: SearchRequest,
     db: AsyncSession = Depends(get_db),
-    current_user: User = Depends(get_current_user),
+    _: User = Depends(get_current_user),
 ):
     results = await hybrid_search(
         db=db,
-        user_id=current_user.id,
         query=request.query,
         category_id=request.category_id,
+        folder_id=request.folder_id,
+        department_id=request.department_id,
+        doc_type=request.doc_type,
         tags=request.tags,
         language=request.language,
         date_from=request.date_from,

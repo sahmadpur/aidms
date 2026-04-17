@@ -10,7 +10,7 @@ interface Props {
 }
 
 export default function SearchBar({ onSearch, loading }: Props) {
-  const t = useTranslations("search");
+  const t = useTranslations();
   const [query, setQuery] = useState("");
 
   function handleSubmit(e: React.FormEvent) {
@@ -26,16 +26,16 @@ export default function SearchBar({ onSearch, loading }: Props) {
           type="text"
           value={query}
           onChange={(e) => setQuery(e.target.value)}
-          placeholder={t("placeholder")}
-          className="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 text-sm"
+          placeholder={t("search.placeholder")}
+          className="w-full pl-10 pr-4 py-2 border border-edge-chip rounded-[6px] text-[13px] bg-surface-hover outline-none focus:border-edge-focus focus:bg-white"
         />
       </div>
       <button
         type="submit"
         disabled={loading || !query.trim()}
-        className="px-5 py-2.5 bg-primary-600 text-white rounded-lg hover:bg-primary-700 disabled:opacity-50 text-sm font-medium"
+        className="px-5 py-2 bg-brand text-brand-pale rounded-[6px] hover:bg-brand-hover disabled:opacity-50 text-[13px] font-medium"
       >
-        {loading ? "..." : t("placeholder").split(" ")[0]}
+        {loading ? "..." : t("common.search")}
       </button>
     </form>
   );

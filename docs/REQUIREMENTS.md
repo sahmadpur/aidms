@@ -1,9 +1,9 @@
 # AI-Powered Document Management Platform — Requirements
 
-> **Version:** 1.0  
-> **Last Updated:** April 14, 2026  
+> **Version:** 2.0  
+> **Last Updated:** April 17, 2026  
 > **Author:** Sohrab (Senior Business Analyst)  
-> **Status:** Ready for Developer Handoff
+> **Status:** Phase 2 shipped (records-management uplift)
 
 ---
 
@@ -103,11 +103,57 @@ All user-facing interfaces, OCR pipelines, and AI responses must support all thr
 - **FR-2.7.4** — Users can only access their own documents unless explicitly shared.
 - **FR-2.7.5** — Authentication must use JWT tokens with refresh token rotation.
 
-### 2.8 Document Sharing (Phase 2)
+### 2.8 Document Sharing (deferred)
 
-- **FR-2.8.1** — Users must be able to share individual documents with other registered users.
-- **FR-2.8.2** — Sharing permissions: `view only` or `view + download`.
-- **FR-2.8.3** — Shared documents must appear in a separate "Shared with me" section.
+The per-user document sharing originally scoped for Phase 2 was **superseded** by the Phase 2 visibility model (see §2.9). If per-document ACLs are revisited later, they'd layer on top of the org-wide default.
+
+### 2.9 Phase 2 — Records-Management Uplift (shipped)
+
+Phase 2 reframes the product from "personal PDF drawer" to **"DocArchive AI" — an organization-wide records archive**. See `artifact.html` at the repo root for the visual reference.
+
+#### 2.9.1 Visibility model
+- **FR-2.9.1.1** — Every authenticated user sees every document. `user_id` becomes the uploader (audit only), not an access filter.
+- **FR-2.9.1.2** — Only the uploader **or** an administrator may PATCH, DELETE, or re-trigger OCR on a document.
+
+#### 2.9.2 New document fields
+- **FR-2.9.2.1 `folder_id`** — optional FK to a hierarchical `folders` tree (adjacency list, multilingual names). Folders are organisational ("where the doc lives") and complement the existing flat `categories` taxonomy ("what the doc is about").
+- **FR-2.9.2.2 `doc_type`** — optional enum with values `contract | invoice | report | letter | permit | other` (enforced by a Postgres CHECK constraint). Rendered as a colored badge.
+- **FR-2.9.2.3 `department_id`** — optional FK to `departments` (multilingual; parallels categories).
+- **FR-2.9.2.4 `physical_location`** — free-text field (e.g. `Shelf B-3, Box 12`) for archived paper originals.
+- **FR-2.9.2.5 `display_id`** — human-friendly identifier `DOC-000001`, assigned by a BEFORE-INSERT Postgres trigger from sequence `document_display_seq`. UUIDs remain the primary key and URL identifier; `display_id` is shown in the UI and in exports.
+
+#### 2.9.3 Folders
+- **FR-2.9.3.1** — Admins may create, rename, move, and delete folders via `POST/PATCH/DELETE /folders`.
+- **FR-2.9.3.2** — Cycle prevention is enforced on move: a folder may not become its own descendant.
+- **FR-2.9.3.3** — Deleting a folder does **not** cascade to its documents or subfolders; `ON DELETE SET NULL` ensures orphans are reparented to the root.
+- **FR-2.9.3.4** — `GET /folders` returns the full tree with localised paths (`path_az`, `path_ru`, `path_en`) and a `document_count` per node.
+- **FR-2.9.3.5** — All authenticated users can browse folders (`/folders`). CRUD is admin-only.
+
+#### 2.9.4 Departments
+- **FR-2.9.4.1** — Admins may create / rename / delete departments via `/admin/departments`. All users may list them to populate filters and pickers.
+
+#### 2.9.5 Filtering + Sorting
+- **FR-2.9.5.1** — `GET /documents` supports filters: `folder_id`, `doc_type`, `department_id`, `year`, `created_from`, `created_to`, plus existing `ocr_status` and `q`.
+- **FR-2.9.5.2** — `sort` param accepts `{created_at,title,display_id,updated_at}:{asc,desc}`; default `created_at:desc`.
+- **FR-2.9.5.3** — `POST /search` hybrid-search filters extend to `folder_id`, `doc_type`, `department_id`.
+
+#### 2.9.6 Audit Log
+- **FR-2.9.6.1** — All mutations (login, register, document upload/patch/delete/reprocess, folder/department/category/user-role mutations, self-profile and password changes) emit an `audit_logs` row with user_id, action, entity_type, entity_id, JSONB metadata, IP, and user-agent.
+- **FR-2.9.6.2** — Reads are not audited.
+- **FR-2.9.6.3** — `GET /admin/audit-logs` is paginated and filterable by `user_id`, `action`, `entity_type`, and date range.
+
+#### 2.9.7 Reports
+- **FR-2.9.7.1** — `GET /admin/reports/stats` returns: totals, breakdown by OCR status, by doc_type, by department, uploads per day (last 30 days), top uploaders. Admin-only.
+
+#### 2.9.8 Settings
+- **FR-2.9.8.1** — Every user can view and edit their own profile (`full_name`, `language_preference`) via `PATCH /users/me`.
+- **FR-2.9.8.2** — Password change via `POST /users/me/password` requires the current password.
+- **FR-2.9.8.3** — Changing interface language updates the `NEXT_LOCALE` cookie and reloads the page so the whole tree re-renders.
+
+#### 2.9.9 UI / visual
+- **FR-2.9.9.1** — The UI adopts the DocArchive AI visual identity: dark-green sidebar (`#2d5016`), Calibri font stack, badge-coloured document types, compact data tables. Sidebar is grouped into **Library / Manage / Account**; the `Manage` section is hidden for non-admins.
+- **FR-2.9.9.2** — Documents list has a top bar (title + search + Filter / Export / Upload) and a filter row (Type chips, Year, Department, OCR status) above a sortable, paginated table matching `artifact.html`.
+- **FR-2.9.9.3** — A client-side CSV **Export** of the filtered Documents view is available from the top bar.
 
 ---
 
@@ -311,7 +357,12 @@ All user-facing interfaces, OCR pipelines, and AI responses must support all thr
 | AC-8 | UI language can be switched between AZ / RU / EN | P1 |
 | AC-9 | Chat history is persisted and retrievable | P1 |
 | AC-10 | Admin can manage categories and users | P1 |
-| AC-11 | Document sharing between users works (Phase 2) | P2 |
+| AC-11 | Document sharing between users works | Superseded by AC-13 (org-wide visibility) |
+| AC-13 | Folders + doc_type + department + physical_location fields exist on documents and filter correctly | P0 (Phase 2 — done) |
+| AC-14 | Display ID `DOC-000001` is assigned on upload and unique | P0 (Phase 2 — done) |
+| AC-15 | Audit log captures all mutations | P1 (Phase 2 — done) |
+| AC-16 | Admin reports page shows totals, charts, and top uploaders | P1 (Phase 2 — done) |
+| AC-17 | Non-admins cannot access `/admin/*` routes (server 403 + sidebar hides `Manage`) | P0 (Phase 2 — done) |
 | AC-12 | System handles 50 concurrent users without degradation | P1 |
 
 ---

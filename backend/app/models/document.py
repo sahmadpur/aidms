@@ -31,6 +31,19 @@ class Document(Base):
     category_id: Mapped[Optional[uuid.UUID]] = mapped_column(
         ForeignKey("categories.id", ondelete="SET NULL"), nullable=True
     )
+    folder_id: Mapped[Optional[uuid.UUID]] = mapped_column(
+        ForeignKey("folders.id", ondelete="SET NULL"), nullable=True, index=True
+    )
+    department_id: Mapped[Optional[uuid.UUID]] = mapped_column(
+        ForeignKey("departments.id", ondelete="SET NULL"), nullable=True, index=True
+    )
+    doc_type: Mapped[Optional[str]] = mapped_column(
+        String(20), nullable=True
+    )  # contract|invoice|report|letter|permit|other
+    physical_location: Mapped[Optional[str]] = mapped_column(String(255), nullable=True)
+    display_id: Mapped[Optional[str]] = mapped_column(
+        String(16), unique=True, nullable=True
+    )  # "DOC-000142" — assigned by DB trigger
     tags: Mapped[list[str]] = mapped_column(ARRAY(String), default=list)
     language: Mapped[Optional[str]] = mapped_column(String(5), nullable=True)
     description: Mapped[Optional[str]] = mapped_column(Text, nullable=True)

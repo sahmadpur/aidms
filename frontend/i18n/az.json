@@ -1,10 +1,28 @@
 {
   "nav": {
+    "library": "Kitabxana",
+    "manage": "İdarəetmə",
+    "account": "Hesab",
+    "allDocuments": "Bütün Sənədlər",
+    "folders": "Qovluqlar",
+    "fullTextSearch": "Mətn Axtarışı",
+    "recentUploads": "Son Yüklənənlər",
+    "aiChat": "AI Söhbəti",
+    "usersRoles": "İstifadəçilər və Rollar",
+    "categories": "Kateqoriyalar",
+    "departments": "Şöbələr",
+    "reports": "Hesabatlar",
+    "auditLog": "Audit Jurnalı",
+    "settings": "Parametrlər",
+    "logout": "Çıxış",
     "documents": "Sənədlər",
     "search": "Axtarış",
     "chat": "AI Söhbəti",
-    "admin": "Admin",
-    "logout": "Çıxış"
+    "admin": "Admin"
+  },
+  "roles": {
+    "admin": "Administrator",
+    "user": "İstifadəçi"
   },
   "auth": {
     "login": "Daxil ol",
@@ -31,15 +49,30 @@
   "ocr": {
     "status": "OCR Statusu",
     "pending": "Gözləyir",
-    "processing": "İşlənir...",
-    "completed": "Tamamlandı",
+    "processing": "İşlənir",
+    "completed": "İndekslənib",
     "failed": "Xəta"
   },
+  "docType": {
+    "contract": "Müqavilə",
+    "invoice": "Faktura",
+    "report": "Hesabat",
+    "letter": "Məktub",
+    "permit": "İcazə",
+    "other": "Digər"
+  },
   "documents": {
-    "title": "Mənim Sənədlərim",
+    "title": "Bütün Sənədlər",
     "noDocuments": "Hələ sənəd yoxdur. İlk PDF-inizi yükləyin.",
-    "uploadDate": "Yükləndi",
+    "uploadDate": "Yaradılıb",
     "category": "Kateqoriya",
+    "type": "Növ",
+    "folder": "Qovluq",
+    "department": "Şöbə",
+    "physicalLocation": "Fiziki yerləşmə",
+    "virtualPath": "Virtual yol",
+    "docId": "Sənəd ID",
+    "uploader": "Yükləyən",
     "tags": "Etiketlər",
     "language": "Dil",
     "edit": "Metadata redaktə et",
@@ -48,7 +81,21 @@
     "viewOcr": "OCR mətnini bax",
     "reprocess": "Yenidən işlə",
     "confirmDelete": "Bu sənədi silmək istədiyinizə əminsiniz?",
-    "searchPlaceholder": "Ad və ya məzmuna görə axtarın..."
+    "searchPlaceholder": "Ad, məzmun və ya açar söz ilə axtarın…",
+    "showing": "{total} sənəddən {shown} göstərilir",
+    "indexed": "{count} indekslənmiş",
+    "pendingOcr": "{count} gözləyən OCR"
+  },
+  "filters": {
+    "type": "Növ",
+    "year": "İl",
+    "allYears": "Bütün illər",
+    "department": "Şöbə",
+    "allDepartments": "Bütün şöbələr",
+    "ocrStatus": "OCR statusu",
+    "all": "Hamısı",
+    "folder": "Qovluq",
+    "allFolders": "Bütün qovluqlar"
   },
   "search": {
     "title": "Sənəd Axtarışı",
@@ -67,6 +114,55 @@
     "thinking": "Düşünür...",
     "sources": "Mənbələr",
     "deleteSession": "Söhbəti sil"
+  },
+  "folders": {
+    "title": "Qovluqlar",
+    "newFolder": "Yeni Qovluq",
+    "rename": "Adını dəyişdir",
+    "move": "Köçür",
+    "delete": "Sil",
+    "empty": "Bu qovluq boşdur.",
+    "root": "Kök",
+    "parent": "Ana qovluq",
+    "none": "Ana qovluq yoxdur"
+  },
+  "departments": {
+    "title": "Şöbələr",
+    "newDepartment": "Yeni Şöbə"
+  },
+  "reports": {
+    "title": "Hesabatlar",
+    "totalDocs": "Cəmi sənədlər",
+    "indexed": "İndekslənmiş",
+    "pending": "Gözləyən",
+    "processing": "İşlənən",
+    "failed": "Uğursuz",
+    "byDocType": "Növə görə",
+    "byDepartment": "Şöbəyə görə",
+    "uploadsLast30d": "Yükləmələr (son 30 gün)",
+    "topUploaders": "Ən çox yükləyənlər"
+  },
+  "auditLog": {
+    "title": "Audit Jurnalı",
+    "user": "İstifadəçi",
+    "action": "Hərəkət",
+    "entity": "Obyekt",
+    "when": "Nə zaman",
+    "ip": "IP",
+    "noLogs": "Audit qeydi yoxdur."
+  },
+  "settings": {
+    "title": "Parametrlər",
+    "profile": "Profil",
+    "fullName": "Ad soyad",
+    "language": "İnterfeys dili",
+    "password": "Şifrə",
+    "currentPassword": "Cari şifrə",
+    "newPassword": "Yeni şifrə",
+    "updateProfile": "Profili yenilə",
+    "changePassword": "Şifrəni dəyişdir",
+    "profileUpdated": "Profil yeniləndi",
+    "passwordChanged": "Şifrə dəyişdirildi"
   },
   "admin": {
     "users": "İstifadəçilər",
@@ -97,6 +193,15 @@
     "edit": "Redaktə et",
     "close": "Bağla",
     "confirm": "Təsdiq et",
-    "language": "Dil"
+    "language": "Dil",
+    "export": "İxrac et",
+    "filter": "Filtr",
+    "uploadDoc": "Sənəd yüklə",
+    "open": "Aç",
+    "prev": "Əvvəlki",
+    "next": "Növbəti",
+    "search": "Axtar",
+    "yes": "Bəli",
+    "no": "Xeyr"
   }
 }

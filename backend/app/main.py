@@ -8,7 +8,18 @@ from slowapi.util import get_remote_address
 
 from app.core.config import settings
 from app.core.logging import configure_logging
-from app.routers import auth, documents, search, chat, admin
+from app.routers import (
+    admin,
+    audit,
+    auth,
+    chat,
+    departments,
+    documents,
+    folders,
+    reports,
+    search,
+    settings as settings_router,
+)
 
 configure_logging()
 
@@ -41,10 +52,15 @@ app.add_middleware(
 )
 
 app.include_router(auth.router, prefix="/auth", tags=["auth"])
+app.include_router(settings_router.router, prefix="/users", tags=["users"])
 app.include_router(documents.router, prefix="/documents", tags=["documents"])
+app.include_router(folders.router, prefix="/folders", tags=["folders"])
 app.include_router(search.router, prefix="/search", tags=["search"])
 app.include_router(chat.router, prefix="/chat", tags=["chat"])
 app.include_router(admin.router, prefix="/admin", tags=["admin"])
+app.include_router(departments.router, prefix="/admin/departments", tags=["admin"])
+app.include_router(reports.router, prefix="/admin/reports", tags=["admin"])
+app.include_router(audit.router, prefix="/admin/audit-logs", tags=["admin"])
 
 
 @app.get("/health")

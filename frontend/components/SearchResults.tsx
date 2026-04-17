@@ -24,10 +24,10 @@ export default function SearchResults({ results, query }: Props) {
       {results.map((r) => (
         <li key={`${r.document_id}-${r.page_number}`}>
           <Link href={`/documents/${r.document_id}`}>
-            <div className="bg-white border border-gray-200 rounded-xl p-4 hover:border-primary-300 hover:shadow-sm transition-all">
+            <div className="bg-surface-card border border-edge-soft rounded-[10px] p-4 hover:border-brand-accent transition-all">
               <div className="flex items-start justify-between gap-3">
                 <div className="flex items-center gap-2 min-w-0">
-                  <FileText className="w-4 h-4 text-gray-400 flex-shrink-0" />
+                  <FileText className="w-4 h-4 text-brand-accent flex-shrink-0" />
                   <span className="text-sm font-medium text-gray-900 truncate">
                     {r.document_title}
                   </span>
@@ -38,7 +38,7 @@ export default function SearchResults({ results, query }: Props) {
                       {t("page")} {r.page_number}
                     </span>
                   )}
-                  <span className="text-xs text-primary-600 font-medium bg-primary-50 px-2 py-0.5 rounded-full">
+                  <span className="text-xs text-[#3b6d11] font-medium bg-surface-chipActive px-2 py-0.5 rounded-full">
                     {Math.round(r.relevance_score * 100)}%
                   </span>
                 </div>

@@ -1,6 +1,6 @@
 import uuid
 
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, Request, status
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
 
@@ -10,6 +10,7 @@ from app.models.document import Category
 from app.models.user import User
 from app.schemas.admin import UserAdminResponse, UserRoleUpdateRequest
 from app.schemas.document import CategoryResponse, CategoryCreate
+from app.services import audit
 
 router = APIRouter()
 
@@ -28,11 +29,12 @@ async def list_users(
 @router.patch("/users/{user_id}", response_model=UserAdminResponse)
 async def update_user(
     user_id: uuid.UUID,
-    request: UserRoleUpdateRequest,
+    body: UserRoleUpdateRequest,
+    request: Request,
     db: AsyncSession = Depends(get_db),
     current_admin: User = Depends(require_admin),
 ):
-    if request.role not in ("admin", "user"):
+    if body.role not in ("admin", "user"):
         raise HTTPException(
             status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
             detail="Role must be 'admin' or 'user'",
@@ -41,10 +43,19 @@ async def update_user(
     if not user:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
 
-    user.role = request.role
-    if request.is_active is not None:
-        user.is_active = request.is_active
+    user.role = body.role
+    if body.is_active is not None:
+        user.is_active = body.is_active
 
+    await audit.log(
+        db,
+        user_id=current_admin.id,
+        action="user.admin_update",
+        entity_type="user",
+        entity_id=user.id,
+        metadata={"role": body.role, "is_active": body.is_active},
+        request=request,
+    )
     await db.commit()
     await db.refresh(user)
     return user
@@ -63,17 +74,27 @@ async def list_categories(
 
 @router.post("/categories", response_model=CategoryResponse, status_code=status.HTTP_201_CREATED)
 async def create_category(
-    request: CategoryCreate,
+    body: CategoryCreate,
+    request: Request,
     db: AsyncSession = Depends(get_db),
-    _: User = Depends(require_admin),
+    current_admin: User = Depends(require_admin),
 ):
     cat = Category(
         id=uuid.uuid4(),
-        name_az=request.name_az,
-        name_ru=request.name_ru,
-        name_en=request.name_en,
+        name_az=body.name_az,
+        name_ru=body.name_ru,
+        name_en=body.name_en,
     )
     db.add(cat)
+    await audit.log(
+        db,
+        user_id=current_admin.id,
+        action="category.create",
+        entity_type="category",
+        entity_id=cat.id,
+        metadata={"name_en": cat.name_en},
+        request=request,
+    )
     await db.commit()
     await db.refresh(cat)
     return cat
@@ -82,11 +103,21 @@ async def create_category(
 @router.delete("/categories/{category_id}", status_code=status.HTTP_204_NO_CONTENT)
 async def delete_category(
     category_id: uuid.UUID,
+    request: Request,
     db: AsyncSession = Depends(get_db),
-    _: User = Depends(require_admin),
+    current_admin: User = Depends(require_admin),
 ):
     cat = await db.scalar(select(Category).where(Category.id == category_id))
     if not cat:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Category not found")
     await db.delete(cat)
+    await audit.log(
+        db,
+        user_id=current_admin.id,
+        action="category.delete",
+        entity_type="category",
+        entity_id=category_id,
+        metadata={"name_en": cat.name_en},
+        request=request,
+    )
     await db.commit()

@@ -31,12 +31,14 @@ RRF_K = 60
 
 
 async def _retrieve_chunks(
-    db: AsyncSession, user_id: uuid.UUID, query: str, query_embedding: list[float]
+    db: AsyncSession, query: str, query_embedding: list[float]
 ) -> list[dict]:
     """
     Retrieve top-k chunks via Reciprocal Rank Fusion over:
       1. Semantic search (pgvector cosine similarity on embeddings)
       2. Full-text search (tsvector on chunk_text — catches exact name/surname matches)
+
+    Retrieval is org-wide: every authenticated user can RAG over every document.
     """
     embedding_str = "[" + ",".join(str(x) for x in query_embedding) + "]"
 
@@ -50,13 +52,12 @@ async def _retrieve_chunks(
             ROW_NUMBER() OVER (ORDER BY dc.embedding <=> '{embedding_str}'::vector) AS sem_rank
         FROM document_chunks dc
         JOIN documents d ON d.id = dc.document_id
-        WHERE d.user_id = :user_id
-          AND d.ocr_status = 'completed'
+        WHERE d.ocr_status = 'completed'
         ORDER BY dc.embedding <=> '{embedding_str}'::vector
         LIMIT 20
     """)
 
-    sem_rows = (await db.execute(semantic_sql, {"user_id": str(user_id)})).mappings().all()
+    sem_rows = (await db.execute(semantic_sql)).mappings().all()
 
     # OR all words so a chunk matching ANY query word (e.g. just "Aliyev") is
     # returned — plainto_tsquery would require ALL words to match. Strip
@@ -80,15 +81,12 @@ async def _retrieve_chunks(
                 ) AS fts_rank
             FROM document_chunks dc
             JOIN documents d ON d.id = dc.document_id
-            WHERE d.user_id = :user_id
-              AND d.ocr_status = 'completed'
+            WHERE d.ocr_status = 'completed'
               AND to_tsvector('simple', dc.chunk_text) @@ to_tsquery('simple', :fts_or_query)
             LIMIT 20
         """)
         fts_rows = (
-            await db.execute(
-                fts_sql, {"user_id": str(user_id), "fts_or_query": fts_or_query}
-            )
+            await db.execute(fts_sql, {"fts_or_query": fts_or_query})
         ).mappings().all()
 
     rrf_scores: dict[str, float] = {}
@@ -111,7 +109,6 @@ async def _retrieve_chunks(
 
 async def stream_chat_response(
     db: AsyncSession,
-    user_id: uuid.UUID,
     session_id: uuid.UUID,
     user_message: str,
 ) -> AsyncGenerator[str, None]:
@@ -125,7 +122,7 @@ async def stream_chat_response(
     """
     # 1. Embed query and retrieve relevant chunks
     [query_embedding] = await embed_texts([user_message])
-    chunks = await _retrieve_chunks(db, user_id, user_message, query_embedding)
+    chunks = await _retrieve_chunks(db, user_message, query_embedding)
 
     # 2. Build context string
     context_parts: list[str] = []

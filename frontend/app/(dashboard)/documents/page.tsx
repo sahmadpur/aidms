@@ -1,147 +1,341 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import useSWR from "swr";
-import { FileText, Loader2, Trash2, ExternalLink, Search } from "lucide-react";
-import DocumentUploader from "@/components/DocumentUploader";
+import { Filter, Search, Plus } from "lucide-react";
+import { DataTable, Column } from "@/components/DataTable";
+import { DocTypeBadge, OcrStatusDot } from "@/components/Badge";
+import { FilterBar, FilterChip, FilterDivider, FilterLabel, FilterSelect } from "@/components/FilterBar";
+import { FolderBreadcrumb, useFolders } from "@/components/FolderPicker";
+import { TopBar, TopBarButton, TopBarTitle } from "@/components/TopBar";
+import UploadModal from "@/components/UploadModal";
 import api from "@/lib/api";
+import type { Document, DocumentList, Department } from "@/lib/types";
+import { DOC_TYPES, localizedName } from "@/lib/types";
+import { pathFor } from "@/components/FolderPicker";
 
 const fetcher = (url: string) => api.get(url).then((r) => r.data);
 
-const OCR_STATUS_COLORS: Record<string, string> = {
-  pending: "bg-yellow-100 text-yellow-700",
-  processing: "bg-blue-100 text-blue-700",
-  completed: "bg-green-100 text-green-700",
-  failed: "bg-red-100 text-red-700",
-};
+const OCR_STATUSES = ["completed", "processing", "pending", "failed"] as const;
+const PAGE_SIZE = 20;
 
 export default function DocumentsPage() {
   const t = useTranslations();
+  const locale = useLocale();
+
   const [page, setPage] = useState(1);
   const [searchInput, setSearchInput] = useState("");
   const [debouncedQuery, setDebouncedQuery] = useState("");
   const debounceTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  function handleSearchChange(value: string) {
-    setSearchInput(value);
+  const [typeFilter, setTypeFilter] = useState<string>(""); // "" = all
+  const [yearFilter, setYearFilter] = useState<string>("");
+  const [departmentFilter, setDepartmentFilter] = useState<string>("");
+  const [ocrFilter, setOcrFilter] = useState<string>("");
+  const [uploadOpen, setUploadOpen] = useState(false);
+
+  function handleSearchChange(v: string) {
+    setSearchInput(v);
     if (debounceTimer.current) clearTimeout(debounceTimer.current);
     debounceTimer.current = setTimeout(() => {
-      setDebouncedQuery(value.trim());
+      setDebouncedQuery(v.trim());
       setPage(1);
     }, 400);
   }
-
   useEffect(() => () => { if (debounceTimer.current) clearTimeout(debounceTimer.current); }, []);
 
-  const swrKey = debouncedQuery
-    ? `/documents?page=${page}&page_size=20&q=${encodeURIComponent(debouncedQuery)}`
-    : `/documents?page=${page}&page_size=20`;
+  const queryString = useMemo(() => {
+    const p = new URLSearchParams();
+    p.set("page", String(page));
+    p.set("page_size", String(PAGE_SIZE));
+    if (debouncedQuery) p.set("q", debouncedQuery);
+    if (typeFilter) p.set("doc_type", typeFilter);
+    if (yearFilter) p.set("year", yearFilter);
+    if (departmentFilter) p.set("department_id", departmentFilter);
+    if (ocrFilter) p.set("ocr_status", ocrFilter);
+    return p.toString();
+  }, [page, debouncedQuery, typeFilter, yearFilter, departmentFilter, ocrFilter]);
 
-  const { data, isLoading, mutate } = useSWR(swrKey, fetcher, {
-    refreshInterval: 5000, // refresh every 5s to catch OCR status updates
+  const { data, mutate } = useSWR<DocumentList>(
+    `/documents?${queryString}`,
+    fetcher,
+    { refreshInterval: 5000 }
+  );
+  const { data: stats } = useSWR<{ total_docs: number; indexed: number; pending: number; processing: number }>(
+    "/admin/reports/stats",
+    fetcher,
+    { revalidateOnFocus: false, shouldRetryOnError: false }
+  );
+  const { data: folders } = useFolders();
+  const { data: departments = [] } = useSWR<Department[]>("/admin/departments", fetcher, {
+    revalidateOnFocus: false,
   });
 
-  async function deleteDocument(id: string) {
-    if (!confirm(t("documents.confirmDelete"))) return;
-    await api.delete(`/documents/${id}`);
-    mutate();
+  const years = useMemo(() => {
+    const now = new Date().getFullYear();
+    return Array.from({ length: 6 }, (_, i) => now - i);
+  }, []);
+
+  const columns: Column<Document>[] = useMemo(
+    () => [
+      {
+        key: "display_id",
+        header: t("documents.docId"),
+        width: "95px",
+        render: (d) => <span className="font-mono text-[11px] text-gray-500">{d.display_id ?? "—"}</span>,
+      },
+      {
+        key: "title",
+        header: t("documents.title"),
+        render: (d) => (
+          <Link href={`/documents/${d.id}`} className="text-brand font-medium hover:underline block truncate">
+            {d.title}
+          </Link>
+        ),
+      },
+      {
+        key: "doc_type",
+        header: t("documents.type"),
+        width: "105px",
+        render: (d) => <DocTypeBadge type={d.doc_type} label={d.doc_type ? t(`docType.${d.doc_type}`) : undefined} />,
+      },
+      {
+        key: "created_at",
+        header: t("documents.uploadDate"),
+        width: "110px",
+        render: (d) => (
+          <span className="text-[12px] text-gray-700">
+            {new Date(d.created_at).toLocaleDateString(locale)}
+          </span>
+        ),
+      },
+      {
+        key: "physical",
+        header: t("documents.physicalLocation"),
+        width: "160px",
+        render: (d) =>
+          d.physical_location ? (
+            <span className="text-[11.5px] text-gray-600">📦 {d.physical_location}</span>
+          ) : (
+            <span className="text-[11.5px] text-gray-400">—</span>
+          ),
+      },
+      {
+        key: "folder",
+        header: t("documents.virtualPath"),
+        width: "170px",
+        render: (d) => <FolderBreadcrumb folderId={d.folder_id} folders={folders} locale={locale} />,
+      },
+      {
+        key: "ocr",
+        header: t("ocr.status"),
+        width: "105px",
+        render: (d) => <OcrStatusDot status={d.ocr_status} label={t(`ocr.${d.ocr_status}`)} />,
+      },
+      {
+        key: "action",
+        header: "",
+        width: "75px",
+        align: "center",
+        render: (d) => (
+          <Link
+            href={`/documents/${d.id}`}
+            className="inline-block px-2 py-0.5 text-[11px] text-[#3b6d11] border border-edge-chip rounded hover:bg-surface-chipActive"
+          >
+            {t("common.open")}
+          </Link>
+        ),
+      },
+    ],
+    [t, locale, folders]
+  );
+
+  const totalPages = data ? Math.max(1, Math.ceil(data.total / PAGE_SIZE)) : 1;
+  const shown = data?.items.length ?? 0;
+
+  function exportCsv() {
+    if (!data) return;
+    const deptById = new Map(departments.map((d) => [d.id, d]));
+    const folderById = new Map(folders?.map((f) => [f.id, f]) ?? []);
+    const header = [
+      "doc_id",
+      "title",
+      "type",
+      "created_at",
+      "physical_location",
+      "folder_path",
+      "department",
+      "ocr_status",
+    ];
+    const rows = data.items.map((d) => [
+      d.display_id ?? "",
+      d.title,
+      d.doc_type ?? "",
+      d.created_at,
+      d.physical_location ?? "",
+      d.folder_id && folderById.has(d.folder_id)
+        ? pathFor(folderById.get(d.folder_id)!, locale).join(" / ")
+        : "",
+      d.department_id && deptById.has(d.department_id)
+        ? localizedName(deptById.get(d.department_id)!, locale)
+        : "",
+      d.ocr_status,
+    ]);
+    const escape = (v: string) =>
+      /[",\n]/.test(v) ? `"${v.replace(/"/g, '""')}"` : v;
+    const csv = [header, ...rows].map((r) => r.map((c) => escape(String(c))).join(",")).join("\n");
+    const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `documents-${new Date().toISOString().slice(0, 10)}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
   }
 
   return (
-    <div className="max-w-4xl mx-auto space-y-6">
-      <div className="flex items-center justify-between">
-        <h1 className="text-xl font-semibold text-gray-900">{t("documents.title")}</h1>
-      </div>
+    <>
+      <TopBar>
+        <TopBarTitle>{t("documents.title")}</TopBarTitle>
+        <div className="flex-1 max-w-[340px] relative">
+          <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-gray-500" />
+          <input
+            value={searchInput}
+            onChange={(e) => handleSearchChange(e.target.value)}
+            placeholder={t("documents.searchPlaceholder")}
+            className="w-full pl-8 pr-2.5 py-1.5 border border-edge-chip rounded-[6px] text-[13px] bg-surface-hover outline-none focus:border-edge-focus focus:bg-white"
+          />
+        </div>
+        <TopBarButton>
+          <Filter className="w-3 h-3" />
+          {t("common.filter")}
+        </TopBarButton>
+        <TopBarButton onClick={exportCsv}>{t("common.export")}</TopBarButton>
+        <TopBarButton variant="primary" onClick={() => setUploadOpen(true)}>
+          <Plus className="w-3 h-3" strokeWidth={2} />
+          {t("common.uploadDoc")}
+        </TopBarButton>
+      </TopBar>
 
-      <div className="relative">
-        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-        <input
-          type="text"
-          value={searchInput}
-          onChange={(e) => handleSearchChange(e.target.value)}
-          placeholder={t("documents.searchPlaceholder")}
-          className="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 text-sm"
+      <FilterBar>
+        <FilterLabel>{t("filters.type")}:</FilterLabel>
+        <FilterChip active={!typeFilter} onClick={() => setTypeFilter("")}>
+          {t("filters.all")}
+        </FilterChip>
+        {DOC_TYPES.map((tp) => (
+          <FilterChip key={tp} active={typeFilter === tp} onClick={() => setTypeFilter(tp)}>
+            {t(`docType.${tp}`)}
+          </FilterChip>
+        ))}
+        <FilterDivider />
+        <FilterLabel>{t("filters.year")}:</FilterLabel>
+        <FilterSelect value={yearFilter} onChange={setYearFilter}>
+          <option value="">{t("filters.allYears")}</option>
+          {years.map((y) => (
+            <option key={y} value={y}>
+              {y}
+            </option>
+          ))}
+        </FilterSelect>
+        <FilterLabel>{t("filters.department")}:</FilterLabel>
+        <FilterSelect value={departmentFilter} onChange={setDepartmentFilter}>
+          <option value="">{t("filters.allDepartments")}</option>
+          {departments.map((d) => (
+            <option key={d.id} value={d.id}>
+              {localizedName(d, locale)}
+            </option>
+          ))}
+        </FilterSelect>
+        <FilterLabel>{t("filters.ocrStatus")}:</FilterLabel>
+        <FilterSelect value={ocrFilter} onChange={setOcrFilter}>
+          <option value="">{t("filters.all")}</option>
+          {OCR_STATUSES.map((s) => (
+            <option key={s} value={s}>
+              {t(`ocr.${s}`)}
+            </option>
+          ))}
+        </FilterSelect>
+      </FilterBar>
+
+      <div className="px-[22px] py-4">
+        <DataTable
+          columns={columns}
+          rows={data?.items ?? []}
+          rowKey={(r) => r.id}
+          empty={t("documents.noDocuments")}
         />
       </div>
 
-      <DocumentUploader onUploadComplete={() => mutate()} />
-
-      {isLoading && (
-        <div className="flex justify-center py-8">
-          <Loader2 className="w-5 h-5 animate-spin text-gray-400" />
+      <div className="bg-surface-card border-t border-edge-soft px-[22px] py-1.5 flex items-center justify-between">
+        <span className="text-[11px] text-gray-600">
+          {t("documents.showing", { shown, total: data?.total ?? 0 })}
+          {stats && (
+            <>
+              {" "}· {t("documents.indexed", { count: stats.indexed })} ·{" "}
+              {t("documents.pendingOcr", { count: stats.pending + stats.processing })}
+            </>
+          )}
+        </span>
+        <div className="flex items-center gap-1.5">
+          <PageBtn onClick={() => setPage((p) => Math.max(1, p - 1))} disabled={page <= 1}>
+            ‹ {t("common.prev")}
+          </PageBtn>
+          {paginationWindow(page, totalPages).map((p, i) =>
+            p === "…" ? (
+              <span key={i} className="px-2 py-0.5 text-[11px] text-gray-500">
+                …
+              </span>
+            ) : (
+              <PageBtn key={i} onClick={() => setPage(p as number)} active={p === page}>
+                {p}
+              </PageBtn>
+            )
+          )}
+          <PageBtn onClick={() => setPage((p) => Math.min(totalPages, p + 1))} disabled={page >= totalPages}>
+            {t("common.next")} ›
+          </PageBtn>
         </div>
-      )}
+      </div>
 
-      {!isLoading && data?.items?.length === 0 && (
-        <p className="text-center text-gray-400 text-sm py-8">{t("documents.noDocuments")}</p>
-      )}
-
-      {data?.items && data.items.length > 0 && (
-        <ul className="space-y-2">
-          {data.items.map((doc: any) => (
-            <li
-              key={doc.id}
-              className="bg-white border border-gray-200 rounded-xl px-4 py-3 flex items-center justify-between gap-3"
-            >
-              <div className="flex items-center gap-3 min-w-0">
-                <FileText className="w-5 h-5 text-gray-400 flex-shrink-0" />
-                <div className="min-w-0">
-                  <p className="text-sm font-medium text-gray-900 truncate">{doc.title}</p>
-                  <p className="text-xs text-gray-400">
-                    {new Date(doc.created_at).toLocaleDateString()}
-                  </p>
-                </div>
-              </div>
-
-              <div className="flex items-center gap-2 flex-shrink-0">
-                <span
-                  className={`text-xs px-2 py-0.5 rounded-full font-medium ${
-                    OCR_STATUS_COLORS[doc.ocr_status] || OCR_STATUS_COLORS.pending
-                  }`}
-                >
-                  {t(`ocr.${doc.ocr_status}`)}
-                </span>
-                <Link
-                  href={`/documents/${doc.id}`}
-                  className="p-1.5 text-gray-400 hover:text-gray-700 rounded hover:bg-gray-100"
-                >
-                  <ExternalLink className="w-4 h-4" />
-                </Link>
-                <button
-                  onClick={() => deleteDocument(doc.id)}
-                  className="p-1.5 text-gray-400 hover:text-red-500 rounded hover:bg-red-50"
-                >
-                  <Trash2 className="w-4 h-4" />
-                </button>
-              </div>
-            </li>
-          ))}
-        </ul>
-      )}
-
-      {data && data.total > 20 && (
-        <div className="flex justify-center gap-2 pt-2">
-          <button
-            onClick={() => setPage((p) => Math.max(1, p - 1))}
-            disabled={page === 1}
-            className="px-3 py-1 text-sm border border-gray-300 rounded hover:bg-gray-50 disabled:opacity-40"
-          >
-            Previous
-          </button>
-          <span className="text-sm text-gray-600 flex items-center px-2">
-            {page} / {Math.ceil(data.total / 20)}
-          </span>
-          <button
-            onClick={() => setPage((p) => p + 1)}
-            disabled={page >= Math.ceil(data.total / 20)}
-            className="px-3 py-1 text-sm border border-gray-300 rounded hover:bg-gray-50 disabled:opacity-40"
-          >
-            Next
-          </button>
-        </div>
-      )}
-    </div>
+      <UploadModal open={uploadOpen} onClose={() => setUploadOpen(false)} onUploaded={() => mutate()} />
+    </>
   );
+}
+
+function PageBtn({
+  onClick,
+  disabled,
+  active,
+  children,
+}: {
+  onClick?: () => void;
+  disabled?: boolean;
+  active?: boolean;
+  children: React.ReactNode;
+}) {
+  return (
+    <button
+      onClick={onClick}
+      disabled={disabled}
+      className={`px-2 py-0.5 rounded border text-[11px] transition-colors disabled:opacity-40 ${
+        active
+          ? "bg-brand text-brand-pale border-brand"
+          : "bg-transparent text-[#3b6d11] border-edge-chip hover:bg-surface-chipActive"
+      }`}
+    >
+      {children}
+    </button>
+  );
+}
+
+function paginationWindow(current: number, total: number): (number | "…")[] {
+  if (total <= 6) return Array.from({ length: total }, (_, i) => i + 1);
+  const items: (number | "…")[] = [1];
+  if (current > 3) items.push("…");
+  for (let p = Math.max(2, current - 1); p <= Math.min(total - 1, current + 1); p++) items.push(p);
+  if (current < total - 2) items.push("…");
+  items.push(total);
+  return items;
 }

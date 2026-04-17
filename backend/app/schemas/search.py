@@ -8,6 +8,9 @@ from pydantic import BaseModel
 class SearchRequest(BaseModel):
     query: str
     category_id: Optional[uuid.UUID] = None
+    folder_id: Optional[uuid.UUID] = None
+    department_id: Optional[uuid.UUID] = None
+    doc_type: Optional[str] = None
     tags: Optional[list[str]] = None
     language: Optional[str] = None
     date_from: Optional[date] = None

@@ -41,6 +41,7 @@ services:
         NEXT_PUBLIC_API_URL: https://api.dms.ahmadpur.org
     environment:
       NEXT_PUBLIC_API_URL: https://api.dms.ahmadpur.org
+      HOSTNAME: 0.0.0.0
     ports: !reset []
     networks:
       - default

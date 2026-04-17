@@ -1,0 +1,59 @@
+# Production override for server deployment behind Traefik + Cloudflare Tunnel.
+# Usage: docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d --build
+#
+# Assumes an external network `n8n-compose_default` where the Traefik container
+# from /home/n8n-compose/docker-compose.yml is running. TLS is terminated by
+# Cloudflare Tunnel; Traefik only does host-based routing inside the box.
+
+services:
+
+  postgres:
+    ports: !reset []
+
+  redis:
+    ports: !reset []
+
+  minio:
+    ports: !reset []
+
+  api:
+    ports: !reset []
+    environment:
+      CORS_ORIGINS: '["https://dms.ahmadpur.org"]'
+    networks:
+      - default
+      - proxy
+    labels:
+      - traefik.enable=true
+      - traefik.docker.network=n8n-compose_default
+      - traefik.http.routers.dms-api.rule=Host(`api.dms.ahmadpur.org`)
+      - traefik.http.routers.dms-api.entrypoints=websecure
+      - traefik.http.routers.dms-api.tls=true
+      - traefik.http.services.dms-api.loadbalancer.server.port=8000
+
+  worker:
+    networks:
+      - default
+
+  frontend:
+    build:
+      args:
+        NEXT_PUBLIC_API_URL: https://api.dms.ahmadpur.org
+    environment:
+      NEXT_PUBLIC_API_URL: https://api.dms.ahmadpur.org
+    ports: !reset []
+    networks:
+      - default
+      - proxy
+    labels:
+      - traefik.enable=true
+      - traefik.docker.network=n8n-compose_default
+      - traefik.http.routers.dms.rule=Host(`dms.ahmadpur.org`)
+      - traefik.http.routers.dms.entrypoints=websecure
+      - traefik.http.routers.dms.tls=true
+      - traefik.http.services.dms.loadbalancer.server.port=3000
+
+networks:
+  proxy:
+    external: true
+    name: n8n-compose_default

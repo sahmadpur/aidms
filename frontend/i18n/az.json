@@ -1,0 +1,102 @@
+{
+  "nav": {
+    "documents": "Sənədlər",
+    "search": "Axtarış",
+    "chat": "AI Söhbəti",
+    "admin": "Admin",
+    "logout": "Çıxış"
+  },
+  "auth": {
+    "login": "Daxil ol",
+    "register": "Qeydiyyat",
+    "email": "E-poçt",
+    "password": "Şifrə",
+    "fullName": "Ad Soyad",
+    "loginPrompt": "Hesabınız yoxdur?",
+    "registerPrompt": "Artıq hesabınız var?",
+    "signInLink": "Daxil olun",
+    "createLink": "Yaradın"
+  },
+  "upload": {
+    "title": "Sənəd yükləyin",
+    "drag": "PDF faylları buraya sürükləyin",
+    "or": "və ya",
+    "browse": "Fayl seçin",
+    "maxSize": "Fayl başına maks. 50 MB",
+    "pdfOnly": "Yalnız PDF fayllar",
+    "uploading": "Yüklənir...",
+    "fileTooLarge": "Fayl 50 MB limitini aşır",
+    "notPdf": "Yalnız PDF fayllar qəbul edilir"
+  },
+  "ocr": {
+    "status": "OCR Statusu",
+    "pending": "Gözləyir",
+    "processing": "İşlənir...",
+    "completed": "Tamamlandı",
+    "failed": "Xəta"
+  },
+  "documents": {
+    "title": "Mənim Sənədlərim",
+    "noDocuments": "Hələ sənəd yoxdur. İlk PDF-inizi yükləyin.",
+    "uploadDate": "Yükləndi",
+    "category": "Kateqoriya",
+    "tags": "Etiketlər",
+    "language": "Dil",
+    "edit": "Metadata redaktə et",
+    "delete": "Sil",
+    "viewFile": "PDF bax",
+    "viewOcr": "OCR mətnini bax",
+    "reprocess": "Yenidən işlə",
+    "confirmDelete": "Bu sənədi silmək istədiyinizə əminsiniz?",
+    "searchPlaceholder": "Ad və ya məzmuna görə axtarın..."
+  },
+  "search": {
+    "title": "Sənəd Axtarışı",
+    "placeholder": "Məna və ya açar söz ilə axtarın...",
+    "filters": "Filtrlər",
+    "noResults": "Nəticə tapılmadı.",
+    "relevance": "Uyğunluq",
+    "page": "Səhifə"
+  },
+  "chat": {
+    "title": "AI Söhbəti",
+    "newChat": "Yeni Söhbət",
+    "placeholder": "Sənədləriniz haqqında sual verin...",
+    "sessions": "Söhbət Tarixi",
+    "noSessions": "Hələ söhbət yoxdur.",
+    "thinking": "Düşünür...",
+    "sources": "Mənbələr",
+    "deleteSession": "Söhbəti sil"
+  },
+  "admin": {
+    "users": "İstifadəçilər",
+    "categories": "Kateqoriyalar",
+    "newCategory": "Yeni Kateqoriya",
+    "nameAz": "Ad (Azərbaycan dilində)",
+    "nameRu": "Ad (Rus dilində)",
+    "nameEn": "Ad (İngilis dilində)",
+    "role": "Rol",
+    "active": "Aktiv",
+    "save": "Saxla",
+    "cancel": "Ləğv et",
+    "delete": "Sil"
+  },
+  "errors": {
+    "unauthorized": "Davam etmək üçün daxil olun.",
+    "forbidden": "Bunu etmək üçün icazəniz yoxdur.",
+    "notFound": "Tapılmadı.",
+    "uploadTooLarge": "Fayl 50 MB yükləmə limitini aşır.",
+    "generic": "Bir şey yanlış getdi. Yenidən cəhd edin.",
+    "networkError": "Serverə qoşulmaq mümkün olmadı."
+  },
+  "common": {
+    "loading": "Yüklənir...",
+    "save": "Saxla",
+    "cancel": "Ləğv et",
+    "delete": "Sil",
+    "edit": "Redaktə et",
+    "close": "Bağla",
+    "confirm": "Təsdiq et",
+    "language": "Dil"
+  }
+}

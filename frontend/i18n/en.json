@@ -1,0 +1,102 @@
+{
+  "nav": {
+    "documents": "Documents",
+    "search": "Search",
+    "chat": "AI Chat",
+    "admin": "Admin",
+    "logout": "Log out"
+  },
+  "auth": {
+    "login": "Sign In",
+    "register": "Create Account",
+    "email": "Email",
+    "password": "Password",
+    "fullName": "Full Name",
+    "loginPrompt": "Don't have an account?",
+    "registerPrompt": "Already have an account?",
+    "signInLink": "Sign in",
+    "createLink": "Create one"
+  },
+  "upload": {
+    "title": "Upload Documents",
+    "drag": "Drag and drop PDFs here",
+    "or": "or",
+    "browse": "Browse files",
+    "maxSize": "Max 50 MB per file",
+    "pdfOnly": "PDF files only",
+    "uploading": "Uploading...",
+    "fileTooLarge": "File exceeds 50 MB limit",
+    "notPdf": "Only PDF files are accepted"
+  },
+  "ocr": {
+    "status": "OCR Status",
+    "pending": "Pending",
+    "processing": "Processing...",
+    "completed": "Processed",
+    "failed": "Failed"
+  },
+  "documents": {
+    "title": "My Documents",
+    "noDocuments": "No documents yet. Upload your first PDF.",
+    "uploadDate": "Uploaded",
+    "category": "Category",
+    "tags": "Tags",
+    "language": "Language",
+    "edit": "Edit metadata",
+    "delete": "Delete",
+    "viewFile": "View PDF",
+    "viewOcr": "View OCR Text",
+    "reprocess": "Reprocess",
+    "confirmDelete": "Are you sure you want to delete this document?",
+    "searchPlaceholder": "Search by name or content..."
+  },
+  "search": {
+    "title": "Search Documents",
+    "placeholder": "Search by meaning or keywords...",
+    "filters": "Filters",
+    "noResults": "No results found.",
+    "relevance": "Relevance",
+    "page": "Page"
+  },
+  "chat": {
+    "title": "AI Chat",
+    "newChat": "New Chat",
+    "placeholder": "Ask a question about your documents...",
+    "sessions": "Chat History",
+    "noSessions": "No conversations yet.",
+    "thinking": "Thinking...",
+    "sources": "Sources",
+    "deleteSession": "Delete conversation"
+  },
+  "admin": {
+    "users": "Users",
+    "categories": "Categories",
+    "newCategory": "New Category",
+    "nameAz": "Name (Azerbaijani)",
+    "nameRu": "Name (Russian)",
+    "nameEn": "Name (English)",
+    "role": "Role",
+    "active": "Active",
+    "save": "Save",
+    "cancel": "Cancel",
+    "delete": "Delete"
+  },
+  "errors": {
+    "unauthorized": "Please sign in to continue.",
+    "forbidden": "You don't have permission to do that.",
+    "notFound": "Not found.",
+    "uploadTooLarge": "File exceeds the 50 MB upload limit.",
+    "generic": "Something went wrong. Please try again.",
+    "networkError": "Could not connect to the server."
+  },
+  "common": {
+    "loading": "Loading...",
+    "save": "Save",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "edit": "Edit",
+    "close": "Close",
+    "confirm": "Confirm",
+    "language": "Language"
+  }
+}

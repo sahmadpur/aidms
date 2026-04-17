@@ -74,7 +74,7 @@ export default function DocumentDetailPage() {
         </div>
 
         <div className="flex items-center gap-2">
-          {doc.ocr_status === "failed" && (
+          {doc.ocr_status !== "completed" && (
             <button
               onClick={handleReprocess}
               className="flex items-center gap-1.5 px-3 py-1.5 text-sm bg-orange-50 text-orange-700 border border-orange-200 rounded-lg hover:bg-orange-100"

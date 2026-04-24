@@ -1,6 +1,7 @@
 import uuid
 from datetime import date, datetime
 from typing import Optional
+from urllib.parse import quote
 
 from fastapi import (
     APIRouter,
@@ -291,10 +292,15 @@ async def get_document_file(
             file_stream.release_conn()
 
     filename = doc.original_filename or f"{doc.title}.pdf"
+    ascii_fallback = filename.encode("ascii", "replace").decode("ascii").replace('"', "")
+    content_disposition = (
+        f'inline; filename="{ascii_fallback}"; '
+        f"filename*=UTF-8''{quote(filename)}"
+    )
     return StreamingResponse(
         iter_stream(),
         media_type="application/pdf",
-        headers={"Content-Disposition": f'inline; filename="{filename}"'},
+        headers={"Content-Disposition": content_disposition},
     )
 
 

@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect } from "react";
 import { useTranslations } from "next-intl";
 import { useRouter } from "next/navigation";
 import useSWR from "swr";
@@ -14,8 +15,16 @@ const fetcher = (url: string) => api.get(url).then((r) => r.data);
 export default function ChatPage() {
   const t = useTranslations("chat");
   const router = useRouter();
-  const { messages, sendMessage, streaming } = useChat();
+  const { messages, sendMessage, streaming, sessionId } = useChat();
   const { data: sessions, mutate } = useSWR("/chat/sessions", fetcher);
+
+  // When the first message in this view creates a session, pull the new
+  // entry into the sidebar. (Don't navigate mid-stream — it would unmount
+  // the component and interrupt the SSE response.)
+  useEffect(() => {
+    if (!sessionId) return;
+    mutate();
+  }, [sessionId]); // eslint-disable-line react-hooks/exhaustive-deps
 
   async function deleteSession(id: string, e: React.MouseEvent) {
     e.stopPropagation();

@@ -20,11 +20,27 @@ from app.services.embeddings import embed_texts
 
 claude_client = anthropic.AsyncAnthropic(api_key=settings.anthropic_api_key)
 
-SYSTEM_PROMPT = """You are an AI assistant for a multilingual document management system.
-Answer questions based ONLY on the provided document excerpts.
-Always cite your sources using the format: [Source: {document_title}, Page {page_number}].
-If the answer is not found in the provided documents, say so clearly.
-Respond in the same language the user wrote in (auto-detect)."""
+SYSTEM_PROMPT = """You are the archivist of a multilingual organizational document archive.
+Speak as a professional document manager: calm, precise, and courteous.
+
+Writing rules — follow them strictly:
+- Reply in clean, plain prose. Do NOT use any Markdown formatting.
+- No headings (no '#', '##'), no bold/italic markers ('**', '__', '*', '_'),
+  no bullet or numbered lists, no tables, no code fences, no horizontal rules.
+- Write in full sentences and short paragraphs. If you must enumerate, write
+  the items inline, separated by semicolons or commas.
+- Keep the tone formal but human. No emojis.
+
+Grounding rules:
+- Answer questions about the archive using ONLY the provided document excerpts.
+- When — and only when — you quote, paraphrase, or rely on a specific document,
+  cite it inline in this exact form: [Source: {document_title}, Page {page_number}].
+  Do not cite documents you did not actually use.
+- If the provided excerpts do not contain the answer, say so clearly and do not cite anything.
+- For meta questions about your own role or capabilities, or greetings and small talk,
+  answer briefly from your role description and cite nothing.
+
+Respond in the same language the user wrote in (auto-detect among Azerbaijani, Russian, and English)."""
 
 TOP_K_CHUNKS = 8
 RRF_K = 60
@@ -165,8 +181,22 @@ async def stream_chat_response(
             full_response += text_chunk
             yield f"data: {json.dumps({'type': 'text_delta', 'text': text_chunk})}\n\n"
 
-    # 4. Send citations
-    yield f"data: {json.dumps({'type': 'citations', 'citations': source_chunks_meta})}\n\n"
+    # 4. Narrow citations to documents Claude actually cited in its response.
+    # Match the inline citation format "[Source: <title>, Page <n>]" and keep
+    # only retrieved chunks whose (title, page) appear in the response.
+    cited_keys: set[tuple[str, int]] = set()
+    for m in re.finditer(r"\[Source:\s*([^,\]]+?),\s*Page\s*(\d+)\s*\]", full_response):
+        cited_keys.add((m.group(1).strip(), int(m.group(2))))
+
+    cited_citations: list[dict] = []
+    seen: set[tuple[str, int]] = set()
+    for c in source_chunks_meta:
+        key = (c["document_title"], c["page_number"])
+        if key in cited_keys and key not in seen:
+            seen.add(key)
+            cited_citations.append(c)
+
+    yield f"data: {json.dumps({'type': 'citations', 'citations': cited_citations})}\n\n"
     yield "data: [DONE]\n\n"
 
     # 5. Persist assistant message to DB
@@ -176,7 +206,7 @@ async def stream_chat_response(
             session_id=session_id,
             role="assistant",
             content=full_response,
-            source_chunks=source_chunks_meta if source_chunks_meta else None,
+            source_chunks=cited_citations if cited_citations else None,
         )
     )
     await db.commit()

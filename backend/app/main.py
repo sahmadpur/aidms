@@ -51,6 +51,11 @@ app.add_middleware(
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
+    # Browsers hide custom response headers from JS unless explicitly exposed.
+    # The chat SSE endpoint returns X-Session-Id so the client can pin the
+    # session id after the first message — without this, every turn comes in
+    # as session_id=null and the server creates a brand-new session each time.
+    expose_headers=["X-Session-Id"],
 )
 
 app.include_router(auth.router, prefix="/auth", tags=["auth"])

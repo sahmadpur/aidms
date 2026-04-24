@@ -37,6 +37,12 @@ async def send_message(
         role="user",
         content=request.content,
     ))
+
+    # First real message → use it as the session title so the history sidebar
+    # doesn't stay stuck on "New Chat".
+    if session.title in (None, "", "New Chat"):
+        session.title = _derive_session_title(request.content)
+
     await db.commit()
 
     async def event_generator():
@@ -113,6 +119,16 @@ async def _get_or_create_session(
     db.add(session)
     await db.flush()
     return session
+
+
+def _derive_session_title(content: str, max_len: int = 60) -> str:
+    """Collapse whitespace and clip the first user message into a sidebar label."""
+    cleaned = " ".join((content or "").split()).strip()
+    if not cleaned:
+        return "New Chat"
+    if len(cleaned) <= max_len:
+        return cleaned
+    return cleaned[: max_len - 1].rstrip() + "…"
 
 
 async def _get_owned_session(

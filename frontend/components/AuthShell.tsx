@@ -63,7 +63,7 @@ export function AuthShell({
         </div>
         <div className="px-6 pb-6 text-center md:text-right">
           <p className="font-mono text-[10px] tracking-[0.22em] uppercase text-ink-soft/70">
-            © {new Date().getFullYear()} DocArchive AI
+            © {new Date().getFullYear()} CyberCraft LLC
           </p>
         </div>
       </section>

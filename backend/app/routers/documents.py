@@ -25,12 +25,15 @@ from app.models.document import Document
 from app.models.user import User
 from app.schemas.document import (
     DOC_TYPES,
+    ApprovalActionRequest,
     DocumentListResponse,
     DocumentResponse,
     DocumentUpdateRequest,
     DocumentUploadResponse,
 )
 from app.services import audit, storage
+from app.services.notifications import managers_of, notify, notify_many
+from app.services.visibility import visible_documents_clause
 
 router = APIRouter()
 
@@ -135,6 +138,15 @@ async def upload_documents(
             metadata={"filename": file.filename, "size": len(data)},
             request=http_request,
         )
+        manager_ids = await managers_of(db, doc.department_id)
+        await notify_many(
+            db,
+            user_ids=manager_ids,
+            type_="approval_requested",
+            document_id=doc.id,
+            actor_id=current_user.id,
+            payload={"title": doc.title},
+        )
         created.append(doc)
 
         try:
@@ -167,11 +179,39 @@ async def list_documents(
     created_to: Optional[date] = None,
     sort: Optional[str] = None,
     q: Optional[str] = None,
+    approval_status: Optional[str] = None,
+    inbox: bool = False,
     db: AsyncSession = Depends(get_db),
-    _: User = Depends(get_current_user),
+    current_user: User = Depends(get_current_user),
 ):
-    # Org-wide visibility: every authenticated user sees every document.
-    base_query = select(Document)
+    # Visibility: approved org-wide + own uploads + docs in departments I manage.
+    base_query = select(Document).where(visible_documents_clause(current_user))
+    if inbox:
+        # Docs I can act on: pending in a dept I manage, or revision_requested
+        # docs I uploaded. Admins: all pending+revision_requested (everything
+        # they could act on org-wide).
+        from sqlalchemy import exists as sa_exists
+        from app.models.department import department_managers as dm
+
+        if current_user.role == "admin":
+            base_query = base_query.where(
+                Document.approval_status.in_(("pending", "revision_requested"))
+            )
+        else:
+            manages_dept = (
+                sa_exists()
+                .where(dm.c.department_id == Document.department_id)
+                .where(dm.c.user_id == current_user.id)
+            )
+            base_query = base_query.where(
+                or_(
+                    (Document.approval_status == "pending") & manages_dept,
+                    (Document.approval_status == "revision_requested")
+                    & (Document.user_id == current_user.id),
+                )
+            )
+    if approval_status:
+        base_query = base_query.where(Document.approval_status == approval_status)
     if ocr_status:
         base_query = base_query.where(Document.ocr_status == ocr_status)
     if doc_type:
@@ -214,9 +254,9 @@ async def list_documents(
 async def get_document(
     document_id: uuid.UUID,
     db: AsyncSession = Depends(get_db),
-    _: User = Depends(get_current_user),
+    current_user: User = Depends(get_current_user),
 ):
-    return await _get_document(db, document_id)
+    return await _get_document(db, document_id, current_user)
 
 
 @router.patch("/{document_id}", response_model=DocumentResponse)
@@ -227,7 +267,7 @@ async def update_document(
     db: AsyncSession = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
-    doc = await _get_document(db, document_id)
+    doc = await _get_document(db, document_id, current_user)
     _require_write(doc, current_user)
 
     update_data = request.model_dump(exclude_unset=True)
@@ -256,7 +296,7 @@ async def delete_document(
     db: AsyncSession = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
-    doc = await _get_document(db, document_id)
+    doc = await _get_document(db, document_id, current_user)
     _require_write(doc, current_user)
 
     await storage.delete_file(doc.file_path)
@@ -277,9 +317,9 @@ async def delete_document(
 async def get_document_file(
     document_id: uuid.UUID,
     db: AsyncSession = Depends(get_db),
-    _: User = Depends(get_current_user),
+    current_user: User = Depends(get_current_user),
 ):
-    doc = await _get_document(db, document_id)
+    doc = await _get_document(db, document_id, current_user)
 
     file_stream = storage.get_file_stream(doc.file_path)
 
@@ -308,9 +348,9 @@ async def get_document_file(
 async def get_ocr_text(
     document_id: uuid.UUID,
     db: AsyncSession = Depends(get_db),
-    _: User = Depends(get_current_user),
+    current_user: User = Depends(get_current_user),
 ):
-    doc = await _get_document(db, document_id)
+    doc = await _get_document(db, document_id, current_user)
     if doc.ocr_status != "completed":
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
@@ -326,7 +366,7 @@ async def reprocess_document(
     db: AsyncSession = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
-    doc = await _get_document(db, document_id)
+    doc = await _get_document(db, document_id, current_user)
     _require_write(doc, current_user)
 
     doc.ocr_status = "pending"
@@ -352,8 +392,14 @@ async def reprocess_document(
     return {"message": "Reprocessing queued", "document_id": str(document_id)}
 
 
-async def _get_document(db: AsyncSession, document_id: uuid.UUID) -> Document:
-    doc = await db.scalar(select(Document).where(Document.id == document_id))
+async def _get_document(
+    db: AsyncSession, document_id: uuid.UUID, user: User
+) -> Document:
+    doc = await db.scalar(
+        select(Document)
+        .where(Document.id == document_id)
+        .where(visible_documents_clause(user))
+    )
     if not doc:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND, detail="Document not found"
@@ -367,3 +413,275 @@ def _require_write(doc: Document, user: User) -> None:
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Only the uploader or an administrator can modify this document",
         )
+
+
+async def _require_approver(
+    db: AsyncSession, doc: Document, user: User
+) -> None:
+    if user.role == "admin":
+        return
+    if doc.department_id is None:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Only administrators can review documents without a department",
+        )
+    from app.services.visibility import is_manager_of
+
+    if not await is_manager_of(db, user, doc.department_id):
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Only a manager of the document's department or an administrator can review it",
+        )
+
+
+def _add_comment(
+    db: AsyncSession, *, document_id: uuid.UUID, user_id: uuid.UUID, body: str
+) -> uuid.UUID:
+    from app.models.comment import DocumentComment
+
+    comment = DocumentComment(
+        id=uuid.uuid4(),
+        document_id=document_id,
+        user_id=user_id,
+        body=body,
+    )
+    db.add(comment)
+    return comment.id
+
+
+@router.post("/{document_id}/approve", response_model=DocumentResponse)
+async def approve_document(
+    document_id: uuid.UUID,
+    http_request: Request,
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    doc = await _get_document(db, document_id, current_user)
+    await _require_approver(db, doc, current_user)
+    if doc.approval_status == "approved":
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="Document is already approved",
+        )
+
+    doc.approval_status = "approved"
+    doc.approved_by = current_user.id
+    doc.approved_at = datetime.utcnow()
+    await audit.log(
+        db,
+        user_id=current_user.id,
+        action="document.approve",
+        entity_type="document",
+        entity_id=doc.id,
+        request=http_request,
+    )
+    await notify(
+        db,
+        user_id=doc.user_id,
+        type_="document_approved",
+        document_id=doc.id,
+        actor_id=current_user.id,
+        payload={"title": doc.title},
+    )
+    await db.commit()
+    await db.refresh(doc)
+    return doc
+
+
+@router.post("/{document_id}/reject", response_model=DocumentResponse)
+async def reject_document(
+    document_id: uuid.UUID,
+    payload: ApprovalActionRequest,
+    http_request: Request,
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    doc = await _get_document(db, document_id, current_user)
+    await _require_approver(db, doc, current_user)
+    if doc.approval_status == "rejected":
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="Document is already rejected",
+        )
+
+    doc.approval_status = "rejected"
+    doc.approved_by = current_user.id
+    doc.approved_at = datetime.utcnow()
+
+    reason = (payload.reason or "").strip()
+    if reason:
+        _add_comment(
+            db,
+            document_id=doc.id,
+            user_id=current_user.id,
+            body=reason,
+        )
+
+    await audit.log(
+        db,
+        user_id=current_user.id,
+        action="document.reject",
+        entity_type="document",
+        entity_id=doc.id,
+        metadata={"reason": reason} if reason else None,
+        request=http_request,
+    )
+    await notify(
+        db,
+        user_id=doc.user_id,
+        type_="document_rejected",
+        document_id=doc.id,
+        actor_id=current_user.id,
+        payload={"title": doc.title, "reason": reason} if reason else {"title": doc.title},
+    )
+    await db.commit()
+    await db.refresh(doc)
+    return doc
+
+
+@router.post("/{document_id}/request-revision", response_model=DocumentResponse)
+async def request_revision(
+    document_id: uuid.UUID,
+    payload: ApprovalActionRequest,
+    http_request: Request,
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    doc = await _get_document(db, document_id, current_user)
+    await _require_approver(db, doc, current_user)
+
+    reason = (payload.reason or "").strip()
+    if not reason:
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            detail="A reason is required when requesting a revision",
+        )
+
+    doc.approval_status = "revision_requested"
+    doc.approved_by = current_user.id
+    doc.approved_at = datetime.utcnow()
+    _add_comment(
+        db,
+        document_id=doc.id,
+        user_id=current_user.id,
+        body=reason,
+    )
+    await audit.log(
+        db,
+        user_id=current_user.id,
+        action="document.request_revision",
+        entity_type="document",
+        entity_id=doc.id,
+        metadata={"reason": reason},
+        request=http_request,
+    )
+    await notify(
+        db,
+        user_id=doc.user_id,
+        type_="revision_requested",
+        document_id=doc.id,
+        actor_id=current_user.id,
+        payload={"title": doc.title, "reason": reason},
+    )
+    await db.commit()
+    await db.refresh(doc)
+    return doc
+
+
+@router.post("/{document_id}/resubmit", response_model=DocumentResponse)
+async def resubmit_document(
+    document_id: uuid.UUID,
+    http_request: Request,
+    file: Optional[UploadFile] = File(None),
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    doc = await _get_document(db, document_id, current_user)
+    if doc.user_id != current_user.id and current_user.role != "admin":
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Only the uploader can resubmit this document",
+        )
+    if doc.approval_status != "revision_requested":
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="Only documents awaiting revision can be resubmitted",
+        )
+
+    replaced_file = False
+    if file is not None and file.filename:
+        if file.content_type not in ("application/pdf", "application/octet-stream"):
+            if not file.filename.lower().endswith(".pdf"):
+                raise HTTPException(
+                    status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                    detail=f"File '{file.filename}' is not a PDF",
+                )
+        data = await file.read()
+        max_bytes = settings.max_upload_size_mb * 1024 * 1024
+        if len(data) > max_bytes:
+            raise HTTPException(
+                status_code=status.HTTP_413_REQUEST_ENTITY_TOO_LARGE,
+                detail=f"File exceeds {settings.max_upload_size_mb}MB limit",
+            )
+
+        old_file_path = doc.file_path
+        new_object_key = await storage.upload_file(data, file.filename)
+
+        # Wipe old chunks — they refer to the previous OCR text.
+        from app.models.chunk import DocumentChunk
+        from sqlalchemy import delete as sa_delete
+
+        await db.execute(
+            sa_delete(DocumentChunk).where(DocumentChunk.document_id == doc.id)
+        )
+
+        doc.file_path = new_object_key
+        doc.file_size_bytes = len(data)
+        doc.original_filename = file.filename
+        doc.ocr_status = "pending"
+        doc.ocr_text = None
+        doc.ocr_method = None
+        doc.ocr_retry_count = 0
+        doc.ocr_error = None
+        replaced_file = True
+
+        try:
+            await storage.delete_file(old_file_path)
+        except Exception:
+            pass  # orphaned object is fine — doesn't block the user
+
+    doc.approval_status = "pending"
+    doc.approved_by = None
+    doc.approved_at = None
+    await audit.log(
+        db,
+        user_id=current_user.id,
+        action="document.resubmit",
+        entity_type="document",
+        entity_id=doc.id,
+        metadata={"file_replaced": replaced_file},
+        request=http_request,
+    )
+    manager_ids = await managers_of(db, doc.department_id)
+    await notify_many(
+        db,
+        user_ids=manager_ids,
+        type_="document_resubmitted",
+        document_id=doc.id,
+        actor_id=current_user.id,
+        payload={"title": doc.title, "file_replaced": replaced_file},
+    )
+    await db.commit()
+    await db.refresh(doc)
+
+    if replaced_file:
+        try:
+            from arq import create_pool
+            from arq.connections import RedisSettings
+
+            pool = await create_pool(RedisSettings.from_dsn(settings.redis_url))
+            await pool.enqueue_job("process_document", str(doc.id))
+            await pool.aclose()
+        except Exception:
+            pass  # OCR retry loop will pick it up
+    return doc

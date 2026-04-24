@@ -53,6 +53,7 @@ async def _retrieve_chunks(
         FROM document_chunks dc
         JOIN documents d ON d.id = dc.document_id
         WHERE d.ocr_status = 'completed'
+          AND d.approval_status = 'approved'
         ORDER BY dc.embedding <=> '{embedding_str}'::vector
         LIMIT 20
     """)
@@ -82,6 +83,7 @@ async def _retrieve_chunks(
             FROM document_chunks dc
             JOIN documents d ON d.id = dc.document_id
             WHERE d.ocr_status = 'completed'
+              AND d.approval_status = 'approved'
               AND to_tsvector('simple', dc.chunk_text) @@ to_tsquery('simple', :fts_or_query)
             LIMIT 20
         """)

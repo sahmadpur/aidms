@@ -5,6 +5,14 @@ from typing import Optional
 from pydantic import BaseModel, field_validator
 
 
+class UserDirectoryEntry(BaseModel):
+    id: uuid.UUID
+    full_name: str
+    email: str
+
+    model_config = {"from_attributes": True}
+
+
 class UserSelfResponse(BaseModel):
     id: uuid.UUID
     email: str
@@ -12,6 +20,7 @@ class UserSelfResponse(BaseModel):
     role: str
     language_preference: str
     is_active: bool
+    managed_department_ids: list[uuid.UUID] = []
     created_at: datetime
     updated_at: datetime
 

@@ -34,8 +34,12 @@ async def hybrid_search(
     [query_embedding] = await embed_texts([query])
     embedding_str = "[" + ",".join(str(x) for x in query_embedding) + "]"
 
-    # Build optional filter clauses — org-wide visibility, no user_id gate
-    filters = ["d.ocr_status = 'completed'"]
+    # Build optional filter clauses — org-wide visibility, but only approved
+    # documents (search must not surface pending/rejected/revision content).
+    filters = [
+        "d.ocr_status = 'completed'",
+        "d.approval_status = 'approved'",
+    ]
     params: dict = {"query": query}
 
     if category_id:

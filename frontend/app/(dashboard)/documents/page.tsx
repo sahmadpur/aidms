@@ -2,18 +2,20 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
 import useSWR from "swr";
 import { Filter, Search, Plus } from "lucide-react";
 import { DataTable, Column } from "@/components/DataTable";
 import { DocTypeBadge, OcrStatusDot } from "@/components/Badge";
+import { ApprovalBadge } from "@/components/ApprovalBadge";
 import { FilterBar, FilterChip, FilterDivider, FilterLabel, FilterSelect } from "@/components/FilterBar";
 import { FolderBreadcrumb, useFolders } from "@/components/FolderPicker";
 import { TopBar, TopBarButton, TopBarTitle } from "@/components/TopBar";
 import UploadModal from "@/components/UploadModal";
 import api from "@/lib/api";
-import type { Document, DocumentList, Department } from "@/lib/types";
-import { DOC_TYPES, localizedName } from "@/lib/types";
+import type { Document, DocumentList, Department, ApprovalStatus } from "@/lib/types";
+import { APPROVAL_STATUSES, DOC_TYPES, localizedName } from "@/lib/types";
 import { pathFor } from "@/components/FolderPicker";
 
 const fetcher = (url: string) => api.get(url).then((r) => r.data);
@@ -24,6 +26,8 @@ const PAGE_SIZE = 20;
 export default function DocumentsPage() {
   const t = useTranslations();
   const locale = useLocale();
+  const searchParams = useSearchParams();
+  const inboxMode = searchParams.get("inbox") === "1";
 
   const [page, setPage] = useState(1);
   const [searchInput, setSearchInput] = useState("");
@@ -34,6 +38,7 @@ export default function DocumentsPage() {
   const [yearFilter, setYearFilter] = useState<string>("");
   const [departmentFilter, setDepartmentFilter] = useState<string>("");
   const [ocrFilter, setOcrFilter] = useState<string>("");
+  const [approvalFilter, setApprovalFilter] = useState<ApprovalStatus | "">("");
   const [uploadOpen, setUploadOpen] = useState(false);
 
   function handleSearchChange(v: string) {
@@ -55,8 +60,13 @@ export default function DocumentsPage() {
     if (yearFilter) p.set("year", yearFilter);
     if (departmentFilter) p.set("department_id", departmentFilter);
     if (ocrFilter) p.set("ocr_status", ocrFilter);
+    if (inboxMode) {
+      p.set("inbox", "1");
+    } else if (approvalFilter) {
+      p.set("approval_status", approvalFilter);
+    }
     return p.toString();
-  }, [page, debouncedQuery, typeFilter, yearFilter, departmentFilter, ocrFilter]);
+  }, [page, debouncedQuery, typeFilter, yearFilter, departmentFilter, ocrFilter, approvalFilter, inboxMode]);
 
   const { data, mutate } = useSWR<DocumentList>(
     `/documents?${queryString}`,
@@ -135,6 +145,17 @@ export default function DocumentsPage() {
         render: (d) => <OcrStatusDot status={d.ocr_status} label={t(`ocr.${d.ocr_status}`)} />,
       },
       {
+        key: "approval",
+        header: t("approval.status"),
+        width: "120px",
+        render: (d) => (
+          <ApprovalBadge
+            status={d.approval_status}
+            label={t(`approval.s_${d.approval_status}`)}
+          />
+        ),
+      },
+      {
         key: "action",
         header: "",
         width: "75px",
@@ -198,7 +219,9 @@ export default function DocumentsPage() {
   return (
     <>
       <TopBar>
-        <TopBarTitle>{t("documents.title")}</TopBarTitle>
+        <TopBarTitle>
+          {inboxMode ? t("inbox.title") : t("documents.title")}
+        </TopBarTitle>
         <div className="flex-1 max-w-[340px] relative">
           <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-gray-500" />
           <input
@@ -257,6 +280,30 @@ export default function DocumentsPage() {
             </option>
           ))}
         </FilterSelect>
+        {!inboxMode && (
+          <>
+            <FilterLabel>{t("approval.status")}:</FilterLabel>
+            <FilterSelect
+              value={approvalFilter}
+              onChange={(v) => setApprovalFilter((v as ApprovalStatus) || "")}
+            >
+              <option value="">{t("filters.all")}</option>
+              {APPROVAL_STATUSES.map((s) => (
+                <option key={s} value={s}>
+                  {t(`approval.s_${s}`)}
+                </option>
+              ))}
+            </FilterSelect>
+          </>
+        )}
+        {inboxMode && (
+          <>
+            <FilterDivider />
+            <span className="text-[11px] text-[#3b6d11] italic">
+              {t("inbox.filterHint")}
+            </span>
+          </>
+        )}
       </FilterBar>
 
       <div className="px-[22px] py-4">

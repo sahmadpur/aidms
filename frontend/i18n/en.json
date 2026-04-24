@@ -4,6 +4,7 @@
     "manage": "Manage",
     "account": "Account",
     "allDocuments": "All Documents",
+    "inbox": "Inbox",
     "folders": "Folders",
     "fullTextSearch": "Full-text Search",
     "recentUploads": "Recent Uploads",
@@ -128,7 +129,10 @@
   },
   "departments": {
     "title": "Departments",
-    "newDepartment": "New Department"
+    "newDepartment": "New Department",
+    "managers": "Managers",
+    "noManagers": "No managers assigned",
+    "managersHint": "Managers can review documents uploaded to this department."
   },
   "reports": {
     "title": "Reports",
@@ -171,11 +175,62 @@
     "nameAz": "Name (Azerbaijani)",
     "nameRu": "Name (Russian)",
     "nameEn": "Name (English)",
+    "name_az": "Name (Azerbaijani)",
+    "name_ru": "Name (Russian)",
+    "name_en": "Name (English)",
     "role": "Role",
     "active": "Active",
     "save": "Save",
     "cancel": "Cancel",
     "delete": "Delete"
+  },
+  "approval": {
+    "status": "Approval",
+    "s_pending": "Pending",
+    "s_approved": "Approved",
+    "s_rejected": "Rejected",
+    "s_revision_requested": "Needs revision",
+    "approve": "Approve",
+    "reject": "Reject",
+    "requestRevision": "Request revision",
+    "resubmit": "Resubmit",
+    "rejectTitle": "Reject document",
+    "rejectHelp": "Optionally leave a reason — it will be visible as a comment on the document.",
+    "requestRevisionTitle": "Request revision",
+    "requestRevisionHelp": "Explain what the uploader should change before resubmitting. This will appear as a comment.",
+    "reasonPlaceholder": "Write your reason…",
+    "resubmitTitle": "Resubmit document",
+    "resubmitHelp": "Optionally upload a new version of the PDF. If you don't pick a file, the existing scan is resubmitted as-is.",
+    "resubmitPickFile": "Choose a new PDF (optional)",
+    "resubmitKeepExisting": "Keep the existing PDF"
+  },
+  "comments": {
+    "tab": "Comments",
+    "comment": "Comment",
+    "add": "Add a comment",
+    "placeholder": "Write a comment — @ to mention, Ctrl/Cmd+Enter to send",
+    "send": "Send",
+    "empty": "No comments yet.",
+    "deleteConfirm": "Delete this comment?",
+    "mentionHint": "Type @ to mention someone — they'll get a notification."
+  },
+  "notifications": {
+    "title": "Notifications",
+    "empty": "You're all caught up.",
+    "markAllRead": "Mark all read",
+    "msg": {
+      "comment_added": "{actor} commented on “{title}”",
+      "approval_requested": "{actor} uploaded “{title}” for your review",
+      "document_approved": "{actor} approved “{title}”",
+      "document_rejected": "{actor} rejected “{title}”",
+      "revision_requested": "{actor} asked you to revise “{title}”",
+      "document_resubmitted": "{actor} resubmitted “{title}”",
+      "comment_mention": "{actor} mentioned you on “{title}”"
+    }
+  },
+  "inbox": {
+    "title": "Inbox",
+    "filterHint": "Showing documents that need your action."
   },
   "errors": {
     "unauthorized": "Please sign in to continue.",
@@ -202,6 +257,7 @@
     "next": "Next",
     "search": "Search",
     "yes": "Yes",
-    "no": "No"
+    "no": "No",
+    "someone": "Someone"
   }
 }

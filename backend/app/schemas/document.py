@@ -61,10 +61,17 @@ class DocumentResponse(BaseModel):
     ocr_status: str
     ocr_error: Optional[str]
     ocr_retry_count: int
+    approval_status: str
+    approved_by: Optional[uuid.UUID]
+    approved_at: Optional[datetime]
     created_at: datetime
     updated_at: datetime
 
     model_config = {"from_attributes": True}
+
+
+class ApprovalActionRequest(BaseModel):
+    reason: Optional[str] = None
 
 
 class DocumentListResponse(BaseModel):

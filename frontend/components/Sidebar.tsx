@@ -14,6 +14,7 @@ import {
   Tag,
   BarChart3,
   ClipboardList,
+  Inbox,
   Settings,
   LogOut,
 } from "lucide-react";
@@ -29,12 +30,30 @@ type NavItem = {
 };
 
 const libraryNav: NavItem[] = [
-  { href: "/documents", icon: FileText, labelKey: "allDocuments", match: (p) => p === "/documents" || p.startsWith("/documents/") },
+  {
+    href: "/documents",
+    icon: FileText,
+    labelKey: "allDocuments",
+    match: (p) => (p === "/documents" || p.startsWith("/documents/")) && !isInboxRoute(p),
+  },
+  {
+    href: "/documents?inbox=1",
+    icon: Inbox,
+    labelKey: "inbox",
+    match: isInboxRoute,
+  },
   { href: "/folders", icon: Folder, labelKey: "folders" },
   { href: "/search", icon: Search, labelKey: "fullTextSearch" },
   { href: "/recent-uploads", icon: Clock, labelKey: "recentUploads" },
   { href: "/chat", icon: MessageSquare, labelKey: "aiChat" },
 ];
+
+function isInboxRoute(pathname: string) {
+  if (typeof window === "undefined") return false;
+  if (pathname !== "/documents" && !pathname.startsWith("/documents?")) return false;
+  const params = new URLSearchParams(window.location.search);
+  return params.get("inbox") === "1";
+}
 
 const manageNav: NavItem[] = [
   { href: "/admin/users", icon: Users, labelKey: "usersRoles" },

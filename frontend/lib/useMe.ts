@@ -10,6 +10,7 @@ export interface Me {
   role: "admin" | "user";
   language_preference: "az" | "ru" | "en";
   is_active: boolean;
+  managed_department_ids: string[];
   created_at: string;
   updated_at: string;
 }

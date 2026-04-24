@@ -13,9 +13,11 @@ from app.routers import (
     audit,
     auth,
     chat,
+    comments,
     departments,
     documents,
     folders,
+    notifications,
     reports,
     search,
     settings as settings_router,
@@ -54,6 +56,8 @@ app.add_middleware(
 app.include_router(auth.router, prefix="/auth", tags=["auth"])
 app.include_router(settings_router.router, prefix="/users", tags=["users"])
 app.include_router(documents.router, prefix="/documents", tags=["documents"])
+app.include_router(comments.router, prefix="/documents", tags=["comments"])
+app.include_router(notifications.router, prefix="/notifications", tags=["notifications"])
 app.include_router(folders.router, prefix="/folders", tags=["folders"])
 app.include_router(search.router, prefix="/search", tags=["search"])
 app.include_router(chat.router, prefix="/chat", tags=["chat"])

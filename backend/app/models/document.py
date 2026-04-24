@@ -58,6 +58,15 @@ class Document(Base):
     ocr_method: Mapped[Optional[str]] = mapped_column(String(10), nullable=True)  # "direct" | "vision"
     ocr_retry_count: Mapped[int] = mapped_column(Integer, default=0)
     ocr_error: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+    approval_status: Mapped[str] = mapped_column(
+        String(20), default="pending", index=True
+    )  # pending|approved|rejected|revision_requested
+    approved_by: Mapped[Optional[uuid.UUID]] = mapped_column(
+        ForeignKey("users.id", ondelete="SET NULL"), nullable=True
+    )
+    approved_at: Mapped[Optional[datetime]] = mapped_column(
+        DateTime(timezone=True), nullable=True
+    )
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), server_default=func.now()
     )

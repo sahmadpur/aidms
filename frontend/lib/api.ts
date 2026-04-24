@@ -18,13 +18,21 @@ api.interceptors.request.use((config) => {
   return config;
 });
 
-// Transparently refresh the access token on 401
+// Transparently refresh the access token on 401 — but skip the /auth/*
+// endpoints: a 401 there is "wrong credentials", not "token expired",
+// and we want the caller to surface it in the form instead of bouncing.
 api.interceptors.response.use(
   (response) => response,
   async (error: AxiosError) => {
     const originalRequest = error.config as typeof error.config & { _retry?: boolean };
+    const url = originalRequest?.url ?? "";
+    const isAuthEndpoint = url.startsWith("/auth/") || url.includes("/auth/");
 
-    if (error.response?.status === 401 && !originalRequest._retry) {
+    if (
+      error.response?.status === 401 &&
+      !originalRequest._retry &&
+      !isAuthEndpoint
+    ) {
       originalRequest._retry = true;
 
       const refreshToken =

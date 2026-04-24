@@ -1,5 +1,25 @@
 export type DocType = "contract" | "invoice" | "report" | "letter" | "permit" | "other";
 export type OcrStatus = "pending" | "processing" | "completed" | "failed";
+export type ApprovalStatus =
+  | "pending"
+  | "approved"
+  | "rejected"
+  | "revision_requested";
+export const APPROVAL_STATUSES: ApprovalStatus[] = [
+  "pending",
+  "approved",
+  "rejected",
+  "revision_requested",
+];
+
+export type NotificationType =
+  | "comment_added"
+  | "approval_requested"
+  | "document_approved"
+  | "document_rejected"
+  | "revision_requested"
+  | "document_resubmitted"
+  | "comment_mention";
 
 export const DOC_TYPES: DocType[] = [
   "contract",
@@ -29,6 +49,9 @@ export interface Document {
   ocr_status: OcrStatus;
   ocr_error: string | null;
   ocr_retry_count: number;
+  approval_status: ApprovalStatus;
+  approved_by: string | null;
+  approved_at: string | null;
   created_at: string;
   updated_at: string;
 }
@@ -40,12 +63,55 @@ export interface DocumentList {
   page_size: number;
 }
 
+export interface DepartmentManager {
+  id: string;
+  full_name: string;
+  email: string;
+}
+
 export interface Department {
   id: string;
   name_az: string;
   name_ru: string;
   name_en: string;
   created_at: string;
+  managers: DepartmentManager[];
+}
+
+export interface CommentAuthor {
+  id: string;
+  full_name: string;
+  email: string;
+}
+
+export interface Comment {
+  id: string;
+  document_id: string;
+  user_id: string;
+  body: string;
+  created_at: string;
+  author: CommentAuthor;
+}
+
+export interface NotificationActor {
+  id: string;
+  full_name: string;
+}
+
+export interface Notification {
+  id: string;
+  user_id: string;
+  actor: NotificationActor | null;
+  type: NotificationType;
+  document_id: string | null;
+  payload: Record<string, unknown> | null;
+  is_read: boolean;
+  created_at: string;
+}
+
+export interface NotificationList {
+  items: Notification[];
+  unread_count: number;
 }
 
 export function localizedName(

@@ -4,6 +4,7 @@
     "manage": "İdarəetmə",
     "account": "Hesab",
     "allDocuments": "Bütün Sənədlər",
+    "inbox": "Gələnlər qutusu",
     "folders": "Qovluqlar",
     "fullTextSearch": "Mətn Axtarışı",
     "recentUploads": "Son Yüklənənlər",
@@ -128,7 +129,10 @@
   },
   "departments": {
     "title": "Şöbələr",
-    "newDepartment": "Yeni Şöbə"
+    "newDepartment": "Yeni Şöbə",
+    "managers": "Rəhbərlər",
+    "noManagers": "Rəhbər təyin olunmayıb",
+    "managersHint": "Rəhbərlər bu şöbəyə yüklənən sənədləri yoxlaya bilərlər."
   },
   "reports": {
     "title": "Hesabatlar",
@@ -171,11 +175,62 @@
     "nameAz": "Ad (Azərbaycan dilində)",
     "nameRu": "Ad (Rus dilində)",
     "nameEn": "Ad (İngilis dilində)",
+    "name_az": "Ad (Azərbaycan dilində)",
+    "name_ru": "Ad (Rus dilində)",
+    "name_en": "Ad (İngilis dilində)",
     "role": "Rol",
     "active": "Aktiv",
     "save": "Saxla",
     "cancel": "Ləğv et",
     "delete": "Sil"
+  },
+  "approval": {
+    "status": "Təsdiq",
+    "s_pending": "Gözləyir",
+    "s_approved": "Təsdiqlənib",
+    "s_rejected": "Rədd edilib",
+    "s_revision_requested": "Düzəliş tələb edilir",
+    "approve": "Təsdiqlə",
+    "reject": "Rədd et",
+    "requestRevision": "Düzəliş tələb et",
+    "resubmit": "Yenidən göndər",
+    "rejectTitle": "Sənədi rədd et",
+    "rejectHelp": "İstəyinizlə səbəb yaza bilərsiniz — o, sənədə şərh kimi əlavə olunacaq.",
+    "requestRevisionTitle": "Düzəliş tələb et",
+    "requestRevisionHelp": "Yükləyənin nəyi dəyişməli olduğunu izah edin. Bu mətn şərh kimi görünəcək.",
+    "reasonPlaceholder": "Səbəb yazın…",
+    "resubmitTitle": "Sənədi yenidən göndər",
+    "resubmitHelp": "İstəyinizlə PDF-in yeni versiyasını yükləyə bilərsiniz. Fayl seçməsəniz, mövcud skan olduğu kimi yenidən göndəriləcək.",
+    "resubmitPickFile": "Yeni PDF seçin (könüllü)",
+    "resubmitKeepExisting": "Mövcud PDF-i saxla"
+  },
+  "comments": {
+    "tab": "Şərhlər",
+    "comment": "Şərh",
+    "add": "Şərh əlavə et",
+    "placeholder": "Şərh yazın — @ istifadəçini qeyd etmək üçün, Ctrl/Cmd+Enter göndərmək üçün",
+    "send": "Göndər",
+    "empty": "Hələ şərh yoxdur.",
+    "deleteConfirm": "Bu şərhi silmək istəyirsiniz?",
+    "mentionHint": "@ yazın və istifadəçi seçin — o, bildiriş alacaq."
+  },
+  "notifications": {
+    "title": "Bildirişlər",
+    "empty": "Yeni bildiriş yoxdur.",
+    "markAllRead": "Hamısını oxunmuş işarələ",
+    "msg": {
+      "comment_added": "{actor} «{title}» sənədinə şərh yazdı",
+      "approval_requested": "{actor} yoxlanılmaq üçün «{title}» yüklədi",
+      "document_approved": "{actor} «{title}» sənədini təsdiqlədi",
+      "document_rejected": "{actor} «{title}» sənədini rədd etdi",
+      "revision_requested": "{actor} «{title}» sənədinə düzəliş istədi",
+      "document_resubmitted": "{actor} «{title}» sənədini yenidən göndərdi",
+      "comment_mention": "{actor} «{title}» sənədində sizi qeyd etdi"
+    }
+  },
+  "inbox": {
+    "title": "Gələnlər qutusu",
+    "filterHint": "Sizdən hərəkət tələb edən sənədlər göstərilir."
   },
   "errors": {
     "unauthorized": "Davam etmək üçün daxil olun.",
@@ -202,6 +257,7 @@
     "next": "Növbəti",
     "search": "Axtar",
     "yes": "Bəli",
-    "no": "Xeyr"
+    "no": "Xeyr",
+    "someone": "Kimsə"
   }
 }

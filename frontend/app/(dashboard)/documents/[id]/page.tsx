@@ -1,14 +1,17 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
-import { useParams, useRouter } from "next/navigation";
+import { useParams, useRouter, useSearchParams } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
 import useSWR from "swr";
 import { ArrowLeft, Loader2, RefreshCw, Trash2 } from "lucide-react";
 import DocumentViewer from "@/components/DocumentViewer";
 import OCRTextPanel from "@/components/OCRTextPanel";
+import CommentsPanel from "@/components/CommentsPanel";
 import { DocTypeBadge, OcrStatusDot } from "@/components/Badge";
+import { ApprovalBadge } from "@/components/ApprovalBadge";
+import { ApprovalActions } from "@/components/ApprovalActions";
 import { FolderPicker, FolderBreadcrumb, useFolders } from "@/components/FolderPicker";
 import api, { API_URL } from "@/lib/api";
 import { useMe } from "@/lib/useMe";
@@ -34,7 +37,18 @@ export default function DocumentDetailPage() {
   const router = useRouter();
   const id = params.id as string;
 
-  const [activeTab, setActiveTab] = useState<"pdf" | "ocr">("pdf");
+  const searchParams = useSearchParams();
+  const initialTab =
+    searchParams.get("tab") === "comments"
+      ? "comments"
+      : searchParams.get("tab") === "ocr"
+      ? "ocr"
+      : "pdf";
+  const [activeTab, setActiveTab] = useState<"pdf" | "ocr" | "comments">(initialTab);
+  useEffect(() => {
+    const t = searchParams.get("tab");
+    if (t === "comments" || t === "ocr" || t === "pdf") setActiveTab(t);
+  }, [searchParams]);
   const [editing, setEditing] = useState(false);
   const [form, setForm] = useState<EditForm | null>(null);
   const [deleting, setDeleting] = useState(false);
@@ -91,7 +105,9 @@ export default function DocumentDetailPage() {
   }
   if (!doc) return <p className="p-6 text-gray-500">{t("errors.notFound")}</p>;
 
-  const fileUrl = `${API_URL}/documents/${id}/file`;
+  // Cache-bust the PDF URL whenever the underlying row changes (e.g. after a
+  // resubmit replaces the file). Without this, the browser shows the cached PDF.
+  const fileUrl = `${API_URL}/documents/${id}/file?v=${encodeURIComponent(doc.updated_at)}`;
 
   return (
     <div className="p-6 space-y-4 max-w-6xl mx-auto">
@@ -127,7 +143,17 @@ export default function DocumentDetailPage() {
               )}
               <span>·</span>
               <OcrStatusDot status={doc.ocr_status} label={t(`ocr.${doc.ocr_status}`)} />
+              <span>·</span>
+              <ApprovalBadge
+                status={doc.approval_status}
+                label={t(`approval.s_${doc.approval_status}`)}
+              />
             </div>
+            {me && (
+              <div className="mt-3">
+                <ApprovalActions doc={doc} me={me} onChange={mutate} size="md" />
+              </div>
+            )}
           </div>
           <div className="flex items-center gap-2 flex-shrink-0">
             {canWrite && doc.ocr_status !== "completed" && doc.ocr_status !== "processing" && (
@@ -251,7 +277,7 @@ export default function DocumentDetailPage() {
 
       {/* Tabs */}
       <div className="flex gap-1 border-b border-edge-soft">
-        {(["pdf", "ocr"] as const).map((tab) => (
+        {(["pdf", "ocr", "comments"] as const).map((tab) => (
           <button
             key={tab}
             onClick={() => setActiveTab(tab)}
@@ -259,7 +285,11 @@ export default function DocumentDetailPage() {
               activeTab === tab ? "border-brand-accent text-brand" : "border-transparent text-gray-500 hover:text-gray-700"
             }`}
           >
-            {tab === "pdf" ? t("documents.viewFile") : t("documents.viewOcr")}
+            {tab === "pdf"
+              ? t("documents.viewFile")
+              : tab === "ocr"
+              ? t("documents.viewOcr")
+              : t("comments.tab")}
           </button>
         ))}
       </div>
@@ -267,6 +297,7 @@ export default function DocumentDetailPage() {
       <div className="h-[70vh] bg-surface-card border border-edge-soft rounded-[10px] overflow-hidden">
         {activeTab === "pdf" && <DocumentViewer fileUrl={fileUrl} />}
         {activeTab === "ocr" && <OCRTextPanel ocrText={ocrData?.ocr_text || ""} />}
+        {activeTab === "comments" && <CommentsPanel documentId={id} />}
       </div>
     </div>
   );

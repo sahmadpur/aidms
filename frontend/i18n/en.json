@@ -34,7 +34,20 @@
     "loginPrompt": "Don't have an account?",
     "registerPrompt": "Already have an account?",
     "signInLink": "Sign in",
-    "createLink": "Create one"
+    "createLink": "Create one",
+    "heroLine1": "Every page.",
+    "heroLine2": "Every year.",
+    "heroLine3": "Archived.",
+    "heroSubtitle": "A searchable, multilingual record of your organization — indexed, cited, and never lost.",
+    "loginHeading": "Open the archive.",
+    "loginSubtitle": "Sign in to continue where you left off.",
+    "registerHeading": "Request access.",
+    "registerSubtitle": "Create a credential to contribute to the archive.",
+    "emailPlaceholder": "you@organization.az",
+    "continue": "Continue",
+    "enter": "Enter the archive",
+    "tagline": "DocArchive · AI",
+    "meta": "EST · MMXXVI · BAKU"
   },
   "upload": {
     "title": "Upload Documents",

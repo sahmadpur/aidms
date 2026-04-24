@@ -34,7 +34,20 @@
     "loginPrompt": "Hesabınız yoxdur?",
     "registerPrompt": "Artıq hesabınız var?",
     "signInLink": "Daxil olun",
-    "createLink": "Yaradın"
+    "createLink": "Yaradın",
+    "heroLine1": "Hər səhifə.",
+    "heroLine2": "Hər il.",
+    "heroLine3": "Arxivdə.",
+    "heroSubtitle": "Təşkilatınızın axtarıla bilən, çoxdilli qeydi — indekslənmiş, istinad edilən və heç vaxt itmir.",
+    "loginHeading": "Arxivi aç.",
+    "loginSubtitle": "Dayandığınız yerdən davam etmək üçün daxil olun.",
+    "registerHeading": "Giriş yarat.",
+    "registerSubtitle": "Arxivə töhfə vermək üçün hesab yaradın.",
+    "emailPlaceholder": "siz@tesk.az",
+    "continue": "Davam et",
+    "enter": "Arxivə daxil ol",
+    "tagline": "DocArchive · AI",
+    "meta": "TƏSİS · MMXXVI · BAKI"
   },
   "upload": {
     "title": "Sənəd yükləyin",

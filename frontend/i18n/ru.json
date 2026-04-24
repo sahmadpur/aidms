@@ -34,7 +34,20 @@
     "loginPrompt": "Нет аккаунта?",
     "registerPrompt": "Уже есть аккаунт?",
     "signInLink": "Войдите",
-    "createLink": "Создайте"
+    "createLink": "Создайте",
+    "heroLine1": "Каждая страница.",
+    "heroLine2": "Каждый год.",
+    "heroLine3": "В архиве.",
+    "heroSubtitle": "Многоязычный архив вашей организации с поиском — индексируется, цитируется и не теряется.",
+    "loginHeading": "Открыть архив.",
+    "loginSubtitle": "Войдите, чтобы продолжить с того места, где остановились.",
+    "registerHeading": "Запросить доступ.",
+    "registerSubtitle": "Создайте учётную запись, чтобы вносить вклад в архив.",
+    "emailPlaceholder": "vy@org.az",
+    "continue": "Продолжить",
+    "enter": "Войти в архив",
+    "tagline": "DocArchive · AI",
+    "meta": "ОСН · MMXXVI · БАКУ"
   },
   "upload": {
     "title": "Загрузить документы",

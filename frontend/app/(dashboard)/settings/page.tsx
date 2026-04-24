@@ -116,7 +116,14 @@ export default function SettingsPage() {
             disabled={savingProfile}
             className="px-3.5 py-1.5 text-[12px] bg-brand text-brand-pale rounded-[6px] hover:bg-brand-hover disabled:opacity-50"
           >
-            {savingProfile ? "..." : t("settings.updateProfile")}
+            {savingProfile ? (
+              <span className="inline-flex items-center gap-1.5">
+                <Loader2 className="w-3 h-3 animate-spin" />
+                {t("common.loading")}
+              </span>
+            ) : (
+              t("settings.updateProfile")
+            )}
           </button>
           {profileMsg && <p className="text-[12px] text-[#3b6d11]">{profileMsg}</p>}
         </form>
@@ -148,7 +155,14 @@ export default function SettingsPage() {
             disabled={savingPw}
             className="px-3.5 py-1.5 text-[12px] bg-brand text-brand-pale rounded-[6px] hover:bg-brand-hover disabled:opacity-50"
           >
-            {savingPw ? "..." : t("settings.changePassword")}
+            {savingPw ? (
+              <span className="inline-flex items-center gap-1.5">
+                <Loader2 className="w-3 h-3 animate-spin" />
+                {t("common.loading")}
+              </span>
+            ) : (
+              t("settings.changePassword")
+            )}
           </button>
           {pwMsg && <p className="text-[12px] text-[#3b6d11]">{pwMsg}</p>}
           {pwErr && <p className="text-[12px] text-red-600">{pwErr}</p>}

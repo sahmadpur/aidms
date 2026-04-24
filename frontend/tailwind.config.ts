@@ -11,10 +11,20 @@ const config: Config = {
         brand: {
           DEFAULT: "#2d5016", // sidebar bg
           hover: "#3a6b1e",
+          deep: "#1c330d", // darker than DEFAULT, for editorial panels
           accent: "#7db542", // active marker / section headings
           light: "#c5e49a", // nav label
           pale: "#e8f5d0", // logo / active nav text
           chip: "#4a8c1c", // user-avatar bg
+        },
+        paper: {
+          DEFAULT: "#f6f0df", // warm cream auth background
+          dim: "#ebe3ca",     // slightly darker cream for subtle contrast
+          edge: "#d9cfb0",    // paper-toned hairline border
+        },
+        ink: {
+          DEFAULT: "#1b201b", // near black with green tint
+          soft: "#4a544a",    // secondary ink
         },
         surface: {
           DEFAULT: "#f4f6f3", // page background
@@ -51,6 +61,43 @@ const config: Config = {
       },
       fontFamily: {
         brand: ["Calibri", "Aptos", "Segoe UI", "Arial", "sans-serif"],
+        display: [
+          "var(--font-display)",
+          "Georgia",
+          "'Iowan Old Style'",
+          "serif",
+        ],
+        mono: [
+          "var(--font-mono)",
+          "ui-monospace",
+          "SFMono-Regular",
+          "Menlo",
+          "monospace",
+        ],
+      },
+      keyframes: {
+        riseFade: {
+          "0%": { opacity: "0", transform: "translateY(14px)" },
+          "100%": { opacity: "1", transform: "translateY(0)" },
+        },
+        cardFloat1: {
+          "0%, 100%": { transform: "rotate(-5.5deg) translateY(0)" },
+          "50%":      { transform: "rotate(-5deg) translateY(-7px)" },
+        },
+        cardFloat2: {
+          "0%, 100%": { transform: "rotate(4deg) translateY(0)" },
+          "50%":      { transform: "rotate(3.5deg) translateY(-5px)" },
+        },
+        stampPulse: {
+          "0%, 100%": { opacity: "0.78" },
+          "50%":      { opacity: "1" },
+        },
+      },
+      animation: {
+        rise: "riseFade 0.8s cubic-bezier(0.2, 0.65, 0.2, 1) both",
+        float1: "cardFloat1 9s ease-in-out infinite",
+        float2: "cardFloat2 11s ease-in-out infinite",
+        stamp: "stampPulse 4s ease-in-out infinite",
       },
     },
   },

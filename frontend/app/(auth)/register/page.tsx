@@ -4,8 +4,8 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import api from "@/lib/api";
-import { setTokens } from "@/lib/auth";
 import { AuthShell, AuthField, AuthSubmit, AuthError } from "@/components/AuthShell";
+import { PasswordStrengthMeter } from "@/components/PasswordStrengthMeter";
 
 export default function RegisterPage() {
   const t = useTranslations();
@@ -13,6 +13,7 @@ export default function RegisterPage() {
   const [form, setForm] = useState({
     email: "",
     password: "",
+    confirm_password: "",
     full_name: "",
     language_preference: "en",
   });
@@ -26,13 +27,18 @@ export default function RegisterPage() {
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    setLoading(true);
     setError("");
 
+    if (form.password !== form.confirm_password) {
+      setError(t("auth.passwordsDoNotMatch"));
+      return;
+    }
+
+    setLoading(true);
     try {
-      const { data } = await api.post("/auth/register", form);
-      setTokens(data.access_token, data.refresh_token);
-      router.push("/documents");
+      const { confirm_password: _omit, ...payload } = form;
+      await api.post("/auth/register", payload);
+      router.push(`/verify?email=${encodeURIComponent(form.email)}`);
     } catch (err: any) {
       const detail = err.response?.data?.detail;
       setError(Array.isArray(detail) ? detail[0]?.msg : detail || t("errors.generic"));
@@ -69,11 +75,23 @@ export default function RegisterPage() {
           placeholder={t("auth.emailPlaceholder")}
           autoComplete="email"
         />
+        <div>
+          <AuthField
+            label={t("auth.password")}
+            type="password"
+            value={form.password}
+            onChange={update("password")}
+            required
+            minLength={8}
+            autoComplete="new-password"
+          />
+          <PasswordStrengthMeter value={form.password} />
+        </div>
         <AuthField
-          label={t("auth.password")}
+          label={t("auth.confirmPassword")}
           type="password"
-          value={form.password}
-          onChange={update("password")}
+          value={form.confirm_password}
+          onChange={update("confirm_password")}
           required
           minLength={8}
           autoComplete="new-password"

@@ -47,7 +47,26 @@
     "continue": "Продолжить",
     "enter": "Войти в архив",
     "tagline": "DocArchive · AI",
-    "meta": "ОСН · MMXXVI · БАКУ"
+    "meta": "ОСН · MMXXVI · БАКУ",
+    "confirmPassword": "Подтвердите пароль",
+    "passwordsDoNotMatch": "Пароли не совпадают.",
+    "passwordStrength": {
+      "label": "Надёжность",
+      "weak": "Слабый",
+      "fair": "Средний",
+      "good": "Хороший",
+      "strong": "Надёжный"
+    },
+    "verifyHeading": "Подтвердите почту.",
+    "verifySubtitle": "Мы отправили 6-значный код на {email}. Введите его ниже, чтобы завершить регистрацию.",
+    "verifyCodeLabel": "Код подтверждения",
+    "verifyCodeHelp": "Срок действия кода — {minutes} минут.",
+    "verifySubmit": "Подтвердить и продолжить",
+    "verifyResend": "Отправить код снова",
+    "verifyResendCooldown": "Повтор через {seconds} с",
+    "verifyResent": "Новый код отправлен.",
+    "verifyDifferentEmailPrompt": "Не тот адрес?",
+    "verifyDifferentEmail": "Использовать другой email"
   },
   "upload": {
     "title": "Загрузить документы",
@@ -251,7 +270,10 @@
     "notFound": "Не найдено.",
     "uploadTooLarge": "Файл превышает лимит загрузки в 50 МБ.",
     "generic": "Что-то пошло не так. Пожалуйста, попробуйте снова.",
-    "networkError": "Не удалось подключиться к серверу."
+    "networkError": "Не удалось подключиться к серверу.",
+    "invalidCode": "Неверный или истёкший код. Попробуйте ещё раз или запросите новый.",
+    "emailNotVerified": "Сначала подтвердите электронную почту.",
+    "tooManyAttempts": "Слишком много попыток. Запросите новый код."
   },
   "common": {
     "loading": "Загрузка...",

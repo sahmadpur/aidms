@@ -1,0 +1,19 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(ssh *)",
+      "Bash(scp \"/Users/sahmadpur/Documents/Personal/AI DMS/alert-parsec-413511-e8c5dac46694.json\" root@173.249.38.125:/home/dms-compose/alert-parsec-413511-e8c5dac46694.json)",
+      "Bash(openssl rand *)",
+      "Bash(curl -s -o /dev/null -w \"frontend: %{http_code}\\\\n\" https://dms.ahmadpur.org/)",
+      "Bash(curl -s -o /dev/null -w \"api docs: %{http_code}\\\\n\" https://api.dms.ahmadpur.org/docs)",
+      "Bash(curl -s https://api.dms.ahmadpur.org/health)",
+      "Bash(curl -s -o /dev/null -w \"dms.ahmadpur.org: %{http_code}\\\\n\" https://dms.ahmadpur.org/)",
+      "Bash(curl -s -o /dev/null -w \"api.dms.ahmadpur.org/health: %{http_code}\\\\n\" https://api.dms.ahmadpur.org/health)",
+      "Bash(curl *)",
+      "Bash(dig +short api.dms.ahmadpur.org @1.1.1.1)",
+      "Bash(dig +short api.dms.ahmadpur.org @8.8.8.8)",
+      "Bash(openssl s_client -servername dms.ahmadpur.org -connect dms.ahmadpur.org:443)",
+      "Bash(openssl x509 *)"
+    ]
+  }
+}

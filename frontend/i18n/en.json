@@ -47,7 +47,26 @@
     "continue": "Continue",
     "enter": "Enter the archive",
     "tagline": "DocArchive · AI",
-    "meta": "EST · MMXXVI · BAKU"
+    "meta": "EST · MMXXVI · BAKU",
+    "confirmPassword": "Confirm Password",
+    "passwordsDoNotMatch": "Passwords do not match.",
+    "passwordStrength": {
+      "label": "Strength",
+      "weak": "Weak",
+      "fair": "Fair",
+      "good": "Good",
+      "strong": "Strong"
+    },
+    "verifyHeading": "Verify your email.",
+    "verifySubtitle": "We sent a 6-digit code to {email}. Enter it below to finish creating your account.",
+    "verifyCodeLabel": "Verification code",
+    "verifyCodeHelp": "Code expires in {minutes} minutes.",
+    "verifySubmit": "Verify and continue",
+    "verifyResend": "Resend code",
+    "verifyResendCooldown": "Resend in {seconds}s",
+    "verifyResent": "A new code is on its way.",
+    "verifyDifferentEmailPrompt": "Wrong address?",
+    "verifyDifferentEmail": "Use a different email"
   },
   "upload": {
     "title": "Upload Documents",
@@ -251,7 +270,10 @@
     "notFound": "Not found.",
     "uploadTooLarge": "File exceeds the 50 MB upload limit.",
     "generic": "Something went wrong. Please try again.",
-    "networkError": "Could not connect to the server."
+    "networkError": "Could not connect to the server.",
+    "invalidCode": "That code is incorrect or has expired. Please try again or request a new one.",
+    "emailNotVerified": "Please verify your email before signing in.",
+    "tooManyAttempts": "Too many attempts. Please request a new code."
   },
   "common": {
     "loading": "Loading...",

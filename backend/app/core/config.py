@@ -36,6 +36,26 @@ class Settings(BaseSettings):
     jwt_expiry_minutes: int = 30
     jwt_refresh_expiry_days: int = 7
 
+    # SMTP — required for email-OTP verification on /auth/register.
+    # If smtp_host is empty (dev), the email service logs the code instead of sending.
+    # smtp_secure=true with port 465 → implicit SSL (Yandex / Gmail SSL).
+    # smtp_secure=false with port 587 → STARTTLS upgrade.
+    smtp_host: str = ""
+    smtp_port: int = 587
+    smtp_user: str = ""
+    smtp_pass: str = ""
+    smtp_from: str = "no-reply@docarchive.local"
+    smtp_from_name: str = "DocArchive"
+    smtp_secure: bool = False
+
+    # OTP
+    otp_ttl_minutes: int = 15
+    otp_resend_cooldown_seconds: int = 60
+    otp_max_attempts: int = 5
+
+    # Frontend (linked from email body)
+    frontend_base_url: str = "http://localhost:3000"
+
     # App
     cors_origins: list[str] = ["http://localhost:3000"]
     environment: str = "development"

@@ -25,7 +25,12 @@ export default function LoginPage() {
       setTokens(data.access_token, data.refresh_token);
       router.push("/documents");
     } catch (err: any) {
-      setError(err.response?.data?.detail || t("errors.generic"));
+      const detail = err.response?.data?.detail;
+      if (err.response?.status === 403 && detail === "email_not_verified") {
+        router.push(`/verify?email=${encodeURIComponent(email)}`);
+        return;
+      }
+      setError(detail || t("errors.generic"));
     } finally {
       setLoading(false);
     }

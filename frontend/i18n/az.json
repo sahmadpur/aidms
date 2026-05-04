@@ -47,7 +47,26 @@
     "continue": "Davam et",
     "enter": "Arxivə daxil ol",
     "tagline": "DocArchive · AI",
-    "meta": "TƏSİS · MMXXVI · BAKI"
+    "meta": "TƏSİS · MMXXVI · BAKI",
+    "confirmPassword": "Şifrəni təsdiqlə",
+    "passwordsDoNotMatch": "Şifrələr uyğun gəlmir.",
+    "passwordStrength": {
+      "label": "Güc",
+      "weak": "Zəif",
+      "fair": "Orta",
+      "good": "Yaxşı",
+      "strong": "Güclü"
+    },
+    "verifyHeading": "E-poçtu təsdiq edin.",
+    "verifySubtitle": "{email} ünvanına 6 rəqəmli kod göndərdik. Hesabınızı tamamlamaq üçün onu aşağıda daxil edin.",
+    "verifyCodeLabel": "Təsdiq kodu",
+    "verifyCodeHelp": "Kodun etibarlılıq müddəti {minutes} dəqiqədir.",
+    "verifySubmit": "Təsdiqlə və davam et",
+    "verifyResend": "Kodu yenidən göndər",
+    "verifyResendCooldown": "{seconds} san sonra yenidən",
+    "verifyResent": "Yeni kod yola düşdü.",
+    "verifyDifferentEmailPrompt": "Səhv ünvan?",
+    "verifyDifferentEmail": "Başqa e-poçt istifadə et"
   },
   "upload": {
     "title": "Sənəd yükləyin",
@@ -251,7 +270,10 @@
     "notFound": "Tapılmadı.",
     "uploadTooLarge": "Fayl 50 MB yükləmə limitini aşır.",
     "generic": "Bir şey yanlış getdi. Yenidən cəhd edin.",
-    "networkError": "Serverə qoşulmaq mümkün olmadı."
+    "networkError": "Serverə qoşulmaq mümkün olmadı.",
+    "invalidCode": "Kod yanlışdır və ya müddəti bitib. Yenidən cəhd edin və ya yeni kod tələb edin.",
+    "emailNotVerified": "Daxil olmadan əvvəl e-poçtunuzu təsdiq edin.",
+    "tooManyAttempts": "Çox sayda cəhd. Yeni kod tələb edin."
   },
   "common": {
     "loading": "Yüklənir...",

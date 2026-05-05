@@ -38,3 +38,38 @@ export function OcrStatusDot({ status, label }: { status: string; label?: string
     </span>
   );
 }
+
+type ValidationStatus =
+  | "not_evaluated"
+  | "pending"
+  | "passed"
+  | "failed"
+  | "skipped";
+
+const validationDotClass: Record<ValidationStatus, string> = {
+  passed: "bg-dot-done",
+  pending: "bg-dot-progress",
+  not_evaluated: "bg-gray-300",
+  skipped: "bg-gray-300",
+  failed: "bg-dot-failed",
+};
+
+export function ValidationStatusDot({
+  status,
+  label,
+}: {
+  status: string;
+  label?: string;
+}) {
+  const variant =
+    validationDotClass[status as ValidationStatus] ??
+    validationDotClass.not_evaluated;
+  return (
+    <span className="inline-flex items-center gap-1.5 text-[11.5px] text-gray-700">
+      <span
+        className={clsx("w-[7px] h-[7px] rounded-full flex-shrink-0", variant)}
+      />
+      {label ?? status}
+    </span>
+  );
+}

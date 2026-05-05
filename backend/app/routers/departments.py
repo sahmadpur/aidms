@@ -6,7 +6,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.database import get_db
 from app.dependencies import get_current_user, require_admin
-from app.models.department import Department, department_managers
+from app.models.department import Department, department_members
 from app.models.user import User
 from app.schemas.department import (
     DepartmentCreate,
@@ -26,9 +26,12 @@ async def _managers_for(
         return {}
     rows = (
         await db.execute(
-            select(department_managers.c.department_id, User)
-            .join(User, User.id == department_managers.c.user_id)
-            .where(department_managers.c.department_id.in_(department_ids))
+            select(department_members.c.department_id, User)
+            .join(User, User.id == department_members.c.user_id)
+            .where(
+                department_members.c.department_id.in_(department_ids),
+                department_members.c.is_manager.is_(True),
+            )
             .order_by(User.full_name)
         )
     ).all()
@@ -73,17 +76,38 @@ async def _replace_managers(
                 status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
                 detail=f"Unknown user_ids: {', '.join(str(m) for m in missing)}",
             )
+    # Delete only the *manager* rows for this department; leave any plain-member
+    # rows untouched (they are managed from the user-management side).
     await db.execute(
-        delete(department_managers).where(
-            department_managers.c.department_id == department_id
+        delete(department_members).where(
+            department_members.c.department_id == department_id,
+            department_members.c.is_manager.is_(True),
         )
     )
     for mid in unique_ids:
-        await db.execute(
-            department_managers.insert().values(
-                department_id=department_id, user_id=mid
+        # If a plain-member row already exists for (mid, department_id), promote
+        # it to manager instead of inserting a duplicate (PK collision).
+        existing = await db.scalar(
+            select(department_members.c.user_id).where(
+                department_members.c.department_id == department_id,
+                department_members.c.user_id == mid,
             )
         )
+        if existing is not None:
+            await db.execute(
+                department_members.update()
+                .where(
+                    department_members.c.department_id == department_id,
+                    department_members.c.user_id == mid,
+                )
+                .values(is_manager=True)
+            )
+        else:
+            await db.execute(
+                department_members.insert().values(
+                    department_id=department_id, user_id=mid, is_manager=True
+                )
+            )
 
 
 @router.get("", response_model=list[DepartmentResponse])

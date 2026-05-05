@@ -17,6 +17,7 @@ import {
   Inbox,
   Settings,
   LogOut,
+  ShieldCheck,
 } from "lucide-react";
 import { clsx } from "clsx";
 import { clearTokens } from "@/lib/auth";
@@ -55,13 +56,28 @@ function isInboxRoute(pathname: string) {
   return params.get("inbox") === "1";
 }
 
-const manageNav: NavItem[] = [
+const adminManageNav: NavItem[] = [
   { href: "/admin/users", icon: Users, labelKey: "usersRoles" },
   { href: "/admin/folders", icon: Folder, labelKey: "folders" },
   { href: "/admin/departments", icon: Building2, labelKey: "departments" },
   { href: "/admin/categories", icon: Tag, labelKey: "categories" },
+  {
+    href: "/admin/validation-rules",
+    icon: ShieldCheck,
+    labelKey: "validationRules",
+  },
   { href: "/admin/reports", icon: BarChart3, labelKey: "reports" },
   { href: "/admin/audit-log", icon: ClipboardList, labelKey: "auditLog" },
+];
+
+// Managers (non-admin users assigned to one or more departments) get a smaller
+// Manage menu — just validation rules. They cannot see users/categories etc.
+const managerManageNav: NavItem[] = [
+  {
+    href: "/admin/validation-rules",
+    icon: ShieldCheck,
+    labelKey: "validationRules",
+  },
 ];
 
 const accountNav: NavItem[] = [
@@ -112,6 +128,12 @@ export default function Sidebar() {
   }
 
   const isAdmin = me?.role === "admin";
+  const isManager = (me?.managed_department_ids ?? []).length > 0;
+  const manageItems = isAdmin
+    ? adminManageNav
+    : isManager
+      ? managerManageNav
+      : null;
 
   return (
     <aside className="w-[210px] min-w-[210px] flex-shrink-0 bg-brand flex flex-col h-screen sticky top-0">
@@ -122,16 +144,16 @@ export default function Sidebar() {
         <sup className="text-[10px] text-brand-accent ml-[3px]">AI</sup>
       </div>
 
-      <nav className="flex-1 py-2 overflow-y-auto">
+      <nav className="flex-1 py-2 overflow-y-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
         <SectionHeader>{t("library")}</SectionHeader>
         {libraryNav.map((item) => (
           <NavLink key={item.href} item={item} active={isActive(pathname, item)} label={t(item.labelKey)} />
         ))}
 
-        {isAdmin && (
+        {manageItems && (
           <>
             <SectionHeader>{t("manage")}</SectionHeader>
-            {manageNav.map((item) => (
+            {manageItems.map((item) => (
               <NavLink key={item.href} item={item} active={isActive(pathname, item)} label={t(item.labelKey)} />
             ))}
           </>

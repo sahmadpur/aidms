@@ -9,6 +9,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.core.config import settings
 from app.services.storage import get_file_stream
 from app.services.embeddings import chunk_and_embed
+from app.services import audit
+from app.services.validation import notify_validation_failed, validate_document
 
 # Set Google credentials from config
 if settings.google_cloud_credentials:
@@ -102,3 +104,20 @@ async def run_ocr_pipeline(db: AsyncSession, doc) -> None:
     ).strip()
 
     await chunk_and_embed(db, doc, page_texts)
+
+    outcome = await validate_document(db, doc)
+    await audit.log(
+        db,
+        user_id=None,
+        action="document.validate",
+        entity_type="document",
+        entity_id=doc.id,
+        metadata={
+            "status": outcome.status,
+            "failed_count": len(outcome.failed_rules),
+            "rule_ids": [str(r.rule_id) for r in outcome.failed_rules],
+            "trigger": "ocr_worker",
+        },
+    )
+    if outcome.status == "failed":
+        await notify_validation_failed(db, doc, outcome.failed_rules)

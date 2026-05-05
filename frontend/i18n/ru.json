@@ -14,6 +14,7 @@
     "departments": "Отделы",
     "reports": "Отчёты",
     "auditLog": "Журнал аудита",
+    "validationRules": "Правила валидации",
     "settings": "Настройки",
     "logout": "Выйти",
     "documents": "Документы",
@@ -212,9 +213,24 @@
     "name_en": "Название (на английском)",
     "role": "Роль",
     "active": "Активен",
+    "inactive": "Неактивен",
     "save": "Сохранить",
     "cancel": "Отмена",
-    "delete": "Удалить"
+    "delete": "Удалить",
+    "newUser": "Новый пользователь",
+    "editUser": "Редактировать пользователя",
+    "resetPassword": "Сбросить пароль",
+    "deactivate": "Деактивировать",
+    "activate": "Активировать",
+    "confirmDeactivate": "Деактивировать этого пользователя? Он больше не сможет войти.",
+    "password": "Пароль",
+    "confirmPassword": "Подтвердите пароль",
+    "passwordsDoNotMatch": "Пароли не совпадают.",
+    "searchPlaceholder": "Поиск пользователей...",
+    "assignedDepartments": "Отделы",
+    "manager": "Менеджер",
+    "member": "Участник",
+    "cannotEditSelf": "Вы не можете понизить или деактивировать себя."
   },
   "approval": {
     "status": "Одобрение",
@@ -257,7 +273,83 @@
       "document_rejected": "{actor} отклонил(а) «{title}»",
       "revision_requested": "{actor} просит доработать «{title}»",
       "document_resubmitted": "{actor} отправил(а) «{title}» повторно",
-      "comment_mention": "{actor} упомянул(а) вас в «{title}»"
+      "comment_mention": "{actor} упомянул(а) вас в «{title}»",
+      "validation_failed": "«{title}» не прошёл валидацию"
+    }
+  },
+  "validation": {
+    "title": "Правила валидации",
+    "newRule": "Новое правило",
+    "column": "Валидация",
+    "empty": "Правил валидации пока нет. Создайте правило, чтобы проверять новые загрузки.",
+    "disabled": "Отключено",
+    "adminAuthored": "Админ",
+    "deleteConfirm": "Удалить это правило валидации?",
+    "revalidate": "Запустить для существующих документов",
+    "revalidateConfirm": "Запустить это правило сейчас для всех подходящих документов? Это может вызвать уведомления.",
+    "revalidateQueued": "Перепроверка поставлена в очередь. Документы будут обновлены вскоре.",
+    "docTypeLabel": "Тип",
+    "scope": {
+      "label": "Область",
+      "global": "Все отделы",
+      "anyType": "Любой тип"
+    },
+    "fields": {
+      "name": "Название",
+      "description": "Описание",
+      "department": "Отдел",
+      "docType": "Тип документа",
+      "target": "Поле для проверки",
+      "operator": "Оператор",
+      "valueText": "Значение",
+      "valueRegex": "Регулярное выражение",
+      "valueList": "Значения (через запятую)",
+      "valueInt": "Порог",
+      "severity": "Важность",
+      "active": "Активно",
+      "activeLabel": "Правило включено"
+    },
+    "placeholder": {
+      "text": "Введите требуемый текст",
+      "regex": "напр. EMP-\\d{4}",
+      "list": "müqavilə, договор, contract"
+    },
+    "valueHint": {
+      "nullary": "Этот оператор не требует значения.",
+      "list": "Срабатывает, если в поле найдено любое / все из этих подстрок.",
+      "regex": "Регистронезависимо. Не более 500 символов. Применяется тайм-аут 50мс."
+    },
+    "target": {
+      "ocr_text": "Текст OCR",
+      "title": "Название",
+      "tags": "Теги",
+      "physical_location": "Физическое место"
+    },
+    "operator": {
+      "contains": "содержит",
+      "not_contains": "не содержит",
+      "regex": "соответствует regex",
+      "any_of": "содержит любое из",
+      "all_of": "содержит все из",
+      "min_length": "мин. длина",
+      "min_word_count": "мин. число слов",
+      "date_present": "содержит дату",
+      "exists": "не пустое"
+    },
+    "severity": {
+      "error": "Ошибка",
+      "warning": "Предупреждение"
+    },
+    "status": {
+      "not_evaluated": "Не проверено",
+      "pending": "Проверяется",
+      "passed": "Проверено",
+      "failed": "Не пройдено",
+      "skipped": "Нет правил"
+    },
+    "banner": {
+      "title": "{count, plural, one {Не пройдено # правило валидации} few {Не пройдено # правила валидации} many {Не пройдено # правил валидации} other {Не пройдено # правил валидации}}",
+      "warnings": "Предупреждения"
     }
   },
   "inbox": {

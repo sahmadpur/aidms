@@ -22,6 +22,52 @@ RETRY_DELAYS = [120, 240]
 MAX_RETRIES = 3
 
 
+async def revalidate_rule(ctx: dict, rule_id: str) -> None:
+    """Re-run validation against every completed document whose scope matches
+    a single rule. Used when an admin authors a rule and wants existing docs
+    evaluated against it."""
+    from sqlalchemy import or_
+    from app.models.validation_rule import ValidationRule
+    from app.services import audit
+    from app.services.validation import notify_validation_failed, validate_document
+
+    async with AsyncSessionLocal() as db:
+        rule = await db.scalar(
+            select(ValidationRule).where(ValidationRule.id == uuid.UUID(rule_id))
+        )
+        if not rule or not rule.is_active:
+            return
+
+        # Match the same scope logic as applicable_rules but flipped: find docs
+        # whose dept/doc_type either match this rule or where this rule is global.
+        stmt = select(Document).where(Document.ocr_status == "completed")
+        if rule.department_id is not None:
+            stmt = stmt.where(Document.department_id == rule.department_id)
+        if rule.doc_type is not None:
+            stmt = stmt.where(Document.doc_type == rule.doc_type)
+
+        docs = (await db.scalars(stmt)).all()
+        for doc in docs:
+            outcome = await validate_document(db, doc)
+            await audit.log(
+                db,
+                user_id=None,
+                action="document.validate",
+                entity_type="document",
+                entity_id=doc.id,
+                metadata={
+                    "status": outcome.status,
+                    "failed_count": len(outcome.failed_rules),
+                    "rule_ids": [str(r.rule_id) for r in outcome.failed_rules],
+                    "trigger": "rule_revalidate",
+                    "source_rule_id": str(rule.id),
+                },
+            )
+            if outcome.status == "failed":
+                await notify_validation_failed(db, doc, outcome.failed_rules)
+            await db.commit()
+
+
 async def process_document(ctx: dict, document_id: str) -> None:
     """Main ARQ job: run OCR pipeline for a document."""
     from app.services.ocr import run_ocr_pipeline
@@ -74,7 +120,7 @@ async def process_document(ctx: dict, document_id: str) -> None:
 
 
 class WorkerSettings:
-    functions = [process_document]
+    functions = [process_document, revalidate_rule]
     redis_settings = REDIS_SETTINGS
     max_jobs = 5
     job_timeout = 180  # 3 minutes max per job

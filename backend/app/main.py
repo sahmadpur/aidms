@@ -10,6 +10,7 @@ from app.core.config import settings
 from app.core.logging import configure_logging
 from app.routers import (
     admin,
+    admin_validation,
     audit,
     auth,
     chat,
@@ -68,6 +69,11 @@ app.include_router(search.router, prefix="/search", tags=["search"])
 app.include_router(chat.router, prefix="/chat", tags=["chat"])
 app.include_router(admin.router, prefix="/admin", tags=["admin"])
 app.include_router(departments.router, prefix="/admin/departments", tags=["admin"])
+app.include_router(
+    admin_validation.router,
+    prefix="/admin/validation-rules",
+    tags=["admin"],
+)
 app.include_router(reports.router, prefix="/admin/reports", tags=["admin"])
 app.include_router(audit.router, prefix="/admin/audit-logs", tags=["admin"])
 

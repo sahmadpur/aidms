@@ -3,6 +3,7 @@ from datetime import datetime
 from typing import Optional
 
 from sqlalchemy import String, ForeignKey, Text, DateTime, func, ARRAY, Integer, BigInteger
+from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.orm import Mapped, mapped_column
 
 from app.core.database import Base
@@ -65,6 +66,13 @@ class Document(Base):
         ForeignKey("users.id", ondelete="SET NULL"), nullable=True
     )
     approved_at: Mapped[Optional[datetime]] = mapped_column(
+        DateTime(timezone=True), nullable=True
+    )
+    validation_status: Mapped[str] = mapped_column(
+        String(20), default="not_evaluated"
+    )  # not_evaluated|pending|passed|failed|skipped
+    validation_results: Mapped[Optional[list]] = mapped_column(JSONB, nullable=True)
+    validated_at: Mapped[Optional[datetime]] = mapped_column(
         DateTime(timezone=True), nullable=True
     )
     created_at: Mapped[datetime] = mapped_column(

@@ -64,6 +64,9 @@ class DocumentResponse(BaseModel):
     approval_status: str
     approved_by: Optional[uuid.UUID]
     approved_at: Optional[datetime]
+    validation_status: str
+    validation_results: Optional[list] = None
+    validated_at: Optional[datetime] = None
     created_at: datetime
     updated_at: datetime
 

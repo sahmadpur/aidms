@@ -14,6 +14,7 @@
     "departments": "Departments",
     "reports": "Reports",
     "auditLog": "Audit Log",
+    "validationRules": "Validation Rules",
     "settings": "Settings",
     "logout": "Log Out",
     "documents": "Documents",
@@ -212,9 +213,24 @@
     "name_en": "Name (English)",
     "role": "Role",
     "active": "Active",
+    "inactive": "Inactive",
     "save": "Save",
     "cancel": "Cancel",
-    "delete": "Delete"
+    "delete": "Delete",
+    "newUser": "New User",
+    "editUser": "Edit User",
+    "resetPassword": "Reset Password",
+    "deactivate": "Deactivate",
+    "activate": "Activate",
+    "confirmDeactivate": "Deactivate this user? They will no longer be able to sign in.",
+    "password": "Password",
+    "confirmPassword": "Confirm Password",
+    "passwordsDoNotMatch": "Passwords do not match.",
+    "searchPlaceholder": "Search users...",
+    "assignedDepartments": "Departments",
+    "manager": "Manager",
+    "member": "Member",
+    "cannotEditSelf": "You cannot demote or deactivate yourself."
   },
   "approval": {
     "status": "Approval",
@@ -257,7 +273,83 @@
       "document_rejected": "{actor} rejected “{title}”",
       "revision_requested": "{actor} asked you to revise “{title}”",
       "document_resubmitted": "{actor} resubmitted “{title}”",
-      "comment_mention": "{actor} mentioned you on “{title}”"
+      "comment_mention": "{actor} mentioned you on “{title}”",
+      "validation_failed": "“{title}” failed validation"
+    }
+  },
+  "validation": {
+    "title": "Validation Rules",
+    "newRule": "New Rule",
+    "column": "Validation",
+    "empty": "No validation rules yet. Create one to start checking new uploads.",
+    "disabled": "Disabled",
+    "adminAuthored": "Admin",
+    "deleteConfirm": "Delete this validation rule?",
+    "revalidate": "Re-run against existing documents",
+    "revalidateConfirm": "Run this rule against every matching document now? This may produce notifications.",
+    "revalidateQueued": "Revalidation queued. Affected documents will be updated shortly.",
+    "docTypeLabel": "Type",
+    "scope": {
+      "label": "Scope",
+      "global": "All departments",
+      "anyType": "Any type"
+    },
+    "fields": {
+      "name": "Name",
+      "description": "Description",
+      "department": "Department",
+      "docType": "Document type",
+      "target": "Field to check",
+      "operator": "Operator",
+      "valueText": "Value",
+      "valueRegex": "Regular expression",
+      "valueList": "Values (comma-separated)",
+      "valueInt": "Threshold",
+      "severity": "Severity",
+      "active": "Active",
+      "activeLabel": "Rule is enabled"
+    },
+    "placeholder": {
+      "text": "Enter the required text",
+      "regex": "e.g. EMP-\\d{4}",
+      "list": "müqavilə, договор, contract"
+    },
+    "valueHint": {
+      "nullary": "This operator does not need a value.",
+      "list": "Match if any/all of these substrings appear in the field.",
+      "regex": "Case-insensitive. Maximum 500 characters. Evaluation is sandboxed with a 50ms timeout."
+    },
+    "target": {
+      "ocr_text": "OCR text",
+      "title": "Title",
+      "tags": "Tags",
+      "physical_location": "Physical location"
+    },
+    "operator": {
+      "contains": "contains",
+      "not_contains": "does not contain",
+      "regex": "matches regex",
+      "any_of": "contains any of",
+      "all_of": "contains all of",
+      "min_length": "min length",
+      "min_word_count": "min word count",
+      "date_present": "contains a date",
+      "exists": "is non-empty"
+    },
+    "severity": {
+      "error": "Error",
+      "warning": "Warning"
+    },
+    "status": {
+      "not_evaluated": "Not evaluated",
+      "pending": "Validating",
+      "passed": "Validated",
+      "failed": "Failed",
+      "skipped": "No rules"
+    },
+    "banner": {
+      "title": "{count, plural, one {# validation rule failed} other {# validation rules failed}}",
+      "warnings": "Warnings"
     }
   },
   "inbox": {

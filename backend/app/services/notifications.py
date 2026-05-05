@@ -4,7 +4,7 @@ from typing import Optional, Any, Iterable
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.models.department import department_managers
+from app.models.department import department_members
 from app.models.notification import Notification
 
 
@@ -63,8 +63,9 @@ async def managers_of(
     if department_id is None:
         return []
     rows = await db.execute(
-        select(department_managers.c.user_id).where(
-            department_managers.c.department_id == department_id
+        select(department_members.c.user_id).where(
+            department_members.c.department_id == department_id,
+            department_members.c.is_manager.is_(True),
         )
     )
     return [r[0] for r in rows.all()]

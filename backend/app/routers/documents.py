@@ -33,6 +33,7 @@ from app.schemas.document import (
 )
 from app.services import audit, storage
 from app.services.notifications import managers_of, notify, notify_many
+from app.services.validation import notify_validation_failed, validate_document
 from app.services.visibility import visible_documents_clause
 
 router = APIRouter()
@@ -180,6 +181,7 @@ async def list_documents(
     sort: Optional[str] = None,
     q: Optional[str] = None,
     approval_status: Optional[str] = None,
+    validation_status: Optional[str] = None,
     inbox: bool = False,
     db: AsyncSession = Depends(get_db),
     current_user: User = Depends(get_current_user),
@@ -191,7 +193,7 @@ async def list_documents(
         # docs I uploaded. Admins: all pending+revision_requested (everything
         # they could act on org-wide).
         from sqlalchemy import exists as sa_exists
-        from app.models.department import department_managers as dm
+        from app.models.department import department_members as dm
 
         if current_user.role == "admin":
             base_query = base_query.where(
@@ -202,6 +204,7 @@ async def list_documents(
                 sa_exists()
                 .where(dm.c.department_id == Document.department_id)
                 .where(dm.c.user_id == current_user.id)
+                .where(dm.c.is_manager.is_(True))
             )
             base_query = base_query.where(
                 or_(
@@ -212,6 +215,8 @@ async def list_documents(
             )
     if approval_status:
         base_query = base_query.where(Document.approval_status == approval_status)
+    if validation_status:
+        base_query = base_query.where(Document.validation_status == validation_status)
     if ocr_status:
         base_query = base_query.where(Document.ocr_status == ocr_status)
     if doc_type:
@@ -271,6 +276,7 @@ async def update_document(
     _require_write(doc, current_user)
 
     update_data = request.model_dump(exclude_unset=True)
+    rescope = "department_id" in update_data or "doc_type" in update_data
     for field, value in update_data.items():
         setattr(doc, field, value)
 
@@ -283,6 +289,28 @@ async def update_document(
         metadata=update_data,
         request=http_request,
     )
+
+    # Re-validate if scope-affecting fields changed and we already have OCR text.
+    if rescope and doc.ocr_status == "completed":
+        outcome = await validate_document(db, doc)
+        await audit.log(
+            db,
+            user_id=current_user.id,
+            action="document.validate",
+            entity_type="document",
+            entity_id=doc.id,
+            metadata={
+                "status": outcome.status,
+                "failed_count": len(outcome.failed_rules),
+                "rule_ids": [str(r.rule_id) for r in outcome.failed_rules],
+                "trigger": "patch_rescope",
+            },
+            request=http_request,
+        )
+        if outcome.status == "failed":
+            await notify_validation_failed(
+                db, doc, outcome.failed_rules, actor_id=current_user.id
+            )
 
     await db.commit()
     await db.refresh(doc)
@@ -357,6 +385,78 @@ async def get_ocr_text(
             detail=f"OCR text not available. Status: {doc.ocr_status}",
         )
     return {"document_id": str(document_id), "ocr_text": doc.ocr_text}
+
+
+@router.get("/{document_id}/validation")
+async def get_document_validation(
+    document_id: uuid.UUID,
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    doc = await _get_document(db, document_id, current_user)
+    return {
+        "validation_status": doc.validation_status,
+        "validation_results": doc.validation_results or [],
+        "validated_at": doc.validated_at,
+    }
+
+
+@router.post("/{document_id}/revalidate", response_model=DocumentResponse)
+async def revalidate_document(
+    document_id: uuid.UUID,
+    http_request: Request,
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    """Synchronously re-run validation for a single document.
+
+    Allowed for: the uploader, a manager of the document's department, or any
+    admin. Useful when a manager fixes title/tags after a rule failure and
+    wants the status to flip without re-running OCR.
+    """
+    doc = await _get_document(db, document_id, current_user)
+
+    if current_user.role != "admin" and doc.user_id != current_user.id:
+        from app.services.visibility import is_manager_of
+
+        is_dept_manager = (
+            doc.department_id is not None
+            and await is_manager_of(db, current_user, doc.department_id)
+        )
+        if not is_dept_manager:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="Only the uploader, a department manager, or an admin can revalidate",
+            )
+
+    if doc.ocr_status != "completed":
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail=f"Document OCR is not completed (status: {doc.ocr_status})",
+        )
+
+    outcome = await validate_document(db, doc)
+    await audit.log(
+        db,
+        user_id=current_user.id,
+        action="document.validate",
+        entity_type="document",
+        entity_id=doc.id,
+        metadata={
+            "status": outcome.status,
+            "failed_count": len(outcome.failed_rules),
+            "rule_ids": [str(r.rule_id) for r in outcome.failed_rules],
+            "trigger": "manual",
+        },
+        request=http_request,
+    )
+    if outcome.status == "failed":
+        await notify_validation_failed(
+            db, doc, outcome.failed_rules, actor_id=current_user.id
+        )
+    await db.commit()
+    await db.refresh(doc)
+    return doc
 
 
 @router.post("/{document_id}/reprocess", status_code=status.HTTP_202_ACCEPTED)

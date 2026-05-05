@@ -7,15 +7,26 @@ import { useLocale, useTranslations } from "next-intl";
 import useSWR from "swr";
 import { Filter, Search, Plus } from "lucide-react";
 import { DataTable, Column } from "@/components/DataTable";
-import { DocTypeBadge, OcrStatusDot } from "@/components/Badge";
+import { DocTypeBadge, OcrStatusDot, ValidationStatusDot } from "@/components/Badge";
 import { ApprovalBadge } from "@/components/ApprovalBadge";
 import { FilterBar, FilterChip, FilterDivider, FilterLabel, FilterSelect } from "@/components/FilterBar";
 import { FolderBreadcrumb, useFolders } from "@/components/FolderPicker";
 import { TopBar, TopBarButton, TopBarTitle } from "@/components/TopBar";
 import UploadModal from "@/components/UploadModal";
 import api from "@/lib/api";
-import type { Document, DocumentList, Department, ApprovalStatus } from "@/lib/types";
-import { APPROVAL_STATUSES, DOC_TYPES, localizedName } from "@/lib/types";
+import type {
+  Document,
+  DocumentList,
+  Department,
+  ApprovalStatus,
+  ValidationStatus,
+} from "@/lib/types";
+import {
+  APPROVAL_STATUSES,
+  DOC_TYPES,
+  VALIDATION_STATUSES,
+  localizedName,
+} from "@/lib/types";
 import { pathFor } from "@/components/FolderPicker";
 
 const fetcher = (url: string) => api.get(url).then((r) => r.data);
@@ -39,6 +50,7 @@ export default function DocumentsPage() {
   const [departmentFilter, setDepartmentFilter] = useState<string>("");
   const [ocrFilter, setOcrFilter] = useState<string>("");
   const [approvalFilter, setApprovalFilter] = useState<ApprovalStatus | "">("");
+  const [validationFilter, setValidationFilter] = useState<ValidationStatus | "">("");
   const [uploadOpen, setUploadOpen] = useState(false);
 
   function handleSearchChange(v: string) {
@@ -60,13 +72,14 @@ export default function DocumentsPage() {
     if (yearFilter) p.set("year", yearFilter);
     if (departmentFilter) p.set("department_id", departmentFilter);
     if (ocrFilter) p.set("ocr_status", ocrFilter);
+    if (validationFilter) p.set("validation_status", validationFilter);
     if (inboxMode) {
       p.set("inbox", "1");
     } else if (approvalFilter) {
       p.set("approval_status", approvalFilter);
     }
     return p.toString();
-  }, [page, debouncedQuery, typeFilter, yearFilter, departmentFilter, ocrFilter, approvalFilter, inboxMode]);
+  }, [page, debouncedQuery, typeFilter, yearFilter, departmentFilter, ocrFilter, validationFilter, approvalFilter, inboxMode]);
 
   const { data, mutate } = useSWR<DocumentList>(
     `/documents?${queryString}`,
@@ -152,6 +165,17 @@ export default function DocumentsPage() {
           <ApprovalBadge
             status={d.approval_status}
             label={t(`approval.s_${d.approval_status}`)}
+          />
+        ),
+      },
+      {
+        key: "validation",
+        header: t("validation.column"),
+        width: "110px",
+        render: (d) => (
+          <ValidationStatusDot
+            status={d.validation_status}
+            label={t(`validation.status.${d.validation_status}`)}
           />
         ),
       },
@@ -296,6 +320,18 @@ export default function DocumentsPage() {
             </FilterSelect>
           </>
         )}
+        <FilterLabel>{t("validation.column")}:</FilterLabel>
+        <FilterSelect
+          value={validationFilter}
+          onChange={(v) => setValidationFilter((v as ValidationStatus) || "")}
+        >
+          <option value="">{t("filters.all")}</option>
+          {VALIDATION_STATUSES.map((s) => (
+            <option key={s} value={s}>
+              {t(`validation.status.${s}`)}
+            </option>
+          ))}
+        </FilterSelect>
         {inboxMode && (
           <>
             <FilterDivider />

@@ -18,6 +18,7 @@ const MESSAGE_KEYS: Record<NotificationType, string> = {
   revision_requested: "notifications.msg.revision_requested",
   document_resubmitted: "notifications.msg.document_resubmitted",
   comment_mention: "notifications.msg.comment_mention",
+  validation_failed: "notifications.msg.validation_failed",
 };
 
 export default function NotificationsBell() {

@@ -12,6 +12,56 @@ export const APPROVAL_STATUSES: ApprovalStatus[] = [
   "revision_requested",
 ];
 
+export type ValidationStatus =
+  | "not_evaluated"
+  | "pending"
+  | "passed"
+  | "failed"
+  | "skipped";
+export const VALIDATION_STATUSES: ValidationStatus[] = [
+  "not_evaluated",
+  "pending",
+  "passed",
+  "failed",
+  "skipped",
+];
+
+export type ValidationTarget =
+  | "ocr_text"
+  | "title"
+  | "tags"
+  | "physical_location";
+export const VALIDATION_TARGETS: ValidationTarget[] = [
+  "ocr_text",
+  "title",
+  "tags",
+  "physical_location",
+];
+
+export type ValidationOperator =
+  | "contains"
+  | "not_contains"
+  | "regex"
+  | "any_of"
+  | "all_of"
+  | "min_length"
+  | "min_word_count"
+  | "date_present"
+  | "exists";
+export const VALIDATION_OPERATORS: ValidationOperator[] = [
+  "contains",
+  "not_contains",
+  "regex",
+  "any_of",
+  "all_of",
+  "min_length",
+  "min_word_count",
+  "date_present",
+  "exists",
+];
+
+export type ValidationSeverity = "error" | "warning";
+
 export type NotificationType =
   | "comment_added"
   | "approval_requested"
@@ -19,7 +69,8 @@ export type NotificationType =
   | "document_rejected"
   | "revision_requested"
   | "document_resubmitted"
-  | "comment_mention";
+  | "comment_mention"
+  | "validation_failed";
 
 export const DOC_TYPES: DocType[] = [
   "contract",
@@ -52,6 +103,34 @@ export interface Document {
   approval_status: ApprovalStatus;
   approved_by: string | null;
   approved_at: string | null;
+  validation_status: ValidationStatus;
+  validation_results: ValidationResultItem[] | null;
+  validated_at: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface ValidationResultItem {
+  rule_id: string;
+  rule_name: string;
+  severity: ValidationSeverity;
+  passed: boolean;
+  message: string;
+}
+
+export interface ValidationRule {
+  id: string;
+  name: string;
+  description: string | null;
+  department_id: string | null;
+  doc_type: DocType | null;
+  target: ValidationTarget;
+  operator: ValidationOperator;
+  value: unknown;
+  severity: ValidationSeverity;
+  is_active: boolean;
+  created_by: string;
+  created_by_role: "admin" | "manager";
   created_at: string;
   updated_at: string;
 }

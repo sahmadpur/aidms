@@ -14,6 +14,7 @@
     "departments": "Şöbələr",
     "reports": "Hesabatlar",
     "auditLog": "Audit Jurnalı",
+    "validationRules": "Validasiya Qaydaları",
     "settings": "Parametrlər",
     "logout": "Çıxış",
     "documents": "Sənədlər",
@@ -212,9 +213,24 @@
     "name_en": "Ad (İngilis dilində)",
     "role": "Rol",
     "active": "Aktiv",
+    "inactive": "Qeyri-aktiv",
     "save": "Saxla",
     "cancel": "Ləğv et",
-    "delete": "Sil"
+    "delete": "Sil",
+    "newUser": "Yeni İstifadəçi",
+    "editUser": "İstifadəçini Redaktə Et",
+    "resetPassword": "Şifrəni Sıfırla",
+    "deactivate": "Deaktiv et",
+    "activate": "Aktivləşdir",
+    "confirmDeactivate": "Bu istifadəçi deaktiv edilsin? O, sistemə daxil ola bilməyəcək.",
+    "password": "Şifrə",
+    "confirmPassword": "Şifrəni təsdiq edin",
+    "passwordsDoNotMatch": "Şifrələr uyğun gəlmir.",
+    "searchPlaceholder": "İstifadəçi axtarın...",
+    "assignedDepartments": "Şöbələr",
+    "manager": "Menecer",
+    "member": "Üzv",
+    "cannotEditSelf": "Özünüzü vəzifədən sala və ya deaktiv edə bilməzsiniz."
   },
   "approval": {
     "status": "Təsdiq",
@@ -257,7 +273,83 @@
       "document_rejected": "{actor} «{title}» sənədini rədd etdi",
       "revision_requested": "{actor} «{title}» sənədinə düzəliş istədi",
       "document_resubmitted": "{actor} «{title}» sənədini yenidən göndərdi",
-      "comment_mention": "{actor} «{title}» sənədində sizi qeyd etdi"
+      "comment_mention": "{actor} «{title}» sənədində sizi qeyd etdi",
+      "validation_failed": "«{title}» validasiyadan keçmədi"
+    }
+  },
+  "validation": {
+    "title": "Validasiya Qaydaları",
+    "newRule": "Yeni Qayda",
+    "column": "Validasiya",
+    "empty": "Hələ validasiya qaydası yoxdur. Yeni yükləmələri yoxlamaq üçün bir qayda yaradın.",
+    "disabled": "Söndürülüb",
+    "adminAuthored": "Admin",
+    "deleteConfirm": "Bu validasiya qaydasını silmək istəyirsiniz?",
+    "revalidate": "Mövcud sənədlərə qarşı yenidən işlət",
+    "revalidateConfirm": "Bu qaydanı indi bütün uyğun sənədlərə qarşı işlətməli? Bu bildirişlər yarada bilər.",
+    "revalidateQueued": "Yenidən validasiya növbəyə qoyuldu. Sənədlər tezliklə yenilənəcək.",
+    "docTypeLabel": "Növ",
+    "scope": {
+      "label": "Əhatə",
+      "global": "Bütün şöbələr",
+      "anyType": "İstənilən növ"
+    },
+    "fields": {
+      "name": "Ad",
+      "description": "Təsvir",
+      "department": "Şöbə",
+      "docType": "Sənəd növü",
+      "target": "Yoxlanılacaq sahə",
+      "operator": "Operator",
+      "valueText": "Dəyər",
+      "valueRegex": "Müntəzəm ifadə (regex)",
+      "valueList": "Dəyərlər (vergüllə ayrılmış)",
+      "valueInt": "Hədd",
+      "severity": "Səviyyə",
+      "active": "Aktiv",
+      "activeLabel": "Qayda aktivdir"
+    },
+    "placeholder": {
+      "text": "Tələb olunan mətni daxil edin",
+      "regex": "məs. EMP-\\d{4}",
+      "list": "müqavilə, договор, contract"
+    },
+    "valueHint": {
+      "nullary": "Bu operator dəyər tələb etmir.",
+      "list": "Sahədə bunlardan biri / hamısı olduqda uyğunlaşır.",
+      "regex": "Hərflərə həssas deyil. Maksimum 500 simvol. 50ms vaxt limiti tətbiq olunur."
+    },
+    "target": {
+      "ocr_text": "OCR mətni",
+      "title": "Başlıq",
+      "tags": "Etiketlər",
+      "physical_location": "Fiziki yer"
+    },
+    "operator": {
+      "contains": "ehtiva edir",
+      "not_contains": "ehtiva etmir",
+      "regex": "regex uyğunlaşır",
+      "any_of": "ən azı birini ehtiva edir",
+      "all_of": "hamısını ehtiva edir",
+      "min_length": "min uzunluq",
+      "min_word_count": "min söz sayı",
+      "date_present": "tarix ehtiva edir",
+      "exists": "boş deyil"
+    },
+    "severity": {
+      "error": "Xəta",
+      "warning": "Xəbərdarlıq"
+    },
+    "status": {
+      "not_evaluated": "Qiymətləndirilməyib",
+      "pending": "Yoxlanılır",
+      "passed": "Təsdiqlənib",
+      "failed": "Uğursuz",
+      "skipped": "Qayda yoxdur"
+    },
+    "banner": {
+      "title": "{count, plural, one {# validasiya qaydası uğursuz oldu} other {# validasiya qaydası uğursuz oldu}}",
+      "warnings": "Xəbərdarlıqlar"
     }
   },
   "inbox": {

@@ -1,15 +1,18 @@
 import uuid
 from datetime import datetime
 
-from sqlalchemy import String, DateTime, Table, Column, ForeignKey, func
+from sqlalchemy import Boolean, String, DateTime, Table, Column, ForeignKey, func
 from sqlalchemy.dialects.postgresql import UUID as PgUUID
 from sqlalchemy.orm import Mapped, mapped_column
 
 from app.core.database import Base
 
 
-department_managers = Table(
-    "department_managers",
+# (department, user) membership rows. is_manager=True means this row also
+# grants manager privileges (inbox visibility, notifications, /users/me
+# managed_department_ids). is_manager=False is a plain member.
+department_members = Table(
+    "department_members",
     Base.metadata,
     Column(
         "department_id",
@@ -23,6 +26,7 @@ department_managers = Table(
         ForeignKey("users.id", ondelete="CASCADE"),
         primary_key=True,
     ),
+    Column("is_manager", Boolean, nullable=False),
     Column(
         "created_at",
         DateTime(timezone=True),

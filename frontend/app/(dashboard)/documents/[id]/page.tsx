@@ -9,7 +9,7 @@ import { ArrowLeft, Loader2, RefreshCw, Trash2 } from "lucide-react";
 import DocumentViewer from "@/components/DocumentViewer";
 import OCRTextPanel from "@/components/OCRTextPanel";
 import CommentsPanel from "@/components/CommentsPanel";
-import { DocTypeBadge, OcrStatusDot } from "@/components/Badge";
+import { DocTypeBadge, OcrStatusDot, ValidationStatusDot } from "@/components/Badge";
 import { ApprovalBadge } from "@/components/ApprovalBadge";
 import { ApprovalActions } from "@/components/ApprovalActions";
 import { FolderPicker, FolderBreadcrumb, useFolders } from "@/components/FolderPicker";
@@ -148,6 +148,11 @@ export default function DocumentDetailPage() {
                 status={doc.approval_status}
                 label={t(`approval.s_${doc.approval_status}`)}
               />
+              <span>·</span>
+              <ValidationStatusDot
+                status={doc.validation_status}
+                label={t(`validation.status.${doc.validation_status}`)}
+              />
             </div>
             {me && (
               <div className="mt-3">
@@ -275,6 +280,10 @@ export default function DocumentDetailPage() {
         </div>
       </div>
 
+      {doc.validation_status === "failed" && (
+        <ValidationFailedBanner doc={doc} />
+      )}
+
       {/* Tabs */}
       <div className="flex gap-1 border-b border-edge-soft">
         {(["pdf", "ocr", "comments"] as const).map((tab) => (
@@ -308,6 +317,66 @@ function MetaField({ label, children }: { label: string; children: React.ReactNo
     <div>
       <div className="text-[10px] uppercase tracking-wide text-gray-500 mb-1">{label}</div>
       {children}
+    </div>
+  );
+}
+
+function ValidationFailedBanner({
+  doc,
+}: {
+  doc: { validation_results: { rule_name: string; severity: string; passed: boolean; message: string }[] | null };
+}) {
+  const t = useTranslations();
+  const failed = (doc.validation_results ?? []).filter(
+    (r) => !r.passed && r.severity === "error"
+  );
+  const warnings = (doc.validation_results ?? []).filter(
+    (r) => !r.passed && r.severity === "warning"
+  );
+  return (
+    <div className="bg-red-50 border border-red-200 rounded-[10px] p-3 space-y-1.5">
+      <div className="flex items-center gap-2 text-[12px] font-semibold text-red-800">
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          className="w-4 h-4"
+          viewBox="0 0 20 20"
+          fill="currentColor"
+        >
+          <path
+            fillRule="evenodd"
+            d="M10 18a8 8 0 100-16 8 8 0 000 16zM9 8a1 1 0 012 0v4a1 1 0 11-2 0V8zm0 7a1 1 0 112 0 1 1 0 01-2 0z"
+            clipRule="evenodd"
+          />
+        </svg>
+        {t("validation.banner.title", { count: failed.length })}
+      </div>
+      <ul className="text-[11.5px] text-red-700 list-disc pl-5 space-y-0.5">
+        {failed.map((r, i) => (
+          <li key={`e-${i}`}>
+            <span className="font-medium">{r.rule_name}</span>
+            {r.message && (
+              <span className="text-red-600"> — {r.message}</span>
+            )}
+          </li>
+        ))}
+      </ul>
+      {warnings.length > 0 && (
+        <>
+          <div className="text-[11px] uppercase tracking-wider text-amber-700 pt-1.5">
+            {t("validation.banner.warnings")}
+          </div>
+          <ul className="text-[11.5px] text-amber-700 list-disc pl-5 space-y-0.5">
+            {warnings.map((r, i) => (
+              <li key={`w-${i}`}>
+                <span className="font-medium">{r.rule_name}</span>
+                {r.message && (
+                  <span className="text-amber-600"> — {r.message}</span>
+                )}
+              </li>
+            ))}
+          </ul>
+        </>
+      )}
     </div>
   );
 }

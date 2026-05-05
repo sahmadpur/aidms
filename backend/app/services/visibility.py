@@ -14,7 +14,7 @@ content. Those modules embed the filter directly in their raw SQL.
 
 from sqlalchemy import exists, or_, true
 
-from app.models.department import department_managers
+from app.models.department import department_members
 from app.models.document import Document
 from app.models.user import User
 
@@ -30,8 +30,9 @@ def visible_documents_clause(user: User):
 
     is_manager_of_doc_dept = (
         exists()
-        .where(department_managers.c.department_id == Document.department_id)
-        .where(department_managers.c.user_id == user.id)
+        .where(department_members.c.department_id == Document.department_id)
+        .where(department_members.c.user_id == user.id)
+        .where(department_members.c.is_manager.is_(True))
     )
     return or_(
         Document.approval_status == "approved",
@@ -46,8 +47,9 @@ async def is_manager_of(db, user: User, department_id) -> bool:
         return False
     row = await db.scalar(
         exists()
-        .where(department_managers.c.department_id == department_id)
-        .where(department_managers.c.user_id == user.id)
+        .where(department_members.c.department_id == department_id)
+        .where(department_members.c.user_id == user.id)
+        .where(department_members.c.is_manager.is_(True))
         .select()
     )
     return bool(row)

@@ -5,7 +5,16 @@ import Link from "next/link";
 import { useParams, useRouter, useSearchParams } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
 import useSWR from "swr";
-import { ArrowLeft, Loader2, RefreshCw, Trash2 } from "lucide-react";
+import {
+  ArrowLeft,
+  Loader2,
+  MessageSquare,
+  PanelRightClose,
+  PanelRightOpen,
+  RefreshCw,
+  ScanText,
+  Trash2,
+} from "lucide-react";
 import DocumentViewer from "@/components/DocumentViewer";
 import OCRTextPanel from "@/components/OCRTextPanel";
 import CommentsPanel from "@/components/CommentsPanel";
@@ -38,16 +47,27 @@ export default function DocumentDetailPage() {
   const id = params.id as string;
 
   const searchParams = useSearchParams();
-  const initialTab =
-    searchParams.get("tab") === "comments"
-      ? "comments"
-      : searchParams.get("tab") === "ocr"
+  const initialRail =
+    searchParams.get("tab") === "ocr"
       ? "ocr"
-      : "pdf";
-  const [activeTab, setActiveTab] = useState<"pdf" | "ocr" | "comments">(initialTab);
+      : searchParams.get("tab") === "pdf"
+      ? null
+      : "comments";
+  const [railTab, setRailTab] = useState<"comments" | "ocr">(
+    initialRail === "ocr" ? "ocr" : "comments"
+  );
+  const [railOpen, setRailOpen] = useState<boolean>(initialRail !== null);
   useEffect(() => {
     const t = searchParams.get("tab");
-    if (t === "comments" || t === "ocr" || t === "pdf") setActiveTab(t);
+    if (t === "ocr") {
+      setRailTab("ocr");
+      setRailOpen(true);
+    } else if (t === "comments") {
+      setRailTab("comments");
+      setRailOpen(true);
+    } else if (t === "pdf") {
+      setRailOpen(false);
+    }
   }, [searchParams]);
   const [editing, setEditing] = useState(false);
   const [form, setForm] = useState<EditForm | null>(null);
@@ -110,7 +130,7 @@ export default function DocumentDetailPage() {
   const fileUrl = `${API_URL}/documents/${id}/file?v=${encodeURIComponent(doc.updated_at)}`;
 
   return (
-    <div className="p-6 space-y-4 max-w-6xl mx-auto">
+    <div className="p-6 max-w-[1500px] mx-auto h-full flex flex-col gap-4">
       <div className="flex items-center gap-2 text-[12px] text-gray-500">
         <Link href="/documents" className="inline-flex items-center gap-1 hover:text-brand">
           <ArrowLeft className="w-3.5 h-3.5" /> {t("documents.title")}
@@ -284,31 +304,136 @@ export default function DocumentDetailPage() {
         <ValidationFailedBanner doc={doc} />
       )}
 
-      {/* Tabs */}
-      <div className="flex gap-1 border-b border-edge-soft">
-        {(["pdf", "ocr", "comments"] as const).map((tab) => (
-          <button
-            key={tab}
-            onClick={() => setActiveTab(tab)}
-            className={`px-4 py-2 text-[13px] font-medium transition-colors border-b-2 -mb-px ${
-              activeTab === tab ? "border-brand-accent text-brand" : "border-transparent text-gray-500 hover:text-gray-700"
-            }`}
-          >
-            {tab === "pdf"
-              ? t("documents.viewFile")
-              : tab === "ocr"
-              ? t("documents.viewOcr")
-              : t("comments.tab")}
-          </button>
-        ))}
-      </div>
+      {/* Workspace: PDF on the left, collapsible side rail on the right. */}
+      <div className="flex gap-3 flex-1 min-h-[520px]">
+        <div className="flex-1 min-w-0 bg-surface-card border border-edge-soft rounded-[10px] overflow-hidden">
+          <DocumentViewer fileUrl={fileUrl} />
+        </div>
 
-      <div className="h-[70vh] bg-surface-card border border-edge-soft rounded-[10px] overflow-hidden">
-        {activeTab === "pdf" && <DocumentViewer fileUrl={fileUrl} />}
-        {activeTab === "ocr" && <OCRTextPanel ocrText={ocrData?.ocr_text || ""} />}
-        {activeTab === "comments" && <CommentsPanel documentId={id} />}
+        {railOpen ? (
+          <aside className="w-[420px] flex-shrink-0 bg-surface-card border border-edge-soft rounded-[10px] overflow-hidden flex flex-col">
+            <div className="flex items-center border-b border-edge-soft pl-2 pr-1">
+              <RailTab
+                active={railTab === "comments"}
+                onClick={() => setRailTab("comments")}
+                icon={<MessageSquare className="w-3.5 h-3.5" />}
+                label={t("commentsPanel.title")}
+              />
+              <RailTab
+                active={railTab === "ocr"}
+                onClick={() => setRailTab("ocr")}
+                icon={<ScanText className="w-3.5 h-3.5" />}
+                label={t("ocrPanel.title")}
+              />
+              <div className="flex-1" />
+              <button
+                onClick={() => setRailOpen(false)}
+                className="p-1.5 rounded-[5px] text-gray-400 hover:text-brand hover:bg-surface-hover"
+                title={t("documents.collapsePanel")}
+                aria-label={t("documents.collapsePanel")}
+              >
+                <PanelRightClose className="w-4 h-4" />
+              </button>
+            </div>
+            <div className="flex-1 min-h-0">
+              {railTab === "comments" ? (
+                <CommentsPanel documentId={id} />
+              ) : (
+                <OCRTextPanel
+                  ocrText={ocrData?.ocr_text || ""}
+                  ocrStatus={doc.ocr_status}
+                  language={doc.language}
+                  documentTitle={doc.title}
+                />
+              )}
+            </div>
+          </aside>
+        ) : (
+          <div className="flex-shrink-0 flex flex-col gap-2">
+            <RailExpandButton
+              icon={<MessageSquare className="w-4 h-4" />}
+              label={t("commentsPanel.title")}
+              onClick={() => {
+                setRailTab("comments");
+                setRailOpen(true);
+              }}
+            />
+            <RailExpandButton
+              icon={<ScanText className="w-4 h-4" />}
+              label={t("ocrPanel.title")}
+              onClick={() => {
+                setRailTab("ocr");
+                setRailOpen(true);
+              }}
+            />
+            <RailExpandButton
+              icon={<PanelRightOpen className="w-4 h-4" />}
+              label={t("documents.expandPanel")}
+              onClick={() => setRailOpen(true)}
+              compact
+            />
+          </div>
+        )}
       </div>
     </div>
+  );
+}
+
+function RailTab({
+  active,
+  onClick,
+  icon,
+  label,
+}: {
+  active: boolean;
+  onClick: () => void;
+  icon: React.ReactNode;
+  label: string;
+}) {
+  return (
+    <button
+      onClick={onClick}
+      className={`px-3 py-2.5 text-[12.5px] font-medium inline-flex items-center gap-1.5 border-b-2 -mb-px transition-colors ${
+        active
+          ? "border-brand-accent text-brand"
+          : "border-transparent text-gray-500 hover:text-gray-800"
+      }`}
+    >
+      {icon}
+      {label}
+    </button>
+  );
+}
+
+function RailExpandButton({
+  icon,
+  label,
+  onClick,
+  compact,
+}: {
+  icon: React.ReactNode;
+  label: string;
+  onClick: () => void;
+  compact?: boolean;
+}) {
+  return (
+    <button
+      onClick={onClick}
+      title={label}
+      className={`group bg-surface-card border border-edge-soft rounded-[10px] hover:border-edge-chip hover:bg-surface-hover transition-colors text-gray-500 hover:text-brand inline-flex flex-col items-center justify-center w-10 ${
+        compact ? "py-2" : "py-3 gap-2"
+      }`}
+    >
+      {icon}
+      {!compact && (
+        <span
+          className="text-[10.5px] tracking-wider uppercase whitespace-nowrap"
+          style={{ writingMode: "vertical-rl", transform: "rotate(180deg)" }}
+        >
+          {label}
+        </span>
+      )}
+    </button>
   );
 }
 

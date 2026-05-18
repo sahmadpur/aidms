@@ -15,6 +15,7 @@ from app.schemas.department import (
     DepartmentUpdate,
 )
 from app.services import audit
+from app.services.email import email_users
 
 router = APIRouter()
 
@@ -63,7 +64,10 @@ async def _attach_managers(
 
 async def _replace_managers(
     db: AsyncSession, department_id: uuid.UUID, manager_ids: list[uuid.UUID]
-) -> None:
+) -> set[uuid.UUID]:
+    """Replace the manager set for a department. Returns the *newly added*
+    manager ids — callers use this to send a one-shot welcome email to people
+    who weren't managers a moment ago (no spam on a no-op re-save)."""
     unique_ids = list({mid for mid in manager_ids})
     if unique_ids:
         found = await db.execute(
@@ -76,6 +80,16 @@ async def _replace_managers(
                 status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
                 detail=f"Unknown user_ids: {', '.join(str(m) for m in missing)}",
             )
+
+    # Snapshot the previous manager set before we delete it so the diff is exact.
+    prev_rows = await db.execute(
+        select(department_members.c.user_id).where(
+            department_members.c.department_id == department_id,
+            department_members.c.is_manager.is_(True),
+        )
+    )
+    previous_managers = {r[0] for r in prev_rows.all()}
+
     # Delete only the *manager* rows for this department; leave any plain-member
     # rows untouched (they are managed from the user-management side).
     await db.execute(
@@ -108,6 +122,50 @@ async def _replace_managers(
                     department_id=department_id, user_id=mid, is_manager=True
                 )
             )
+
+    return set(unique_ids) - previous_managers
+
+
+def _dept_name_for(dept: Department, language: str) -> str:
+    if language == "az":
+        return dept.name_az or dept.name_en
+    if language == "ru":
+        return dept.name_ru or dept.name_en
+    return dept.name_en or dept.name_az
+
+
+async def _notify_new_managers(
+    db: AsyncSession,
+    *,
+    new_manager_ids: set[uuid.UUID],
+    dept: Department,
+    actor: User,
+) -> None:
+    if not new_manager_ids:
+        return
+    # Per-recipient language requires per-recipient context — can't use
+    # email_users directly because dept_name is localised. Fetch users and loop.
+    users = list(
+        await db.scalars(
+            select(User).where(
+                User.id.in_(new_manager_ids),
+                User.is_active.is_(True),
+                User.id != actor.id,
+            )
+        )
+    )
+    from app.services.email import send_event_email
+    for u in users:
+        await send_event_email(
+            to_email=u.email,
+            full_name=u.full_name,
+            language=u.language_preference or "en",
+            event="manager_assigned",
+            context={
+                "actor_name": actor.full_name,
+                "dept_name": _dept_name_for(dept, u.language_preference or "en"),
+            },
+        )
 
 
 @router.get("", response_model=list[DepartmentResponse])
@@ -147,8 +205,9 @@ async def create_department(
     )
     db.add(dept)
     await db.flush()
+    newly_added_managers: set[uuid.UUID] = set()
     if request.manager_ids is not None:
-        await _replace_managers(db, dept.id, request.manager_ids)
+        newly_added_managers = await _replace_managers(db, dept.id, request.manager_ids)
     await audit.log(
         db,
         user_id=current_admin.id,
@@ -163,6 +222,9 @@ async def create_department(
     )
     await db.commit()
     await db.refresh(dept)
+    await _notify_new_managers(
+        db, new_manager_ids=newly_added_managers, dept=dept, actor=current_admin
+    )
     return await _attach_managers(db, dept)
 
 
@@ -183,8 +245,9 @@ async def update_department(
     for field, value in data.items():
         setattr(dept, field, value)
 
+    newly_added_managers: set[uuid.UUID] = set()
     if manager_ids is not None:
-        await _replace_managers(db, dept.id, manager_ids)
+        newly_added_managers = await _replace_managers(db, dept.id, manager_ids)
 
     await audit.log(
         db,
@@ -204,6 +267,9 @@ async def update_department(
     )
     await db.commit()
     await db.refresh(dept)
+    await _notify_new_managers(
+        db, new_manager_ids=newly_added_managers, dept=dept, actor=current_admin
+    )
     return await _attach_managers(db, dept)
 
 

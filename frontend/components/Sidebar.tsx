@@ -19,6 +19,7 @@ import {
   LogOut,
   ShieldCheck,
   Sparkles,
+  BookOpen,
 } from "lucide-react";
 import { clsx } from "clsx";
 import { clearTokens } from "@/lib/auth";
@@ -49,6 +50,7 @@ const libraryNav: NavItem[] = [
   { href: "/search", icon: Search, labelKey: "fullTextSearch" },
   { href: "/recent-uploads", icon: Clock, labelKey: "recentUploads" },
   { href: "/chat", icon: MessageSquare, labelKey: "aiChat" },
+  { href: "/dictionary", icon: BookOpen, labelKey: "dictionary" },
 ];
 
 const adminManageNav: NavItem[] = [
@@ -62,6 +64,7 @@ const adminManageNav: NavItem[] = [
     labelKey: "validationRules",
   },
   { href: "/admin/ai-settings", icon: Sparkles, labelKey: "aiSettings" },
+  { href: "/admin/dictionary", icon: BookOpen, labelKey: "dictionaryManage" },
   { href: "/admin/reports", icon: BarChart3, labelKey: "reports" },
   { href: "/admin/audit-log", icon: ClipboardList, labelKey: "auditLog" },
 ];

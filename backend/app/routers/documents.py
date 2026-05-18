@@ -31,10 +31,16 @@ from app.schemas.document import (
     DocumentUpdateRequest,
     DocumentUploadResponse,
 )
+from app.core.config import settings as app_settings
 from app.services import audit, storage
+from app.services.email import email_user, email_users
 from app.services.notifications import managers_of, notify, notify_many
 from app.services.validation import notify_validation_failed, validate_document
 from app.services.visibility import visible_documents_clause
+
+
+def _doc_url(doc_id) -> str:
+    return f"{app_settings.frontend_base_url}/documents/{doc_id}"
 
 router = APIRouter()
 
@@ -148,6 +154,18 @@ async def upload_documents(
             actor_id=current_user.id,
             payload={"title": doc.title},
         )
+        if manager_ids:
+            await email_users(
+                db,
+                user_ids=manager_ids,
+                event="approval_requested",
+                context={
+                    "actor_name": current_user.full_name,
+                    "doc_title": doc.title,
+                    "doc_url": _doc_url(doc.id),
+                },
+                exclude_user_id=current_user.id,
+            )
         created.append(doc)
 
         try:
@@ -585,6 +603,17 @@ async def approve_document(
     )
     await db.commit()
     await db.refresh(doc)
+    if doc.user_id != current_user.id:
+        await email_user(
+            db,
+            user_id=doc.user_id,
+            event="document_approved",
+            context={
+                "actor_name": current_user.full_name,
+                "doc_title": doc.title,
+                "doc_url": _doc_url(doc.id),
+            },
+        )
     return doc
 
 
@@ -636,6 +665,18 @@ async def reject_document(
     )
     await db.commit()
     await db.refresh(doc)
+    if doc.user_id != current_user.id:
+        await email_user(
+            db,
+            user_id=doc.user_id,
+            event="document_rejected",
+            context={
+                "actor_name": current_user.full_name,
+                "doc_title": doc.title,
+                "doc_url": _doc_url(doc.id),
+                "reason": reason or "—",
+            },
+        )
     return doc
 
 
@@ -685,6 +726,18 @@ async def request_revision(
     )
     await db.commit()
     await db.refresh(doc)
+    if doc.user_id != current_user.id:
+        await email_user(
+            db,
+            user_id=doc.user_id,
+            event="revision_requested",
+            context={
+                "actor_name": current_user.full_name,
+                "doc_title": doc.title,
+                "doc_url": _doc_url(doc.id),
+                "reason": reason,
+            },
+        )
     return doc
 
 
@@ -773,6 +826,21 @@ async def resubmit_document(
     )
     await db.commit()
     await db.refresh(doc)
+
+    if manager_ids:
+        # Reuse the approval_requested template — a resubmit is functionally
+        # the same call-to-action for the manager (please re-review).
+        await email_users(
+            db,
+            user_ids=manager_ids,
+            event="approval_requested",
+            context={
+                "actor_name": current_user.full_name,
+                "doc_title": doc.title,
+                "doc_url": _doc_url(doc.id),
+            },
+            exclude_user_id=current_user.id,
+        )
 
     if replaced_file:
         try:

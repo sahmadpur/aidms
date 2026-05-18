@@ -17,6 +17,7 @@ from app.routers import (
     chat,
     comments,
     departments,
+    dictionary,
     documents,
     folders,
     notifications,
@@ -79,6 +80,10 @@ app.include_router(reports.router, prefix="/admin/reports", tags=["admin"])
 app.include_router(audit.router, prefix="/admin/audit-logs", tags=["admin"])
 app.include_router(
     admin_settings.router, prefix="/admin/settings", tags=["admin"]
+)
+app.include_router(dictionary.read_router, prefix="/dictionary", tags=["dictionary"])
+app.include_router(
+    dictionary.admin_router, prefix="/admin/dictionary", tags=["admin"]
 )
 
 

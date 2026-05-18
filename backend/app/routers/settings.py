@@ -14,6 +14,7 @@ from app.schemas.user import (
     UserSelfUpdate,
 )
 from app.services import audit
+from app.services.email import send_event_email
 
 router = APIRouter()
 
@@ -131,3 +132,11 @@ async def change_password(
         request=http_request,
     )
     await db.commit()
+
+    await send_event_email(
+        to_email=current_user.email,
+        full_name=current_user.full_name,
+        language=current_user.language_preference or "en",
+        event="password_changed",
+        context={},
+    )

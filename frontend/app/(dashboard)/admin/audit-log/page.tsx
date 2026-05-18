@@ -3,7 +3,7 @@
 import { useMemo, useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import useSWR from "swr";
-import { TopBar, TopBarTitle } from "@/components/TopBar";
+import { TopBar, TopBarTitle, TopBarButton } from "@/components/TopBar";
 import { FilterBar, FilterLabel, FilterSelect } from "@/components/FilterBar";
 import { DataTable, Column } from "@/components/DataTable";
 import api from "@/lib/api";
@@ -35,30 +35,72 @@ const ACTIONS = [
   "folder.create", "folder.update", "folder.delete",
   "department.create", "department.update", "department.delete",
   "category.create", "category.delete",
+  "dictionary.create", "dictionary.update", "dictionary.delete",
 ];
 
-const ENTITIES = ["user", "document", "folder", "department", "category"];
+const ENTITIES = ["user", "document", "folder", "department", "category", "dictionary"];
 
 const fetcher = (url: string) => api.get(url).then((r) => r.data);
+
+function buildFilterParams(opts: {
+  action: string;
+  entityType: string;
+  from: string;
+  to: string;
+}) {
+  const p = new URLSearchParams();
+  if (opts.action) p.set("action", opts.action);
+  if (opts.entityType) p.set("entity_type", opts.entityType);
+  if (opts.from) p.set("from", new Date(opts.from).toISOString());
+  if (opts.to) {
+    // include the full selected day
+    const end = new Date(opts.to);
+    end.setHours(23, 59, 59, 999);
+    p.set("to", end.toISOString());
+  }
+  return p;
+}
 
 export default function AuditLogPage() {
   const t = useTranslations();
   const locale = useLocale();
   const [action, setAction] = useState("");
   const [entityType, setEntityType] = useState("");
+  const [fromDate, setFromDate] = useState("");
+  const [toDate, setToDate] = useState("");
   const [offset, setOffset] = useState(0);
+  const [downloading, setDownloading] = useState(false);
   const limit = 50;
 
   const qs = useMemo(() => {
-    const p = new URLSearchParams();
-    if (action) p.set("action", action);
-    if (entityType) p.set("entity_type", entityType);
+    const p = buildFilterParams({ action, entityType, from: fromDate, to: toDate });
     p.set("limit", String(limit));
     p.set("offset", String(offset));
     return p.toString();
-  }, [action, entityType, offset]);
+  }, [action, entityType, fromDate, toDate, offset]);
 
   const { data } = useSWR<AuditList>(`/admin/audit-logs?${qs}`, fetcher, { refreshInterval: 15000 });
+
+  async function downloadXlsx() {
+    setDownloading(true);
+    try {
+      const params = buildFilterParams({ action, entityType, from: fromDate, to: toDate });
+      const resp = await api.get(`/admin/audit-logs/export.xlsx?${params.toString()}`, {
+        responseType: "blob",
+      });
+      const blob = new Blob([resp.data], {
+        type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+      });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `audit-log-${new Date().toISOString().slice(0, 10)}.xlsx`;
+      a.click();
+      URL.revokeObjectURL(url);
+    } finally {
+      setDownloading(false);
+    }
+  }
 
   const cols: Column<AuditRow>[] = [
     {
@@ -104,12 +146,6 @@ export default function AuditLogPage() {
         </span>
       ),
     },
-    {
-      key: "ip",
-      header: t("auditLog.ip"),
-      width: "130px",
-      render: (r) => <span className="text-[11.5px] text-gray-600 font-mono">{r.ip_address ?? "—"}</span>,
-    },
   ];
 
   const total = data?.total ?? 0;
@@ -120,6 +156,10 @@ export default function AuditLogPage() {
     <>
       <TopBar>
         <TopBarTitle>{t("auditLog.title")}</TopBarTitle>
+        <div className="flex-1" />
+        <TopBarButton onClick={downloadXlsx} disabled={downloading}>
+          {downloading ? t("common.loading") : t("common.download")}
+        </TopBarButton>
       </TopBar>
       <FilterBar>
         <FilterLabel>{t("auditLog.action")}:</FilterLabel>
@@ -140,6 +180,20 @@ export default function AuditLogPage() {
             </option>
           ))}
         </FilterSelect>
+        <FilterLabel>{t("auditLog.from")}:</FilterLabel>
+        <input
+          type="date"
+          value={fromDate}
+          onChange={(e) => { setFromDate(e.target.value); setOffset(0); }}
+          className="px-2 py-1 border border-edge-chip rounded-[5px] text-[12px] bg-surface-hover text-gray-900 outline-none focus:border-edge-focus"
+        />
+        <FilterLabel>{t("auditLog.to")}:</FilterLabel>
+        <input
+          type="date"
+          value={toDate}
+          onChange={(e) => { setToDate(e.target.value); setOffset(0); }}
+          className="px-2 py-1 border border-edge-chip rounded-[5px] text-[12px] bg-surface-hover text-gray-900 outline-none focus:border-edge-focus"
+        />
       </FilterBar>
       <div className="px-[22px] py-4">
         <DataTable
@@ -147,7 +201,7 @@ export default function AuditLogPage() {
           rows={data?.items ?? []}
           rowKey={(r) => r.id}
           empty={t("auditLog.noLogs")}
-          minWidth={900}
+          minWidth={760}
         />
         <div className="flex items-center justify-between mt-3 text-[11px] text-gray-600">
           <span>

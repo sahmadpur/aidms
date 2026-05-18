@@ -1,3 +1,4 @@
+import secrets
 import uuid
 from datetime import datetime, timedelta, timezone
 
@@ -20,18 +21,29 @@ from app.core.security import (
 )
 from app.models.user import User
 from app.schemas.auth import (
+    AcceptInviteRequest,
+    ForgotPasswordRequest,
+    InviteInfoResponse,
     RegisterRequest,
     RegisterResponse,
     LoginRequest,
     TokenResponse,
     RefreshRequest,
+    ResetPasswordRequest,
     VerifyEmailRequest,
     ResendVerificationRequest,
     ResendVerificationResponse,
 )
 from app.services import audit
-from app.services.email import EmailDeliveryError, send_verification_email
+from app.services.email import (
+    EmailDeliveryError,
+    send_event_email,
+    send_verification_email,
+)
 from app.services.verification import generate_code, hash_code, verify_code
+
+RESET_TTL_MINUTES = 15
+RESET_MAX_ATTEMPTS = 5
 
 router = APIRouter()
 
@@ -232,7 +244,13 @@ async def resend_verification(
 @limiter.limit("10/minute")
 async def login(request: Request, body: LoginRequest, db: AsyncSession = Depends(get_db)):
     user = await db.scalar(select(User).where(User.email == body.email, User.is_active == True))  # noqa: E712
-    if not user or not verify_password(body.password, user.password_hash):
+    # Pending-invite users (password_hash IS NULL) match the same generic 401
+    # so we don't leak account state.
+    if (
+        not user
+        or user.password_hash is None
+        or not verify_password(body.password, user.password_hash)
+    ):
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Invalid email or password",
@@ -253,6 +271,170 @@ async def login(request: Request, body: LoginRequest, db: AsyncSession = Depends
         request=request,
     )
     await db.commit()
+
+    return TokenResponse(
+        access_token=create_access_token(str(user.id)),
+        refresh_token=create_refresh_token(str(user.id)),
+    )
+
+
+# ── Invite acceptance ─────────────────────────────────────────────────────
+
+
+def _invite_invalid() -> HTTPException:
+    return HTTPException(
+        status_code=status.HTTP_404_NOT_FOUND,
+        detail="invite_invalid_or_expired",
+    )
+
+
+@router.get("/invite/{token}", response_model=InviteInfoResponse)
+async def get_invite(token: str, db: AsyncSession = Depends(get_db)):
+    user = await db.scalar(select(User).where(User.invite_token == token))
+    if (
+        user is None
+        or user.invite_token_expires_at is None
+        or user.invite_token_expires_at < _now()
+        or not user.is_active
+    ):
+        raise _invite_invalid()
+    return InviteInfoResponse(email=user.email, full_name=user.full_name)
+
+
+@router.post("/accept-invite", response_model=TokenResponse)
+@limiter.limit("10/minute")
+async def accept_invite(
+    request: Request,
+    body: AcceptInviteRequest,
+    db: AsyncSession = Depends(get_db),
+):
+    user = await db.scalar(select(User).where(User.invite_token == body.token))
+    if (
+        user is None
+        or user.invite_token_expires_at is None
+        or user.invite_token_expires_at < _now()
+        or not user.is_active
+    ):
+        raise _invite_invalid()
+
+    user.password_hash = hash_password(body.password)
+    user.is_verified = True
+    user.email_verified_at = _now()
+    user.invite_token = None
+    user.invite_token_expires_at = None
+
+    await audit.log(
+        db,
+        user_id=user.id,
+        action="user.invite_accepted",
+        entity_type="user",
+        entity_id=user.id,
+        request=request,
+    )
+    await db.commit()
+
+    return TokenResponse(
+        access_token=create_access_token(str(user.id)),
+        refresh_token=create_refresh_token(str(user.id)),
+    )
+
+
+# ── Forgot / reset password ───────────────────────────────────────────────
+
+
+@router.post("/forgot-password", status_code=status.HTTP_204_NO_CONTENT)
+@limiter.limit("3/minute")
+async def forgot_password(
+    request: Request,
+    body: ForgotPasswordRequest,
+    db: AsyncSession = Depends(get_db),
+):
+    # Always return 204 — never confirm or deny whether the email exists.
+    user = await db.scalar(
+        select(User).where(
+            User.email == body.email,
+            User.is_active.is_(True),
+            User.is_verified.is_(True),
+        )
+    )
+    if user is None or user.password_hash is None:
+        return
+
+    code = generate_code()
+    user.reset_code_hash = hash_code(code)
+    user.reset_code_expires_at = _now() + timedelta(minutes=RESET_TTL_MINUTES)
+    user.reset_attempts = 0
+
+    await audit.log(
+        db,
+        user_id=user.id,
+        action="user.password_reset_requested",
+        entity_type="user",
+        entity_id=user.id,
+        request=request,
+    )
+    await db.commit()
+
+    await send_event_email(
+        to_email=user.email,
+        full_name=user.full_name,
+        language=user.language_preference or "en",
+        event="password_reset_code",
+        context={"code": code},
+    )
+
+
+@router.post("/reset-password", response_model=TokenResponse)
+@limiter.limit("10/minute")
+async def reset_password(
+    request: Request,
+    body: ResetPasswordRequest,
+    db: AsyncSession = Depends(get_db),
+):
+    invalid = HTTPException(
+        status_code=status.HTTP_400_BAD_REQUEST,
+        detail="invalid_or_expired_code",
+    )
+
+    user = await db.scalar(select(User).where(User.email == body.email))
+    if (
+        user is None
+        or not user.is_active
+        or user.reset_code_hash is None
+        or user.reset_code_expires_at is None
+        or user.reset_code_expires_at < _now()
+        or user.reset_attempts >= RESET_MAX_ATTEMPTS
+    ):
+        raise invalid
+
+    if not verify_code(body.code, user.reset_code_hash):
+        user.reset_attempts += 1
+        await db.commit()
+        raise invalid
+
+    user.password_hash = hash_password(body.new_password)
+    user.reset_code_hash = None
+    user.reset_code_expires_at = None
+    user.reset_attempts = 0
+
+    await audit.log(
+        db,
+        user_id=user.id,
+        action="user.password_reset",
+        entity_type="user",
+        entity_id=user.id,
+        request=request,
+    )
+    await db.commit()
+
+    # Security notice — fire-and-forget; never blocks the response.
+    await send_event_email(
+        to_email=user.email,
+        full_name=user.full_name,
+        language=user.language_preference or "en",
+        event="password_changed",
+        context={},
+    )
 
     return TokenResponse(
         access_token=create_access_token(str(user.id)),

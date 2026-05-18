@@ -17,6 +17,8 @@
     "auditLog": "Audit Log",
     "validationRules": "Validation Rules",
     "aiSettings": "AI Settings",
+    "dictionary": "Dictionary",
+    "dictionaryManage": "Dictionary",
     "settings": "Settings",
     "logout": "Log Out",
     "documents": "Documents",
@@ -69,7 +71,34 @@
     "verifyResendCooldown": "Resend in {seconds}s",
     "verifyResent": "A new code is on its way.",
     "verifyDifferentEmailPrompt": "Wrong address?",
-    "verifyDifferentEmail": "Use a different email"
+    "verifyDifferentEmail": "Use a different email",
+    "forgotPassword": {
+      "link": "Forgot password?",
+      "heading": "Forgot your password?",
+      "subtitle": "Enter your email and we'll send you a 6-digit code to reset it.",
+      "submit": "Send reset code",
+      "backPrompt": "Remembered it?",
+      "backLink": "Back to sign in"
+    },
+    "resetPassword": {
+      "heading": "Reset your password.",
+      "subtitle": "Enter the code we sent you, then choose a new password.",
+      "codeLabel": "Reset code",
+      "codeSent": "If an account exists for {email}, a 6-digit reset code is on its way.",
+      "newPassword": "New password",
+      "submit": "Reset and sign in"
+    },
+    "acceptInvite": {
+      "heading": "Welcome to DocArchive.",
+      "subtitle": "Hi {name} — set a password for {email} to finish creating your account.",
+      "newPassword": "Choose a password",
+      "confirmPassword": "Confirm password",
+      "submit": "Activate my account",
+      "invalid": "This invite is invalid or has expired. Please ask your administrator to send a new one.",
+      "mismatch": "Passwords do not match.",
+      "backPrompt": "Already have an account?",
+      "backLink": "Sign in instead"
+    }
   },
   "upload": {
     "title": "Upload Documents",
@@ -198,7 +227,42 @@
     "entity": "Entity",
     "when": "When",
     "ip": "IP",
+    "from": "From",
+    "to": "To",
     "noLogs": "No audit events."
+  },
+  "dictionary": {
+    "title": "Dictionary",
+    "search": "Search terms…",
+    "scopeLabel": "Scope",
+    "term": "Term",
+    "definition": "Definition",
+    "term_en": "Term (English)",
+    "term_az": "Term (Azerbaijani)",
+    "term_ru": "Term (Russian)",
+    "definition_en": "Definition (English)",
+    "definition_az": "Definition (Azerbaijani)",
+    "definition_ru": "Definition (Russian)",
+    "empty": "No dictionary entries yet.",
+    "create": "New entry",
+    "update": "Edit entry",
+    "delete": "Delete",
+    "confirmDelete": "Delete this dictionary entry?",
+    "manageScopes": "Manage scopes",
+    "newScope": "Add a new scope",
+    "scopeKey": "key (e.g. regulation)",
+    "scopeKeyHint": "The key is a stable machine identifier — lowercase letters, digits, and underscores only.",
+    "scopeName_en": "Name (English)",
+    "scopeName_az": "Name (Azerbaijani)",
+    "scopeName_ru": "Name (Russian)",
+    "scopeError": "Could not save scope.",
+    "confirmDeleteScope": "Delete the scope \"{name}\"? Existing entries keep their tag but will show the raw key until you reassign them.",
+    "scope": {
+      "term": "Term",
+      "doc_type": "Doc type",
+      "category": "Category",
+      "department": "Department"
+    }
   },
   "settings": {
     "title": "Settings",
@@ -231,6 +295,7 @@
     "cancel": "Cancel",
     "delete": "Delete",
     "newUser": "New User",
+    "inviteNotice": "An invite email will be sent to the address above. The user will set their own password from the link inside.",
     "editUser": "Edit User",
     "resetPassword": "Reset Password",
     "deactivate": "Deactivate",
@@ -443,6 +508,7 @@
     "confirm": "Confirm",
     "language": "Language",
     "export": "Export",
+    "download": "Download",
     "filter": "Filter",
     "uploadDoc": "Upload Doc",
     "open": "Open",

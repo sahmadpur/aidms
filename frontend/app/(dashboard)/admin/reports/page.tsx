@@ -1,10 +1,11 @@
 "use client";
 
+import { useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import useSWR from "swr";
 import { FileText, CheckCircle2, Clock, Loader2, AlertCircle } from "lucide-react";
 import api from "@/lib/api";
-import { TopBar, TopBarTitle } from "@/components/TopBar";
+import { TopBar, TopBarTitle, TopBarButton } from "@/components/TopBar";
 import { StatCard } from "@/components/StatCard";
 import { DocTypeBadge } from "@/components/Badge";
 import { localizedName } from "@/lib/types";
@@ -32,7 +33,26 @@ interface Stats {
 export default function ReportsPage() {
   const t = useTranslations();
   const locale = useLocale();
+  const [downloading, setDownloading] = useState(false);
   const { data, isLoading } = useSWR<Stats>("/admin/reports/stats", fetcher);
+
+  async function downloadXlsx() {
+    setDownloading(true);
+    try {
+      const resp = await api.get("/admin/reports/export.xlsx", { responseType: "blob" });
+      const blob = new Blob([resp.data], {
+        type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+      });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `reports-${new Date().toISOString().slice(0, 10)}.xlsx`;
+      a.click();
+      URL.revokeObjectURL(url);
+    } finally {
+      setDownloading(false);
+    }
+  }
 
   if (isLoading || !data) {
     return (
@@ -55,6 +75,10 @@ export default function ReportsPage() {
     <>
       <TopBar>
         <TopBarTitle>{t("reports.title")}</TopBarTitle>
+        <div className="flex-1" />
+        <TopBarButton onClick={downloadXlsx} disabled={downloading}>
+          {downloading ? t("common.loading") : t("common.download")}
+        </TopBarButton>
       </TopBar>
       <div className="px-[22px] py-4 space-y-6">
         {/* Stat cards */}

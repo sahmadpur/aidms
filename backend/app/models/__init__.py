@@ -9,6 +9,7 @@ from app.models.comment import DocumentComment
 from app.models.notification import Notification
 from app.models.validation_rule import ValidationRule
 from app.models.system_setting import SystemSetting
+from app.models.dictionary import DictionaryEntry, DictionaryScope
 
 __all__ = [
     "User",
@@ -25,4 +26,6 @@ __all__ = [
     "Notification",
     "ValidationRule",
     "SystemSetting",
+    "DictionaryEntry",
+    "DictionaryScope",
 ]

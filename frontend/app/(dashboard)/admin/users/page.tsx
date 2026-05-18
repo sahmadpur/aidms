@@ -178,16 +178,11 @@ export default function AdminUsersPage() {
   async function submitCreate(e: React.FormEvent) {
     e.preventDefault();
     setError(null);
-    if (form.password !== form.confirm_password) {
-      setError(t("admin.passwordsDoNotMatch"));
-      return;
-    }
     setSubmitting(true);
     try {
       await api.post("/admin/users", {
         email: form.email,
         full_name: form.full_name,
-        password: form.password,
         role: form.role,
         language_preference: form.language_preference,
         departments: form.departments,
@@ -493,34 +488,9 @@ export default function AdminUsersPage() {
               </div>
 
               {mode === "create" && (
-                <>
-                  <Field label={t("admin.password")}>
-                    <input
-                      required
-                      type="password"
-                      value={form.password}
-                      onChange={(e) =>
-                        setForm({ ...form, password: e.target.value })
-                      }
-                      className={inputCls}
-                    />
-                    <PasswordStrengthMeter value={form.password} />
-                  </Field>
-                  <Field label={t("admin.confirmPassword")}>
-                    <input
-                      required
-                      type="password"
-                      value={form.confirm_password}
-                      onChange={(e) =>
-                        setForm({
-                          ...form,
-                          confirm_password: e.target.value,
-                        })
-                      }
-                      className={inputCls}
-                    />
-                  </Field>
-                </>
+                <div className="border-l-2 border-brand-accent bg-brand-accent/5 px-3 py-2 text-[11.5px] text-brand rounded-r">
+                  {t("admin.inviteNotice")}
+                </div>
               )}
 
               <div>

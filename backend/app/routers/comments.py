@@ -15,7 +15,9 @@ from app.schemas.comment import (
     CommentCreateRequest,
     CommentResponse,
 )
+from app.core.config import settings
 from app.services import audit
+from app.services.email import email_user, email_users
 from app.services.notifications import managers_of, notify, notify_many
 from app.services.visibility import visible_documents_clause
 
@@ -132,19 +134,29 @@ async def create_comment(
         )
         valid_mention_ids = {row[0] for row in found.all()}
 
+    preview = payload.body[:160]
+    common_email_context = {
+        "actor_name": current_user.full_name,
+        "doc_title": doc.title,
+        "comment_preview": preview,
+        "doc_url": f"{settings.frontend_base_url}/documents/{doc.id}",
+    }
+
     # Notify uploader (unless mentioned — they'll get the louder mention ping)
-    if doc.user_id not in valid_mention_ids:
+    if doc.user_id not in valid_mention_ids and doc.user_id != current_user.id:
         await notify(
             db,
             user_id=doc.user_id,
             type_="comment_added",
             document_id=doc.id,
             actor_id=current_user.id,
-            payload={"title": doc.title, "preview": payload.body[:160]},
+            payload={"title": doc.title, "preview": preview},
         )
+
     # While the doc is awaiting a decision, also notify dept managers so they
     # see comments that might change their review. After approval/rejection,
     # skip to avoid notification spam on archive-stage discussions.
+    managers_to_notify: list[uuid.UUID] = []
     if doc.approval_status in ("pending", "revision_requested"):
         manager_ids = await managers_of(db, doc.department_id)
         managers_to_notify = [
@@ -157,21 +169,49 @@ async def create_comment(
             type_="comment_added",
             document_id=doc.id,
             actor_id=current_user.id,
-            payload={"title": doc.title, "preview": payload.body[:160]},
+            payload={"title": doc.title, "preview": preview},
         )
+
     # Fire mention notifications (skip self).
-    if valid_mention_ids:
+    mention_recipients = [uid for uid in valid_mention_ids if uid != current_user.id]
+    if mention_recipients:
         await notify_many(
             db,
-            user_ids=[uid for uid in valid_mention_ids if uid != current_user.id],
+            user_ids=mention_recipients,
             type_="comment_mention",
             document_id=doc.id,
             actor_id=current_user.id,
-            payload={"title": doc.title, "preview": payload.body[:160]},
+            payload={"title": doc.title, "preview": preview},
         )
 
     await db.commit()
     await db.refresh(comment)
+
+    # Email after commit so a successful comment post never fails on SMTP.
+    if doc.user_id not in valid_mention_ids and doc.user_id != current_user.id:
+        await email_user(
+            db,
+            user_id=doc.user_id,
+            event="comment_added",
+            context=common_email_context,
+        )
+    if managers_to_notify:
+        await email_users(
+            db,
+            user_ids=managers_to_notify,
+            event="comment_added",
+            context=common_email_context,
+            exclude_user_id=current_user.id,
+        )
+    if mention_recipients:
+        await email_users(
+            db,
+            user_ids=mention_recipients,
+            event="comment_mention",
+            context=common_email_context,
+            exclude_user_id=current_user.id,
+        )
+
     return _to_response(comment, current_user)
 
 

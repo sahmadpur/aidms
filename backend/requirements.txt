@@ -40,6 +40,9 @@ limits==3.10.1
 # Email (SMTP)
 aiosmtplib==3.0.2
 
+# Spreadsheet export
+openpyxl==3.1.2
+
 # Utilities
 python-dotenv==1.0.1
 Pillow==10.3.0

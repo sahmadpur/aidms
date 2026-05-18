@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import api from "@/lib/api";
@@ -64,6 +65,14 @@ export default function LoginPage() {
           required
           autoComplete="current-password"
         />
+        <div className="text-right">
+          <Link
+            href="/forgot-password"
+            className="font-mono text-[10.5px] tracking-[0.18em] uppercase text-brand underline decoration-[1.5px] decoration-brand-accent underline-offset-[5px] hover:decoration-brand transition-colors"
+          >
+            {t("auth.forgotPassword.link")}
+          </Link>
+        </div>
         <AuthSubmit loading={loading}>
           {loading ? t("common.loading") : t("auth.enter")}
         </AuthSubmit>

@@ -1,10 +1,12 @@
+import secrets
 import uuid
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 
 from fastapi import APIRouter, Depends, HTTPException, Request, status
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
 
+from app.core.config import settings
 from app.core.database import get_db
 from app.core.security import hash_password
 from app.dependencies import require_admin
@@ -20,7 +22,69 @@ from app.schemas.admin import (
 )
 from app.schemas.document import CategoryResponse, CategoryCreate
 from app.services import audit
-from app.services.membership import replace_user_departments
+from app.services.email import send_event_email
+from app.services.membership import MembershipDiff, replace_user_departments
+
+INVITE_TTL_DAYS = 7
+
+
+def _dept_name_for(dept: Department, language: str) -> str:
+    if language == "az":
+        return dept.name_az or dept.name_en
+    if language == "ru":
+        return dept.name_ru or dept.name_en
+    return dept.name_en or dept.name_az
+
+
+async def _email_membership_changes(
+    db: AsyncSession,
+    *,
+    recipient: User,
+    diff: MembershipDiff,
+    actor: User,
+) -> None:
+    """Send one email per newly-assigned department (member or manager)."""
+    if recipient.id == actor.id:
+        # Admin editing their own departments — don't email self.
+        return
+    if not recipient.is_active:
+        return
+    dept_ids = diff.newly_member_dept_ids | diff.newly_manager_dept_ids
+    if not dept_ids:
+        return
+    depts = list(
+        await db.scalars(select(Department).where(Department.id.in_(dept_ids)))
+    )
+    by_id = {d.id: d for d in depts}
+    lang = recipient.language_preference or "en"
+    for dept_id in diff.newly_manager_dept_ids:
+        dept = by_id.get(dept_id)
+        if dept is None:
+            continue
+        await send_event_email(
+            to_email=recipient.email,
+            full_name=recipient.full_name,
+            language=lang,
+            event="manager_assigned",
+            context={
+                "actor_name": actor.full_name,
+                "dept_name": _dept_name_for(dept, lang),
+            },
+        )
+    for dept_id in diff.newly_member_dept_ids:
+        dept = by_id.get(dept_id)
+        if dept is None:
+            continue
+        await send_event_email(
+            to_email=recipient.email,
+            full_name=recipient.full_name,
+            language=lang,
+            event="member_assigned",
+            context={
+                "actor_name": actor.full_name,
+                "dept_name": _dept_name_for(dept, lang),
+            },
+        )
 
 router = APIRouter()
 
@@ -111,22 +175,27 @@ async def create_user(
         )
 
     now = datetime.now(timezone.utc)
+    invite_token = secrets.token_urlsafe(32)
     user = User(
         id=uuid.uuid4(),
         email=body.email,
-        password_hash=hash_password(body.password),
+        password_hash=None,
         full_name=body.full_name,
         role=body.role,
         language_preference=body.language_preference,
         is_active=True,
-        is_verified=True,
-        email_verified_at=now,
+        is_verified=False,
+        invite_token=invite_token,
+        invite_token_expires_at=now + timedelta(days=INVITE_TTL_DAYS),
     )
     db.add(user)
     await db.flush()  # FK target for audit + membership rows
 
+    membership_diff: MembershipDiff | None = None
     if body.departments:
-        await replace_user_departments(db, user.id, body.departments)
+        membership_diff = await replace_user_departments(
+            db, user.id, body.departments
+        )
 
     await audit.log(
         db,
@@ -138,11 +207,33 @@ async def create_user(
             "email": user.email,
             "role": user.role,
             "department_count": len(body.departments or []),
+            "invited": True,
         },
         request=request,
     )
     await db.commit()
     await db.refresh(user)
+
+    # Fire the invite email outside the transaction. Errors are logged inside
+    # send_event_email; the admin still gets a successful response so they can
+    # retry by re-sending an invite or resetting the user password manually.
+    await send_event_email(
+        to_email=user.email,
+        full_name=user.full_name,
+        language=user.language_preference or "en",
+        event="invite",
+        context={
+            "actor_name": current_admin.full_name,
+            "invite_url": f"{settings.frontend_base_url}/accept-invite?token={invite_token}",
+        },
+    )
+    # Newly-created user gets membership emails too — useful when departments
+    # are assigned at creation time (their inbox state already has the invite
+    # next to the dept notices).
+    if membership_diff is not None:
+        await _email_membership_changes(
+            db, recipient=user, diff=membership_diff, actor=current_admin
+        )
 
     by_user = await _hydrate_departments(db, [user.id])
     return _user_to_response(user, by_user.get(user.id, []))
@@ -190,16 +281,21 @@ async def update_user(
                 detail="Email already registered",
             )
 
+    # Capture before-state so we can email only on meaningful changes.
+    before_role = user.role
+    before_active = user.is_active
+
     for field, value in data.items():
         setattr(user, field, value)
 
+    membership_diff: MembershipDiff | None = None
     if departments is not None:
         # Re-parse via the schema field so we get DepartmentAssignment objects
         # (model_dump returned plain dicts).
         from app.schemas.admin import DepartmentAssignment
 
         assignments = [DepartmentAssignment(**d) for d in departments]
-        await replace_user_departments(db, user.id, assignments)
+        membership_diff = await replace_user_departments(db, user.id, assignments)
 
     audit_meta: dict = dict(data)
     if departments is not None:
@@ -215,6 +311,44 @@ async def update_user(
     )
     await db.commit()
     await db.refresh(user)
+
+    role_changed = "role" in data and user.role != before_role
+    active_changed = "is_active" in data and user.is_active != before_active
+
+    if role_changed:
+        await send_event_email(
+            to_email=user.email,
+            full_name=user.full_name,
+            language=user.language_preference or "en",
+            event="role_changed",
+            context={
+                "actor_name": current_admin.full_name,
+                "old_role": before_role,
+                "new_role": user.role,
+            },
+        )
+    if active_changed:
+        status_word = {
+            "en": "activated" if user.is_active else "deactivated",
+            "az": "aktivləşdirdi" if user.is_active else "deaktivləşdirdi",
+            "ru": "активировал(а)" if user.is_active else "деактивировал(а)",
+        }
+        lang = (user.language_preference or "en").lower()
+        await send_event_email(
+            to_email=user.email,
+            full_name=user.full_name,
+            language=lang,
+            event="activation_changed",
+            context={
+                "actor_name": current_admin.full_name,
+                "status": status_word.get(lang, status_word["en"]),
+            },
+        )
+
+    if membership_diff is not None:
+        await _email_membership_changes(
+            db, recipient=user, diff=membership_diff, actor=current_admin
+        )
 
     by_user = await _hydrate_departments(db, [user.id])
     return _user_to_response(user, by_user.get(user.id, []))

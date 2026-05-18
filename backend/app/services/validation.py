@@ -15,10 +15,12 @@ from typing import Any, Iterable, Optional
 from sqlalchemy import and_, or_, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.core.config import settings
 from app.models.document import Document
 from app.models.notification import Notification
 from app.models.user import User
 from app.models.validation_rule import ValidationRule
+from app.services.email import email_users
 from app.services.notifications import managers_of, notify_many
 
 # Hard caps — see plan §"Gotchas locked in"
@@ -298,5 +300,21 @@ async def notify_validation_failed(
         document_id=doc.id,
         actor_id=actor_id,
         payload=payload,
+    )
+
+    rules_summary = "\n".join(
+        f"• {r.rule_name}: {r.message}" for r in failed_rules[:5]
+    )
+    await email_users(
+        db,
+        user_ids=eligible,
+        event="validation_failed",
+        context={
+            "doc_title": doc.title,
+            "doc_url": f"{settings.frontend_base_url}/documents/{doc.id}",
+            "failed_count": len(failed_rules),
+            "rules_summary": rules_summary,
+        },
+        exclude_user_id=actor_id,
     )
     return len(eligible)

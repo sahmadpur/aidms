@@ -43,7 +43,6 @@ class UserAdminResponse(BaseModel):
 class UserCreateRequest(BaseModel):
     email: EmailStr
     full_name: str
-    password: str
     role: str = "user"
     language_preference: str = "en"
     departments: Optional[list[DepartmentAssignment]] = None
@@ -54,11 +53,6 @@ class UserCreateRequest(BaseModel):
         if not v.strip():
             raise ValueError("Name cannot be empty")
         return v.strip()
-
-    @field_validator("password")
-    @classmethod
-    def _password(cls, v: str) -> str:
-        return validate_password_strength(v)
 
     @field_validator("language_preference")
     @classmethod

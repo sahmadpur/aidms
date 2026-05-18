@@ -152,27 +152,6 @@ export default function DictionaryPage() {
                       {main.definition}
                     </p>
                   </button>
-                  {isOpen && (
-                    <div className="mt-3 pt-3 border-t border-[#eef3e8] grid grid-cols-1 sm:grid-cols-3 gap-3 text-[11.5px]">
-                      {(["en", "az", "ru"] as const).map((lng) => (
-                        <div key={lng}>
-                          <div className="text-[10px] uppercase tracking-wide text-gray-400 mb-0.5">
-                            {lng}
-                          </div>
-                          <div className="font-medium text-gray-800">
-                            {lng === "en" ? e.term_en : lng === "az" ? e.term_az : e.term_ru}
-                          </div>
-                          <p className="mt-1 text-gray-600 whitespace-pre-wrap">
-                            {lng === "en"
-                              ? e.definition_en
-                              : lng === "az"
-                                ? e.definition_az
-                                : e.definition_ru}
-                          </p>
-                        </div>
-                      ))}
-                    </div>
-                  )}
                 </li>
               );
             })}

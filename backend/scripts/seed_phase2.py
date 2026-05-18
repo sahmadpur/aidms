@@ -45,6 +45,17 @@ FOLDER_TREE: list[tuple[list[str], dict]] = [
     (["HR"], {"name_az": "Siyasətlər",   "name_ru": "Политики",   "name_en": "Policies"}),
     ([], {"name_az": "Əməliyyatlar",     "name_ru": "Операции",   "name_en": "Operations"}),
     (["Operations"], {"name_az": "Tenderlər", "name_ru": "Тендеры", "name_en": "Tenders"}),
+    ([], {"name_az": "İT", "name_ru": "ИТ", "name_en": "IT"}),
+    (["IT"], {"name_az": "İnfrastruktur", "name_ru": "Инфраструктура", "name_en": "Infrastructure"}),
+    (["IT"], {"name_az": "Proqram Lisenziyaları", "name_ru": "Программные лицензии", "name_en": "Software Licenses"}),
+    (["IT", "Software Licenses"], {"name_az": "2024", "name_ru": "2024", "name_en": "2024"}),
+    (["IT", "Software Licenses"], {"name_az": "2025", "name_ru": "2025", "name_en": "2025"}),
+    (["IT"], {"name_az": "Təhlükəsizlik Siyasətləri", "name_ru": "Политики безопасности", "name_en": "Security Policies"}),
+    ([], {"name_az": "Marketinq", "name_ru": "Маркетинг", "name_en": "Marketing"}),
+    (["Marketing"], {"name_az": "Kampaniyalar", "name_ru": "Кампании", "name_en": "Campaigns"}),
+    (["Marketing", "Campaigns"], {"name_az": "2024", "name_ru": "2024", "name_en": "2024"}),
+    (["Marketing", "Campaigns"], {"name_az": "2025", "name_ru": "2025", "name_en": "2025"}),
+    (["Marketing"], {"name_az": "Brend Materialları", "name_ru": "Брендовые материалы", "name_en": "Brand Assets"}),
 ]
 
 

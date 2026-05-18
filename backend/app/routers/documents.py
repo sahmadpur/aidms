@@ -286,7 +286,7 @@ async def update_document(
         action="document.update",
         entity_type="document",
         entity_id=doc.id,
-        metadata=update_data,
+        metadata=request.model_dump(exclude_unset=True, mode="json"),
         request=http_request,
     )
 

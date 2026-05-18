@@ -48,18 +48,28 @@ async def list_folders(
                 tree.depth + 1
             FROM folders f
             JOIN tree ON f.parent_id = tree.id
+        ),
+        -- For every folder, enumerate itself and all descendants so each row can
+        -- count documents in its own subtree.
+        subtree AS (
+            SELECT id AS root_id, id AS node_id FROM folders
+            UNION ALL
+            SELECT s.root_id, f.id
+            FROM subtree s
+            JOIN folders f ON f.parent_id = s.node_id
+        ),
+        counts AS (
+            SELECT s.root_id AS folder_id, COUNT(d.id) AS count
+            FROM subtree s
+            LEFT JOIN documents d ON d.folder_id = s.node_id
+            GROUP BY s.root_id
         )
         SELECT
             t.id, t.parent_id, t.name_az, t.name_ru, t.name_en,
             t.depth, t.path_az, t.path_ru, t.path_en,
-            COALESCE(dc.count, 0) AS document_count
+            COALESCE(c.count, 0) AS document_count
         FROM tree t
-        LEFT JOIN (
-            SELECT folder_id, COUNT(*) AS count
-            FROM documents
-            WHERE folder_id IS NOT NULL
-            GROUP BY folder_id
-        ) dc ON dc.folder_id = t.id
+        LEFT JOIN counts c ON c.folder_id = t.id
         ORDER BY t.path_en
         """
     )
@@ -154,7 +164,7 @@ async def update_folder(
         action="folder.update",
         entity_type="folder",
         entity_id=folder.id,
-        metadata=data,
+        metadata=request.model_dump(exclude_unset=True, mode="json"),
         request=http_request,
     )
 

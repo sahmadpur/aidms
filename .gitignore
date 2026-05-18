@@ -42,3 +42,10 @@ yarn-error.log*
 dist/
 build/
 coverage/
+
+#General
+.claude/
+docs/
+*.md
+*.xlsx
+*.docx

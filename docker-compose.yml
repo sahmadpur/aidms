@@ -8,6 +8,8 @@ services:
       POSTGRES_DB: aidms
       POSTGRES_USER: aidms
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-changeme}
+      TZ: Asia/Baku
+      PGTZ: Asia/Baku
     volumes:
       - pgdata:/var/lib/postgresql/data
     ports:
@@ -20,6 +22,8 @@ services:
 
   redis:
     image: redis:7-alpine
+    environment:
+      TZ: Asia/Baku
     ports:
       - "6379:6379"
     volumes:
@@ -36,6 +40,7 @@ services:
     environment:
       MINIO_ROOT_USER: ${MINIO_ACCESS_KEY:-minioadmin}
       MINIO_ROOT_PASSWORD: ${MINIO_SECRET_KEY:-minioadmin123}
+      TZ: Asia/Baku
     volumes:
       - miniodata:/data
     ports:
@@ -56,6 +61,7 @@ services:
     env_file: .env
     environment:
       DATABASE_URL: postgresql+asyncpg://aidms:${POSTGRES_PASSWORD:-changeme}@postgres:5432/aidms
+      TZ: Asia/Baku
     depends_on:
       postgres:
         condition: service_healthy
@@ -73,6 +79,8 @@ services:
       CORS_ORIGINS: '["http://localhost:3000"]'
       GOOGLE_CLOUD_CREDENTIALS: /run/secrets/gcp.json
       GOOGLE_APPLICATION_CREDENTIALS: /run/secrets/gcp.json
+      TZ: Asia/Baku
+      PGTZ: Asia/Baku
     volumes:
       - ./alert-parsec-413511-e8c5dac46694.json:/run/secrets/gcp.json:ro
     ports:
@@ -99,6 +107,8 @@ services:
       MINIO_ENDPOINT: minio:9000
       GOOGLE_CLOUD_CREDENTIALS: /run/secrets/gcp.json
       GOOGLE_APPLICATION_CREDENTIALS: /run/secrets/gcp.json
+      TZ: Asia/Baku
+      PGTZ: Asia/Baku
     volumes:
       - ./alert-parsec-413511-e8c5dac46694.json:/run/secrets/gcp.json:ro
     depends_on:
@@ -117,6 +127,7 @@ services:
       context: ./frontend
     environment:
       NEXT_PUBLIC_API_URL: http://localhost:8000
+      TZ: Asia/Baku
     ports:
       - "3000:3000"
     depends_on:

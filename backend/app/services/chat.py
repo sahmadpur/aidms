@@ -17,6 +17,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.core.config import settings
 from app.models.chat import ChatMessage
 from app.services.embeddings import embed_texts
+from app.services.system_settings import get_chat_model
 
 claude_client = anthropic.AsyncAnthropic(api_key=settings.anthropic_api_key)
 
@@ -170,9 +171,10 @@ async def stream_chat_response(
 
     # 3. Stream Claude response
     full_response = ""
+    model_name = await get_chat_model(db)
 
     async with claude_client.messages.stream(
-        model="claude-sonnet-4-6",
+        model=model_name,
         max_tokens=2048,
         system=SYSTEM_PROMPT,
         messages=messages,

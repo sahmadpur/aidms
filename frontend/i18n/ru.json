@@ -16,6 +16,7 @@
     "reports": "Отчёты",
     "auditLog": "Журнал аудита",
     "validationRules": "Правила валидации",
+    "aiSettings": "Настройки ИИ",
     "settings": "Настройки",
     "logout": "Выйти",
     "documents": "Документы",
@@ -242,7 +243,16 @@
     "assignedDepartments": "Отделы",
     "manager": "Менеджер",
     "member": "Участник",
-    "cannotEditSelf": "Вы не можете понизить или деактивировать себя."
+    "cannotEditSelf": "Вы не можете понизить или деактивировать себя.",
+    "aiSettings": "Настройки ИИ",
+    "aiSettingsDescription": "Выберите модель Claude, используемую для ответов в чате.",
+    "chatModel": "Модель чата",
+    "modelSonnetTitle": "Claude Sonnet 4.6",
+    "modelSonnetHint": "Высшее качество, медленнее и дороже.",
+    "modelHaikuTitle": "Claude Haiku 4.5",
+    "modelHaikuHint": "Быстрее и дешевле, подходит для повседневных вопросов.",
+    "lastUpdated": "Последнее обновление",
+    "saved": "Сохранено"
   },
   "approval": {
     "status": "Одобрение",

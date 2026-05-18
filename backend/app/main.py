@@ -10,6 +10,7 @@ from app.core.config import settings
 from app.core.logging import configure_logging
 from app.routers import (
     admin,
+    admin_settings,
     admin_validation,
     audit,
     auth,
@@ -76,6 +77,9 @@ app.include_router(
 )
 app.include_router(reports.router, prefix="/admin/reports", tags=["admin"])
 app.include_router(audit.router, prefix="/admin/audit-logs", tags=["admin"])
+app.include_router(
+    admin_settings.router, prefix="/admin/settings", tags=["admin"]
+)
 
 
 @app.get("/health")

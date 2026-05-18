@@ -16,6 +16,7 @@
     "reports": "Reports",
     "auditLog": "Audit Log",
     "validationRules": "Validation Rules",
+    "aiSettings": "AI Settings",
     "settings": "Settings",
     "logout": "Log Out",
     "documents": "Documents",
@@ -242,7 +243,16 @@
     "assignedDepartments": "Departments",
     "manager": "Manager",
     "member": "Member",
-    "cannotEditSelf": "You cannot demote or deactivate yourself."
+    "cannotEditSelf": "You cannot demote or deactivate yourself.",
+    "aiSettings": "AI Settings",
+    "aiSettingsDescription": "Choose the Claude model used for chat responses.",
+    "chatModel": "Chat model",
+    "modelSonnetTitle": "Claude Sonnet 4.6",
+    "modelSonnetHint": "Highest quality, slower, more expensive.",
+    "modelHaikuTitle": "Claude Haiku 4.5",
+    "modelHaikuHint": "Faster and cheaper, good for routine Q&A.",
+    "lastUpdated": "Last updated",
+    "saved": "Saved"
   },
   "approval": {
     "status": "Approval",

@@ -8,6 +8,7 @@ from app.models.audit_log import AuditLog
 from app.models.comment import DocumentComment
 from app.models.notification import Notification
 from app.models.validation_rule import ValidationRule
+from app.models.system_setting import SystemSetting
 
 __all__ = [
     "User",
@@ -23,4 +24,5 @@ __all__ = [
     "DocumentComment",
     "Notification",
     "ValidationRule",
+    "SystemSetting",
 ]

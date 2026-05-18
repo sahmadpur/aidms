@@ -4,7 +4,7 @@
     "manage": "İdarəetmə",
     "account": "Hesab",
     "allDocuments": "Bütün sənədlər",
-    "inbox": "Gələnlər qutusu",
+    "inbox": "Daxil olanlar",
     "folders": "Qovluqlar",
     "fullTextSearch": "Mətn axtarışı",
     "recentUploads": "Son yüklənənlər",
@@ -16,11 +16,12 @@
     "reports": "Hesabatlar",
     "auditLog": "Audit jurnalı",
     "validationRules": "Validasiya qaydaları",
+    "aiSettings": "AI parametrləri",
     "settings": "Parametrlər",
     "logout": "Çıxış",
     "documents": "Sənədlər",
     "search": "Axtarış",
-    "chat": "AI söhbəti",
+    "chat": "AI chat",
     "admin": "Admin"
   },
   "roles": {
@@ -40,12 +41,12 @@
     "heroLine1": "Hər səhifə.",
     "heroLine2": "Hər il.",
     "heroLine3": "Arxivdə.",
-    "heroSubtitle": "Təşkilatınızın axtarıla bilən, çoxdilli qeydi — indekslənmiş, istinad edilən və heç vaxt itmir.",
+    "heroSubtitle": "Təşkilatınızın axtarıla bilən, çoxdilli arxivi — indekslənmiş, istinadlı və heç vaxt itməyən.",
     "loginHeading": "Arxivi aç.",
     "loginSubtitle": "Dayandığınız yerdən davam etmək üçün daxil olun.",
     "registerHeading": "Giriş yarat.",
     "registerSubtitle": "Arxivə töhfə vermək üçün hesab yaradın.",
-    "emailPlaceholder": "siz@tesk.az",
+    "emailPlaceholder": "siz@test.az",
     "continue": "Davam et",
     "enter": "Arxivə daxil ol",
     "tagline": "DocArchive · AI",
@@ -66,8 +67,8 @@
     "verifySubmit": "Təsdiqlə və davam et",
     "verifyResend": "Kodu yenidən göndər",
     "verifyResendCooldown": "{seconds} san sonra yenidən",
-    "verifyResent": "Yeni kod yola düşdü.",
-    "verifyDifferentEmailPrompt": "Səhv ünvan?",
+    "verifyResent": "Yeni kod göndərildi.",
+    "verifyDifferentEmailPrompt": "Səhv e-poçt?",
     "verifyDifferentEmail": "Başqa e-poçt istifadə et"
   },
   "upload": {
@@ -84,7 +85,7 @@
   "ocr": {
     "status": "OCR statusu",
     "pending": "Gözləyir",
-    "processing": "İşlənir",
+    "processing": "İcradadır",
     "completed": "İndekslənib",
     "failed": "Xəta"
   },
@@ -146,18 +147,18 @@
       "phrasing": "Tam cümlə də yaza bilərsiniz. Axtarış mənanı başa düşür, sadəcə hərfi uyğunluqları yox.",
       "filters": "Yuxarıdakı filtrlərdən şöbə, növ və ya ilə görə daraltmaq üçün istifadə edin.",
       "open": "Sənədi açmaq və vurğulanmış səhifəni görmək üçün nəticələrdən birini seçin.",
-      "aiChat": "Təbii dildə suallar üçün («X müqaviləsini kim imzalayıb?») AI söhbətindən istifadə edin."
+      "aiChat": "Təbii dildə suallar üçün («X müqaviləsini kim imzalayıb?») AI chatdan istifadə edin."
     }
   },
   "chat": {
-    "title": "AI söhbəti",
-    "newChat": "Yeni söhbət",
+    "title": "AI chat",
+    "newChat": "Yeni chat",
     "placeholder": "Sənədləriniz haqqında sual verin...",
-    "sessions": "Söhbət tarixi",
-    "noSessions": "Hələ söhbət yoxdur.",
+    "sessions": "Chat tarixçəsi",
+    "noSessions": "Hələ chat yoxdur.",
     "thinking": "Düşünür...",
     "sources": "Mənbələr",
-    "deleteSession": "Söhbəti sil"
+    "deleteSession": "Chatı sil"
   },
   "folders": {
     "title": "Qovluqlar",
@@ -242,7 +243,16 @@
     "assignedDepartments": "Şöbələr",
     "manager": "Menecer",
     "member": "Üzv",
-    "cannotEditSelf": "Özünüzü vəzifədən sala və ya deaktiv edə bilməzsiniz."
+    "cannotEditSelf": "Özünüzü vəzifədən sala və ya deaktiv edə bilməzsiniz.",
+    "aiSettings": "AI parametrləri",
+    "aiSettingsDescription": "Söhbət cavabları üçün istifadə olunan Claude modelini seçin.",
+    "chatModel": "Söhbət modeli",
+    "modelSonnetTitle": "Claude Sonnet 4.6",
+    "modelSonnetHint": "Ən yüksək keyfiyyət, daha yavaş və bahalıdır.",
+    "modelHaikuTitle": "Claude Haiku 4.5",
+    "modelHaikuHint": "Daha sürətli və ucuz, gündəlik suallar üçün uyğundur.",
+    "lastUpdated": "Son yenilənmə",
+    "saved": "Saxlanıldı"
   },
   "approval": {
     "status": "Təsdiq",
@@ -410,7 +420,7 @@
   },
   "inbox": {
     "title": "Gələnlər qutusu",
-    "filterHint": "Sizdən hərəkət tələb edən sənədlər göstərilir."
+    "filterHint": "Sizdən əməliyyat tələb edən sənədlər göstərilir."
   },
   "errors": {
     "unauthorized": "Davam etmək üçün daxil olun.",

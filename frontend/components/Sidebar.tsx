@@ -18,6 +18,7 @@ import {
   Settings,
   LogOut,
   ShieldCheck,
+  Sparkles,
 } from "lucide-react";
 import { clsx } from "clsx";
 import { clearTokens } from "@/lib/auth";
@@ -60,6 +61,7 @@ const adminManageNav: NavItem[] = [
     icon: ShieldCheck,
     labelKey: "validationRules",
   },
+  { href: "/admin/ai-settings", icon: Sparkles, labelKey: "aiSettings" },
   { href: "/admin/reports", icon: BarChart3, labelKey: "reports" },
   { href: "/admin/audit-log", icon: ClipboardList, labelKey: "auditLog" },
 ];

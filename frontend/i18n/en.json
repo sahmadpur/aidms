@@ -10,6 +10,7 @@
     "recentUploads": "Recent Uploads",
     "aiChat": "AI Chat",
     "usersRoles": "Users & Roles",
+    "editFolders": "Edit Folders",
     "categories": "Categories",
     "departments": "Departments",
     "reports": "Reports",
@@ -104,7 +105,6 @@
     "folder": "Folder",
     "department": "Department",
     "physicalLocation": "Physical Location",
-    "virtualPath": "Virtual Path",
     "docId": "Doc ID",
     "uploader": "Uploader",
     "tags": "Tags",
@@ -134,12 +134,20 @@
     "allFolders": "All folders"
   },
   "search": {
-    "title": "Search Documents",
+    "title": "Full-text Search",
     "placeholder": "Search by meaning or keywords...",
     "filters": "Filters",
     "noResults": "No results found.",
     "relevance": "Relevance",
-    "page": "Page"
+    "page": "Page",
+    "instructionsTitle": "How to search",
+    "tips": {
+      "keywords": "Type any words you remember from the document — title, names, dates, or a phrase you saw inside.",
+      "phrasing": "You can write a full sentence. The search understands meaning, not just exact matches.",
+      "filters": "Use the filters above to narrow by department, type, or year.",
+      "open": "Click any result to open the document and view the highlighted page.",
+      "aiChat": "For natural questions (\"who signed contract X?\"), try AI Chat instead."
+    }
   },
   "chat": {
     "title": "AI Chat",
@@ -153,6 +161,7 @@
   },
   "folders": {
     "title": "Folders",
+    "editTitle": "Edit Folders",
     "newFolder": "New Folder",
     "rename": "Rename",
     "move": "Move",
@@ -205,6 +214,7 @@
   },
   "admin": {
     "users": "Users",
+    "languageColumn": "Language",
     "categories": "Categories",
     "newCategory": "New Category",
     "nameAz": "Name (Azerbaijani)",

@@ -3,23 +3,24 @@
     "library": "Kitabxana",
     "manage": "İdarəetmə",
     "account": "Hesab",
-    "allDocuments": "Bütün Sənədlər",
+    "allDocuments": "Bütün sənədlər",
     "inbox": "Gələnlər qutusu",
     "folders": "Qovluqlar",
-    "fullTextSearch": "Mətn Axtarışı",
-    "recentUploads": "Son Yüklənənlər",
-    "aiChat": "AI Söhbəti",
-    "usersRoles": "İstifadəçilər və Rollar",
+    "fullTextSearch": "Mətn axtarışı",
+    "recentUploads": "Son yüklənənlər",
+    "aiChat": "AI söhbəti",
+    "usersRoles": "İstifadəçilər və rollar",
+    "editFolders": "Qovluqları redaktə et",
     "categories": "Kateqoriyalar",
     "departments": "Şöbələr",
     "reports": "Hesabatlar",
-    "auditLog": "Audit Jurnalı",
-    "validationRules": "Validasiya Qaydaları",
+    "auditLog": "Audit jurnalı",
+    "validationRules": "Validasiya qaydaları",
     "settings": "Parametrlər",
     "logout": "Çıxış",
     "documents": "Sənədlər",
     "search": "Axtarış",
-    "chat": "AI Söhbəti",
+    "chat": "AI söhbəti",
     "admin": "Admin"
   },
   "roles": {
@@ -31,7 +32,7 @@
     "register": "Qeydiyyat",
     "email": "E-poçt",
     "password": "Şifrə",
-    "fullName": "Ad Soyad",
+    "fullName": "Ad soyad",
     "loginPrompt": "Hesabınız yoxdur?",
     "registerPrompt": "Artıq hesabınız var?",
     "signInLink": "Daxil olun",
@@ -81,7 +82,7 @@
     "notPdf": "Yalnız PDF fayllar qəbul edilir"
   },
   "ocr": {
-    "status": "OCR Statusu",
+    "status": "OCR statusu",
     "pending": "Gözləyir",
     "processing": "İşlənir",
     "completed": "İndekslənib",
@@ -96,7 +97,7 @@
     "other": "Digər"
   },
   "documents": {
-    "title": "Bütün Sənədlər",
+    "title": "Bütün sənədlər",
     "noDocuments": "Hələ sənəd yoxdur. İlk PDF-inizi yükləyin.",
     "uploadDate": "Yaradılıb",
     "category": "Kateqoriya",
@@ -104,7 +105,6 @@
     "folder": "Qovluq",
     "department": "Şöbə",
     "physicalLocation": "Fiziki yerləşmə",
-    "virtualPath": "Virtual yol",
     "docId": "Sənəd ID",
     "uploader": "Yükləyən",
     "tags": "Etiketlər",
@@ -134,18 +134,26 @@
     "allFolders": "Bütün qovluqlar"
   },
   "search": {
-    "title": "Sənəd Axtarışı",
+    "title": "Mətn axtarışı",
     "placeholder": "Məna və ya açar söz ilə axtarın...",
     "filters": "Filtrlər",
     "noResults": "Nəticə tapılmadı.",
     "relevance": "Uyğunluq",
-    "page": "Səhifə"
+    "page": "Səhifə",
+    "instructionsTitle": "Necə axtarmaq olar",
+    "tips": {
+      "keywords": "Sənəddən xatırladığınız sözləri yazın — başlıq, adlar, tarixlər və ya gördüyünüz ifadə.",
+      "phrasing": "Tam cümlə də yaza bilərsiniz. Axtarış mənanı başa düşür, sadəcə hərfi uyğunluqları yox.",
+      "filters": "Yuxarıdakı filtrlərdən şöbə, növ və ya ilə görə daraltmaq üçün istifadə edin.",
+      "open": "Sənədi açmaq və vurğulanmış səhifəni görmək üçün nəticələrdən birini seçin.",
+      "aiChat": "Təbii dildə suallar üçün («X müqaviləsini kim imzalayıb?») AI söhbətindən istifadə edin."
+    }
   },
   "chat": {
-    "title": "AI Söhbəti",
-    "newChat": "Yeni Söhbət",
+    "title": "AI söhbəti",
+    "newChat": "Yeni söhbət",
     "placeholder": "Sənədləriniz haqqında sual verin...",
-    "sessions": "Söhbət Tarixi",
+    "sessions": "Söhbət tarixi",
     "noSessions": "Hələ söhbət yoxdur.",
     "thinking": "Düşünür...",
     "sources": "Mənbələr",
@@ -153,7 +161,8 @@
   },
   "folders": {
     "title": "Qovluqlar",
-    "newFolder": "Yeni Qovluq",
+    "editTitle": "Qovluqları redaktə et",
+    "newFolder": "Yeni qovluq",
     "rename": "Adını dəyişdir",
     "move": "Köçür",
     "delete": "Sil",
@@ -164,7 +173,7 @@
   },
   "departments": {
     "title": "Şöbələr",
-    "newDepartment": "Yeni Şöbə",
+    "newDepartment": "Yeni şöbə",
     "managers": "Rəhbərlər",
     "noManagers": "Rəhbər təyin olunmayıb",
     "managersHint": "Rəhbərlər bu şöbəyə yüklənən sənədləri yoxlaya bilərlər."
@@ -182,7 +191,7 @@
     "topUploaders": "Ən çox yükləyənlər"
   },
   "auditLog": {
-    "title": "Audit Jurnalı",
+    "title": "Audit jurnalı",
     "user": "İstifadəçi",
     "action": "Hərəkət",
     "entity": "Obyekt",
@@ -205,8 +214,9 @@
   },
   "admin": {
     "users": "İstifadəçilər",
+    "languageColumn": "Dil",
     "categories": "Kateqoriyalar",
-    "newCategory": "Yeni Kateqoriya",
+    "newCategory": "Yeni kateqoriya",
     "nameAz": "Ad (Azərbaycan dilində)",
     "nameRu": "Ad (Rus dilində)",
     "nameEn": "Ad (İngilis dilində)",
@@ -219,9 +229,9 @@
     "save": "Saxla",
     "cancel": "Ləğv et",
     "delete": "Sil",
-    "newUser": "Yeni İstifadəçi",
-    "editUser": "İstifadəçini Redaktə Et",
-    "resetPassword": "Şifrəni Sıfırla",
+    "newUser": "Yeni istifadəçi",
+    "editUser": "İstifadəçini redaktə et",
+    "resetPassword": "Şifrəni sıfırla",
     "deactivate": "Deaktiv et",
     "activate": "Aktivləşdir",
     "confirmDeactivate": "Bu istifadəçi deaktiv edilsin? O, sistemə daxil ola bilməyəcək.",
@@ -324,8 +334,8 @@
     }
   },
   "validation": {
-    "title": "Validasiya Qaydaları",
-    "newRule": "Yeni Qayda",
+    "title": "Validasiya qaydaları",
+    "newRule": "Yeni qayda",
     "column": "Validasiya",
     "empty": "Hələ validasiya qaydası yoxdur. Yeni yükləmələri yoxlamaq üçün bir qayda yaradın.",
     "disabled": "Söndürülüb",

@@ -56,7 +56,7 @@ export default function AdminFoldersPage() {
   return (
     <>
       <TopBar>
-        <TopBarTitle>{t("folders.title")}</TopBarTitle>
+        <TopBarTitle>{t("folders.editTitle")}</TopBarTitle>
         <div className="flex-1" />
         <TopBarButton variant="primary" onClick={() => { setShowCreate(true); setForm(EMPTY); }}>
           <Plus className="w-3 h-3" />

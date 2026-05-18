@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useTranslations } from "next-intl";
 import {
   FileText,
@@ -27,7 +27,7 @@ type NavItem = {
   href: string;
   icon: React.ComponentType<{ className?: string }>;
   labelKey: string;
-  match?: (pathname: string) => boolean;
+  match?: (pathname: string, search: URLSearchParams) => boolean;
 };
 
 const libraryNav: NavItem[] = [
@@ -35,13 +35,14 @@ const libraryNav: NavItem[] = [
     href: "/documents",
     icon: FileText,
     labelKey: "allDocuments",
-    match: (p) => (p === "/documents" || p.startsWith("/documents/")) && !isInboxRoute(p),
+    match: (p, s) =>
+      (p === "/documents" || p.startsWith("/documents/")) && s.get("inbox") !== "1",
   },
   {
     href: "/documents?inbox=1",
     icon: Inbox,
     labelKey: "inbox",
-    match: isInboxRoute,
+    match: (p, s) => p === "/documents" && s.get("inbox") === "1",
   },
   { href: "/folders", icon: Folder, labelKey: "folders" },
   { href: "/search", icon: Search, labelKey: "fullTextSearch" },
@@ -49,16 +50,9 @@ const libraryNav: NavItem[] = [
   { href: "/chat", icon: MessageSquare, labelKey: "aiChat" },
 ];
 
-function isInboxRoute(pathname: string) {
-  if (typeof window === "undefined") return false;
-  if (pathname !== "/documents" && !pathname.startsWith("/documents?")) return false;
-  const params = new URLSearchParams(window.location.search);
-  return params.get("inbox") === "1";
-}
-
 const adminManageNav: NavItem[] = [
   { href: "/admin/users", icon: Users, labelKey: "usersRoles" },
-  { href: "/admin/folders", icon: Folder, labelKey: "folders" },
+  { href: "/admin/folders", icon: Folder, labelKey: "editFolders" },
   { href: "/admin/departments", icon: Building2, labelKey: "departments" },
   { href: "/admin/categories", icon: Tag, labelKey: "categories" },
   {
@@ -84,8 +78,8 @@ const accountNav: NavItem[] = [
   { href: "/settings", icon: Settings, labelKey: "settings" },
 ];
 
-function isActive(pathname: string, item: NavItem): boolean {
-  if (item.match) return item.match(pathname);
+function isActive(pathname: string, search: URLSearchParams, item: NavItem): boolean {
+  if (item.match) return item.match(pathname, search);
   return pathname === item.href || pathname.startsWith(item.href + "/");
 }
 
@@ -119,6 +113,7 @@ export default function Sidebar() {
   const t = useTranslations("nav");
   const tRoles = useTranslations("roles");
   const pathname = usePathname();
+  const searchParams = useSearchParams();
   const router = useRouter();
   const { data: me } = useMe();
 
@@ -147,21 +142,21 @@ export default function Sidebar() {
       <nav className="flex-1 py-2 overflow-y-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
         <SectionHeader>{t("library")}</SectionHeader>
         {libraryNav.map((item) => (
-          <NavLink key={item.href} item={item} active={isActive(pathname, item)} label={t(item.labelKey)} />
+          <NavLink key={item.href} item={item} active={isActive(pathname, searchParams, item)} label={t(item.labelKey)} />
         ))}
 
         {manageItems && (
           <>
             <SectionHeader>{t("manage")}</SectionHeader>
             {manageItems.map((item) => (
-              <NavLink key={item.href} item={item} active={isActive(pathname, item)} label={t(item.labelKey)} />
+              <NavLink key={item.href} item={item} active={isActive(pathname, searchParams, item)} label={t(item.labelKey)} />
             ))}
           </>
         )}
 
         <SectionHeader>{t("account")}</SectionHeader>
         {accountNav.map((item) => (
-          <NavLink key={item.href} item={item} active={isActive(pathname, item)} label={t(item.labelKey)} />
+          <NavLink key={item.href} item={item} active={isActive(pathname, searchParams, item)} label={t(item.labelKey)} />
         ))}
         <button
           onClick={handleLogout}

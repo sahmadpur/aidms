@@ -147,7 +147,7 @@ export default function DocumentsPage() {
       },
       {
         key: "folder",
-        header: t("documents.virtualPath"),
+        header: t("documents.folder"),
         width: "170px",
         render: (d) => <FolderBreadcrumb folderId={d.folder_id} folders={folders} locale={locale} />,
       },

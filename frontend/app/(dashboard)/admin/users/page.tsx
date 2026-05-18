@@ -295,7 +295,7 @@ export default function AdminUsersPage() {
     },
     {
       key: "lang",
-      header: t("settings.language"),
+      header: t("admin.languageColumn"),
       width: "70px",
       render: (u) => (
         <span className="text-[11px] uppercase font-mono text-gray-500">

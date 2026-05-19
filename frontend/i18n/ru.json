@@ -58,7 +58,7 @@
     "emailPlaceholder": "vy@org.az",
     "continue": "Продолжить",
     "enter": "Войти в архив",
-    "tagline": "DocArchive · AI",
+    "tagline": "DocAI",
     "meta": "ОСН · MMXXVI · БАКУ",
     "confirmPassword": "Подтвердите пароль",
     "passwordsDoNotMatch": "Пароли не совпадают.",
@@ -96,7 +96,7 @@
       "submit": "Сбросить и войти"
     },
     "acceptInvite": {
-      "heading": "Добро пожаловать в DocArchive.",
+      "heading": "Добро пожаловать в DocAI.",
       "subtitle": "Здравствуйте, {name} — задайте пароль для {email}, чтобы завершить создание учётной записи.",
       "newPassword": "Придумайте пароль",
       "confirmPassword": "Повторите пароль",

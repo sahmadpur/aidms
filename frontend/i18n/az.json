@@ -58,7 +58,7 @@
     "emailPlaceholder": "siz@test.az",
     "continue": "Davam et",
     "enter": "Arxivə daxil ol",
-    "tagline": "DocArchive · AI",
+    "tagline": "DocAI",
     "meta": "TƏSİS · MMXXVI · BAKI",
     "confirmPassword": "Şifrəni təsdiqlə",
     "passwordsDoNotMatch": "Şifrələr uyğun gəlmir.",
@@ -96,7 +96,7 @@
       "submit": "Sıfırla və daxil ol"
     },
     "acceptInvite": {
-      "heading": "DocArchive-ə xoş gəlmisiniz.",
+      "heading": "DocAI-yə xoş gəlmisiniz.",
       "subtitle": "Salam {name} — {email} üçün hesabınızı tamamlamaq üçün şifrə təyin edin.",
       "newPassword": "Şifrə seçin",
       "confirmPassword": "Şifrəni təkrar daxil edin",

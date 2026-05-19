@@ -58,7 +58,7 @@
     "emailPlaceholder": "you@organization.az",
     "continue": "Continue",
     "enter": "Enter the archive",
-    "tagline": "DocArchive · AI",
+    "tagline": "DocAI",
     "meta": "EST · MMXXVI · BAKU",
     "confirmPassword": "Confirm Password",
     "passwordsDoNotMatch": "Passwords do not match.",
@@ -96,7 +96,7 @@
       "submit": "Reset and sign in"
     },
     "acceptInvite": {
-      "heading": "Welcome to DocArchive.",
+      "heading": "Welcome to DocAI.",
       "subtitle": "Hi {name} — set a password for {email} to finish creating your account.",
       "newPassword": "Choose a password",
       "confirmPassword": "Confirm password",

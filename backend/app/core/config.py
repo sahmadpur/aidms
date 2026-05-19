@@ -44,8 +44,8 @@ class Settings(BaseSettings):
     smtp_port: int = 587
     smtp_user: str = ""
     smtp_pass: str = ""
-    smtp_from: str = "no-reply@docarchive.local"
-    smtp_from_name: str = "DocArchive"
+    smtp_from: str = "no-reply@docai.local"
+    smtp_from_name: str = "DocAI"
     smtp_secure: bool = False
 
     # OTP

@@ -94,7 +94,7 @@ function HeroPanel() {
             className="font-display text-[22px] leading-none text-paper tracking-tight"
             style={{ fontFeatureSettings: '"ss01", "liga"' }}
           >
-            DocArchive
+            Doc
           </span>
           <span className="font-mono text-[10px] tracking-[0.22em] uppercase text-brand-accent">
             AI
@@ -304,7 +304,7 @@ function MobileBrand() {
   return (
     <div className="flex items-center gap-2">
       <span className="font-display text-[20px] leading-none text-ink tracking-tight">
-        DocArchive
+        Doc
       </span>
       <span className="font-mono text-[9.5px] tracking-[0.22em] uppercase text-brand">
         AI

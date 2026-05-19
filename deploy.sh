@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Deploy DocArchive AI on the prod server.
+# Deploy DocAI on the prod server.
 #   Usage:  ./deploy.sh              # pull + rebuild all app services
 #           ./deploy.sh api worker   # pull + rebuild only the named services
 # Run from /home/dms-compose on the server.

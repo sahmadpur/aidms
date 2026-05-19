@@ -33,28 +33,28 @@ class EmailDeliveryError(RuntimeError):
 
 _VERIFICATION_TEMPLATES = {
     "en": {
-        "subject": "Your DocArchive verification code",
+        "subject": "Your DocAI verification code",
         "greeting": "Hello {name},",
-        "intro": "Use the code below to finish creating your DocArchive account.",
+        "intro": "Use the code below to finish creating your DocAI account.",
         "code_label": "Verification code",
         "expires": "This code expires in {minutes} minutes. If you didn't request it, you can ignore this email.",
-        "footer": "DocArchive · AI",
+        "footer": "DocAI",
     },
     "az": {
-        "subject": "DocArchive təsdiq kodunuz",
+        "subject": "DocAI təsdiq kodunuz",
         "greeting": "Salam {name},",
-        "intro": "DocArchive hesabınızı yaratmağı tamamlamaq üçün aşağıdakı kodu istifadə edin.",
+        "intro": "DocAI hesabınızı yaratmağı tamamlamaq üçün aşağıdakı kodu istifadə edin.",
         "code_label": "Təsdiq kodu",
         "expires": "Bu kodun etibarlılıq müddəti {minutes} dəqiqədir. Əgər bu sorğunu siz göndərməmisinizsə, bu məktubu nəzərə almayın.",
-        "footer": "DocArchive · AI",
+        "footer": "DocAI",
     },
     "ru": {
-        "subject": "Ваш код подтверждения DocArchive",
+        "subject": "Ваш код подтверждения DocAI",
         "greeting": "Здравствуйте, {name},",
-        "intro": "Используйте код ниже, чтобы завершить создание учётной записи DocArchive.",
+        "intro": "Используйте код ниже, чтобы завершить создание учётной записи DocAI.",
         "code_label": "Код подтверждения",
         "expires": "Срок действия кода — {minutes} минут. Если вы не запрашивали этот код, просто проигнорируйте это письмо.",
-        "footer": "DocArchive · AI",
+        "footer": "DocAI",
     },
 }
 
@@ -106,9 +106,9 @@ async def send_verification_email(
 
 
 _HTML_CHROME = {
-    "en": {"footer": "DocArchive · AI", "view": "Open DocArchive"},
-    "az": {"footer": "DocArchive · AI", "view": "DocArchive-i aç"},
-    "ru": {"footer": "DocArchive · AI", "view": "Открыть DocArchive"},
+    "en": {"footer": "DocAI", "view": "Open DocAI"},
+    "az": {"footer": "DocAI", "view": "DocAI-ni aç"},
+    "ru": {"footer": "DocAI", "view": "Открыть DocAI"},
 }
 
 
@@ -160,10 +160,10 @@ async def _send(to_email: str, subject: str, text: str, html: str) -> None:
 EVENT_TEMPLATES: dict[str, dict[str, dict[str, str]]] = {
     "invite": {
         "en": {
-            "subject": "You're invited to DocArchive",
+            "subject": "You're invited to DocAI",
             "text": (
                 "Hello {full_name},\n\n"
-                "{actor_name} has invited you to DocArchive. "
+                "{actor_name} has invited you to DocAI. "
                 "Click the link below to set your password and finish creating your account.\n\n"
                 "{invite_url}\n\n"
                 "This invite expires in 7 days.\n"
@@ -171,7 +171,7 @@ EVENT_TEMPLATES: dict[str, dict[str, dict[str, str]]] = {
             "html_body": (
                 "<p style='font-size:15px;margin:0 0 12px 0;'>Hello {full_name},</p>"
                 "<p style='font-size:14px;line-height:1.6;color:#3a3a3a;margin:0 0 18px 0;'>"
-                "<strong>{actor_name}</strong> has invited you to DocArchive. "
+                "<strong>{actor_name}</strong> has invited you to DocAI. "
                 "Click the button below to set your password and finish creating your account.</p>"
                 "<p style='margin:24px 0;'><a href='{invite_url}' "
                 "style='display:inline-block;background:#2d5016;color:#fff;text-decoration:none;padding:12px 22px;border-radius:6px;font-weight:600;'>Set my password</a></p>"
@@ -180,10 +180,10 @@ EVENT_TEMPLATES: dict[str, dict[str, dict[str, str]]] = {
             ),
         },
         "az": {
-            "subject": "Sizi DocArchive-ə dəvət etdik",
+            "subject": "Sizi DocAI-yə dəvət etdik",
             "text": (
                 "Salam {full_name},\n\n"
-                "{actor_name} sizi DocArchive-ə dəvət etdi. "
+                "{actor_name} sizi DocAI-yə dəvət etdi. "
                 "Şifrənizi təyin etmək və hesabınızı tamamlamaq üçün aşağıdakı linkə daxil olun.\n\n"
                 "{invite_url}\n\n"
                 "Bu dəvətin etibarlılıq müddəti 7 gündür.\n"
@@ -191,7 +191,7 @@ EVENT_TEMPLATES: dict[str, dict[str, dict[str, str]]] = {
             "html_body": (
                 "<p style='font-size:15px;margin:0 0 12px 0;'>Salam {full_name},</p>"
                 "<p style='font-size:14px;line-height:1.6;color:#3a3a3a;margin:0 0 18px 0;'>"
-                "<strong>{actor_name}</strong> sizi DocArchive-ə dəvət etdi. "
+                "<strong>{actor_name}</strong> sizi DocAI-yə dəvət etdi. "
                 "Şifrənizi təyin etmək və hesabınızı tamamlamaq üçün aşağıdakı düyməyə klikləyin.</p>"
                 "<p style='margin:24px 0;'><a href='{invite_url}' "
                 "style='display:inline-block;background:#2d5016;color:#fff;text-decoration:none;padding:12px 22px;border-radius:6px;font-weight:600;'>Şifrəni təyin et</a></p>"
@@ -200,10 +200,10 @@ EVENT_TEMPLATES: dict[str, dict[str, dict[str, str]]] = {
             ),
         },
         "ru": {
-            "subject": "Вас пригласили в DocArchive",
+            "subject": "Вас пригласили в DocAI",
             "text": (
                 "Здравствуйте, {full_name},\n\n"
-                "{actor_name} пригласил(а) вас в DocArchive. "
+                "{actor_name} пригласил(а) вас в DocAI. "
                 "Перейдите по ссылке ниже, чтобы задать пароль и завершить создание учётной записи.\n\n"
                 "{invite_url}\n\n"
                 "Приглашение действительно 7 дней.\n"
@@ -211,7 +211,7 @@ EVENT_TEMPLATES: dict[str, dict[str, dict[str, str]]] = {
             "html_body": (
                 "<p style='font-size:15px;margin:0 0 12px 0;'>Здравствуйте, {full_name},</p>"
                 "<p style='font-size:14px;line-height:1.6;color:#3a3a3a;margin:0 0 18px 0;'>"
-                "<strong>{actor_name}</strong> пригласил(а) вас в DocArchive. "
+                "<strong>{actor_name}</strong> пригласил(а) вас в DocAI. "
                 "Нажмите на кнопку ниже, чтобы задать пароль и завершить создание учётной записи.</p>"
                 "<p style='margin:24px 0;'><a href='{invite_url}' "
                 "style='display:inline-block;background:#2d5016;color:#fff;text-decoration:none;padding:12px 22px;border-radius:6px;font-weight:600;'>Задать пароль</a></p>"
@@ -222,45 +222,45 @@ EVENT_TEMPLATES: dict[str, dict[str, dict[str, str]]] = {
     },
     "password_reset_code": {
         "en": {
-            "subject": "Your DocArchive password reset code",
+            "subject": "Your DocAI password reset code",
             "text": (
-                "Hello {full_name},\n\nUse the code below to reset your DocArchive password.\n\n"
+                "Hello {full_name},\n\nUse the code below to reset your DocAI password.\n\n"
                 "Reset code: {code}\n\nThis code expires in 15 minutes. If you didn't request it, you can ignore this email.\n"
             ),
             "html_body": (
                 "<p style='font-size:15px;margin:0 0 12px 0;'>Hello {full_name},</p>"
                 "<p style='font-size:14px;line-height:1.6;color:#3a3a3a;margin:0 0 18px 0;'>"
-                "Use the code below to reset your DocArchive password.</p>"
+                "Use the code below to reset your DocAI password.</p>"
                 "<div style='font:600 10px/1 monospace;letter-spacing:0.24em;text-transform:uppercase;color:#7d7466;margin-bottom:6px;'>Reset code</div>"
                 "<div style='font:600 32px/1 monospace;letter-spacing:0.24em;color:#2d5016;background:#f6f4ee;border:1px solid #e6e1d3;padding:18px 20px;text-align:center;margin-bottom:18px;'>{code}</div>"
                 "<p style='font-size:12.5px;color:#7d7466;margin:0;'>This code expires in 15 minutes. If you didn't request it, you can ignore this email.</p>"
             ),
         },
         "az": {
-            "subject": "DocArchive şifrə sıfırlama kodunuz",
+            "subject": "DocAI şifrə sıfırlama kodunuz",
             "text": (
-                "Salam {full_name},\n\nDocArchive şifrənizi sıfırlamaq üçün aşağıdakı kodu istifadə edin.\n\n"
+                "Salam {full_name},\n\nDocAI şifrənizi sıfırlamaq üçün aşağıdakı kodu istifadə edin.\n\n"
                 "Sıfırlama kodu: {code}\n\nBu kodun etibarlılıq müddəti 15 dəqiqədir. Əgər bu sorğunu siz göndərməmisinizsə, bu məktubu nəzərə almayın.\n"
             ),
             "html_body": (
                 "<p style='font-size:15px;margin:0 0 12px 0;'>Salam {full_name},</p>"
                 "<p style='font-size:14px;line-height:1.6;color:#3a3a3a;margin:0 0 18px 0;'>"
-                "DocArchive şifrənizi sıfırlamaq üçün aşağıdakı kodu istifadə edin.</p>"
+                "DocAI şifrənizi sıfırlamaq üçün aşağıdakı kodu istifadə edin.</p>"
                 "<div style='font:600 10px/1 monospace;letter-spacing:0.24em;text-transform:uppercase;color:#7d7466;margin-bottom:6px;'>Sıfırlama kodu</div>"
                 "<div style='font:600 32px/1 monospace;letter-spacing:0.24em;color:#2d5016;background:#f6f4ee;border:1px solid #e6e1d3;padding:18px 20px;text-align:center;margin-bottom:18px;'>{code}</div>"
                 "<p style='font-size:12.5px;color:#7d7466;margin:0;'>Bu kodun etibarlılıq müddəti 15 dəqiqədir. Əgər bu sorğunu siz göndərməmisinizsə, bu məktubu nəzərə almayın.</p>"
             ),
         },
         "ru": {
-            "subject": "Ваш код сброса пароля DocArchive",
+            "subject": "Ваш код сброса пароля DocAI",
             "text": (
-                "Здравствуйте, {full_name},\n\nИспользуйте код ниже, чтобы сбросить пароль в DocArchive.\n\n"
+                "Здравствуйте, {full_name},\n\nИспользуйте код ниже, чтобы сбросить пароль в DocAI.\n\n"
                 "Код сброса: {code}\n\nСрок действия кода — 15 минут. Если вы не запрашивали сброс, просто проигнорируйте это письмо.\n"
             ),
             "html_body": (
                 "<p style='font-size:15px;margin:0 0 12px 0;'>Здравствуйте, {full_name},</p>"
                 "<p style='font-size:14px;line-height:1.6;color:#3a3a3a;margin:0 0 18px 0;'>"
-                "Используйте код ниже, чтобы сбросить пароль в DocArchive.</p>"
+                "Используйте код ниже, чтобы сбросить пароль в DocAI.</p>"
                 "<div style='font:600 10px/1 monospace;letter-spacing:0.24em;text-transform:uppercase;color:#7d7466;margin-bottom:6px;'>Код сброса</div>"
                 "<div style='font:600 32px/1 monospace;letter-spacing:0.24em;color:#2d5016;background:#f6f4ee;border:1px solid #e6e1d3;padding:18px 20px;text-align:center;margin-bottom:18px;'>{code}</div>"
                 "<p style='font-size:12.5px;color:#7d7466;margin:0;'>Срок действия кода — 15 минут. Если вы не запрашивали сброс, просто проигнорируйте это письмо.</p>"
@@ -269,48 +269,48 @@ EVENT_TEMPLATES: dict[str, dict[str, dict[str, str]]] = {
     },
     "password_changed": {
         "en": {
-            "subject": "Your DocArchive password was changed",
+            "subject": "Your DocAI password was changed",
             "text": (
-                "Hello {full_name},\n\nYour DocArchive password was just changed. "
+                "Hello {full_name},\n\nYour DocAI password was just changed. "
                 "If this was you, no action is needed. If not, contact your administrator immediately.\n"
             ),
             "html_body": (
                 "<p style='font-size:15px;margin:0 0 12px 0;'>Hello {full_name},</p>"
                 "<p style='font-size:14px;line-height:1.6;color:#3a3a3a;margin:0 0 18px 0;'>"
-                "Your DocArchive password was just changed. If this was you, no action is needed. "
+                "Your DocAI password was just changed. If this was you, no action is needed. "
                 "If not, contact your administrator immediately.</p>"
             ),
         },
         "az": {
-            "subject": "DocArchive şifrəniz dəyişdirildi",
+            "subject": "DocAI şifrəniz dəyişdirildi",
             "text": (
-                "Salam {full_name},\n\nDocArchive şifrəniz indicə dəyişdirildi. "
+                "Salam {full_name},\n\nDocAI şifrəniz indicə dəyişdirildi. "
                 "Bunu siz etmisinizsə, heç bir tədbir lazım deyil. Əksinə isə, dərhal administratorunuzla əlaqə saxlayın.\n"
             ),
             "html_body": (
                 "<p style='font-size:15px;margin:0 0 12px 0;'>Salam {full_name},</p>"
                 "<p style='font-size:14px;line-height:1.6;color:#3a3a3a;margin:0 0 18px 0;'>"
-                "DocArchive şifrəniz indicə dəyişdirildi. Bunu siz etmisinizsə, heç bir tədbir lazım deyil. "
+                "DocAI şifrəniz indicə dəyişdirildi. Bunu siz etmisinizsə, heç bir tədbir lazım deyil. "
                 "Əksinə isə, dərhal administratorunuzla əlaqə saxlayın.</p>"
             ),
         },
         "ru": {
-            "subject": "Ваш пароль DocArchive был изменён",
+            "subject": "Ваш пароль DocAI был изменён",
             "text": (
-                "Здравствуйте, {full_name},\n\nВаш пароль DocArchive был только что изменён. "
+                "Здравствуйте, {full_name},\n\nВаш пароль DocAI был только что изменён. "
                 "Если это сделали вы — никаких действий не требуется. Если нет — немедленно свяжитесь с администратором.\n"
             ),
             "html_body": (
                 "<p style='font-size:15px;margin:0 0 12px 0;'>Здравствуйте, {full_name},</p>"
                 "<p style='font-size:14px;line-height:1.6;color:#3a3a3a;margin:0 0 18px 0;'>"
-                "Ваш пароль DocArchive был только что изменён. Если это сделали вы — никаких действий не требуется. "
+                "Ваш пароль DocAI был только что изменён. Если это сделали вы — никаких действий не требуется. "
                 "Если нет — немедленно свяжитесь с администратором.</p>"
             ),
         },
     },
     "role_changed": {
         "en": {
-            "subject": "Your DocArchive role was updated",
+            "subject": "Your DocAI role was updated",
             "text": (
                 "Hello {full_name},\n\n{actor_name} changed your role from \"{old_role}\" to \"{new_role}\".\n"
             ),
@@ -322,7 +322,7 @@ EVENT_TEMPLATES: dict[str, dict[str, dict[str, str]]] = {
             ),
         },
         "az": {
-            "subject": "DocArchive rolunuz yeniləndi",
+            "subject": "DocAI rolunuz yeniləndi",
             "text": (
                 "Salam {full_name},\n\n{actor_name} rolunuzu \"{old_role}\" → \"{new_role}\" olaraq dəyişdi.\n"
             ),
@@ -334,7 +334,7 @@ EVENT_TEMPLATES: dict[str, dict[str, dict[str, str]]] = {
             ),
         },
         "ru": {
-            "subject": "Ваша роль в DocArchive обновлена",
+            "subject": "Ваша роль в DocAI обновлена",
             "text": (
                 "Здравствуйте, {full_name},\n\n{actor_name} изменил(а) вашу роль с «{old_role}» на «{new_role}».\n"
             ),
@@ -348,36 +348,36 @@ EVENT_TEMPLATES: dict[str, dict[str, dict[str, str]]] = {
     },
     "activation_changed": {
         "en": {
-            "subject": "Your DocArchive account was {status}",
+            "subject": "Your DocAI account was {status}",
             "text": (
-                "Hello {full_name},\n\n{actor_name} {status} your DocArchive account.\n"
+                "Hello {full_name},\n\n{actor_name} {status} your DocAI account.\n"
             ),
             "html_body": (
                 "<p style='font-size:15px;margin:0 0 12px 0;'>Hello {full_name},</p>"
                 "<p style='font-size:14px;line-height:1.6;color:#3a3a3a;margin:0 0 18px 0;'>"
-                "<strong>{actor_name}</strong> {status} your DocArchive account.</p>"
+                "<strong>{actor_name}</strong> {status} your DocAI account.</p>"
             ),
         },
         "az": {
-            "subject": "DocArchive hesabınız {status}",
+            "subject": "DocAI hesabınız {status}",
             "text": (
-                "Salam {full_name},\n\n{actor_name} DocArchive hesabınızı {status}.\n"
+                "Salam {full_name},\n\n{actor_name} DocAI hesabınızı {status}.\n"
             ),
             "html_body": (
                 "<p style='font-size:15px;margin:0 0 12px 0;'>Salam {full_name},</p>"
                 "<p style='font-size:14px;line-height:1.6;color:#3a3a3a;margin:0 0 18px 0;'>"
-                "<strong>{actor_name}</strong> DocArchive hesabınızı {status}.</p>"
+                "<strong>{actor_name}</strong> DocAI hesabınızı {status}.</p>"
             ),
         },
         "ru": {
-            "subject": "Ваша учётная запись DocArchive {status}",
+            "subject": "Ваша учётная запись DocAI {status}",
             "text": (
-                "Здравствуйте, {full_name},\n\n{actor_name} {status} вашу учётную запись DocArchive.\n"
+                "Здравствуйте, {full_name},\n\n{actor_name} {status} вашу учётную запись DocAI.\n"
             ),
             "html_body": (
                 "<p style='font-size:15px;margin:0 0 12px 0;'>Здравствуйте, {full_name},</p>"
                 "<p style='font-size:14px;line-height:1.6;color:#3a3a3a;margin:0 0 18px 0;'>"
-                "<strong>{actor_name}</strong> {status} вашу учётную запись DocArchive.</p>"
+                "<strong>{actor_name}</strong> {status} вашу учётную запись DocAI.</p>"
             ),
         },
     },

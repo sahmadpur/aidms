@@ -22,7 +22,7 @@ const jetbrainsMono = JetBrains_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "DocArchive AI",
+  title: "DocAI",
   description: "A searchable, multilingual archive for your organization.",
 };
 

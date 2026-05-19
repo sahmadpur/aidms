@@ -140,7 +140,7 @@ export default function Sidebar() {
     <aside className="w-[210px] min-w-[210px] flex-shrink-0 bg-sidebar flex flex-col h-screen sticky top-0">
       <div className="px-[18px] py-5 border-b border-white/10">
         <span className="text-base font-semibold text-sidebar-fg tracking-[0.3px]">
-          DocArchive
+          Doc
         </span>
         <sup className="text-[10px] text-brand-accent ml-[3px]">AI</sup>
       </div>

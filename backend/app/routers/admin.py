@@ -4,14 +4,14 @@ from datetime import datetime, timedelta, timezone
 
 from fastapi import APIRouter, Depends, HTTPException, Request, status
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select
+from sqlalchemy import func, select
 
 from app.core.config import settings
 from app.core.database import get_db
 from app.core.security import hash_password
 from app.dependencies import require_admin
 from app.models.department import Department, department_members
-from app.models.document import Category
+from app.models.document import Category, Document
 from app.models.user import User
 from app.schemas.admin import (
     PasswordResetRequest,
@@ -20,7 +20,7 @@ from app.schemas.admin import (
     UserDepartment,
     UserUpdateRequest,
 )
-from app.schemas.document import CategoryResponse, CategoryCreate
+from app.schemas.document import CategoryCreate, CategoryResponse, CategoryUpdate
 from app.services import audit
 from app.services.email import send_event_email
 from app.services.membership import MembershipDiff, replace_user_departments
@@ -392,8 +392,24 @@ async def list_categories(
     db: AsyncSession = Depends(get_db),
     _: User = Depends(require_admin),
 ):
-    cats = (await db.scalars(select(Category).order_by(Category.created_at.desc()))).all()
-    return cats
+    stmt = (
+        select(Category, func.count(Document.id).label("usage_count"))
+        .outerjoin(Document, Document.category_id == Category.id)
+        .group_by(Category.id)
+        .order_by(Category.created_at.desc())
+    )
+    rows = (await db.execute(stmt)).all()
+    return [
+        CategoryResponse(
+            id=cat.id,
+            name_az=cat.name_az,
+            name_ru=cat.name_ru,
+            name_en=cat.name_en,
+            usage_count=usage,
+            created_at=cat.created_at,
+        )
+        for cat, usage in rows
+    ]
 
 
 @router.post("/categories", response_model=CategoryResponse, status_code=status.HTTP_201_CREATED)
@@ -421,12 +437,20 @@ async def create_category(
     )
     await db.commit()
     await db.refresh(cat)
-    return cat
+    return CategoryResponse(
+        id=cat.id,
+        name_az=cat.name_az,
+        name_ru=cat.name_ru,
+        name_en=cat.name_en,
+        usage_count=0,
+        created_at=cat.created_at,
+    )
 
 
-@router.delete("/categories/{category_id}", status_code=status.HTTP_204_NO_CONTENT)
-async def delete_category(
+@router.patch("/categories/{category_id}", response_model=CategoryResponse)
+async def update_category(
     category_id: uuid.UUID,
+    body: CategoryUpdate,
     request: Request,
     db: AsyncSession = Depends(get_db),
     current_admin: User = Depends(require_admin),
@@ -434,6 +458,61 @@ async def delete_category(
     cat = await db.scalar(select(Category).where(Category.id == category_id))
     if not cat:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Category not found")
+    data = body.model_dump(exclude_unset=True)
+    for field, value in data.items():
+        setattr(cat, field, value)
+    await audit.log(
+        db,
+        user_id=current_admin.id,
+        action="category.update",
+        entity_type="category",
+        entity_id=cat.id,
+        metadata=data,
+        request=request,
+    )
+    await db.commit()
+    await db.refresh(cat)
+    usage = await db.scalar(
+        select(func.count(Document.id)).where(Document.category_id == cat.id)
+    )
+    return CategoryResponse(
+        id=cat.id,
+        name_az=cat.name_az,
+        name_ru=cat.name_ru,
+        name_en=cat.name_en,
+        usage_count=usage or 0,
+        created_at=cat.created_at,
+    )
+
+
+@router.delete("/categories/{category_id}", status_code=status.HTTP_204_NO_CONTENT)
+async def delete_category(
+    category_id: uuid.UUID,
+    request: Request,
+    force: bool = False,
+    db: AsyncSession = Depends(get_db),
+    current_admin: User = Depends(require_admin),
+):
+    cat = await db.scalar(select(Category).where(Category.id == category_id))
+    if not cat:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Category not found")
+    usage = (
+        await db.scalar(
+            select(func.count(Document.id)).where(Document.category_id == cat.id)
+        )
+    ) or 0
+    if usage > 0 and not force:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail={
+                "code": "category_in_use",
+                "usage_count": usage,
+                "message": (
+                    f"Category is used by {usage} documents. "
+                    "Pass ?force=true to delete anyway."
+                ),
+            },
+        )
     await db.delete(cat)
     await audit.log(
         db,
@@ -441,7 +520,7 @@ async def delete_category(
         action="category.delete",
         entity_type="category",
         entity_id=category_id,
-        metadata={"name_en": cat.name_en},
+        metadata={"name_en": cat.name_en, "usage_count": usage},
         request=request,
     )
     await db.commit()

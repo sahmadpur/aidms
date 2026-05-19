@@ -13,6 +13,7 @@ class CategoryResponse(BaseModel):
     name_az: str
     name_ru: str
     name_en: str
+    usage_count: int = 0
     created_at: datetime
 
     model_config = {"from_attributes": True}
@@ -26,6 +27,21 @@ class CategoryCreate(BaseModel):
     @field_validator("name_az", "name_ru", "name_en")
     @classmethod
     def name_not_empty(cls, v: str) -> str:
+        if not v.strip():
+            raise ValueError("Category name cannot be empty")
+        return v.strip()
+
+
+class CategoryUpdate(BaseModel):
+    name_az: Optional[str] = None
+    name_ru: Optional[str] = None
+    name_en: Optional[str] = None
+
+    @field_validator("name_az", "name_ru", "name_en")
+    @classmethod
+    def name_not_empty(cls, v: Optional[str]) -> Optional[str]:
+        if v is None:
+            return v
         if not v.strip():
             raise ValueError("Category name cannot be empty")
         return v.strip()

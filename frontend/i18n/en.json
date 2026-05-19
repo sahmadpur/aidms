@@ -218,7 +218,22 @@
     "empty": "This folder is empty.",
     "root": "Root",
     "parent": "Parent folder",
-    "none": "No parent"
+    "none": "No parent",
+    "expandAll": "Expand all",
+    "collapseAll": "Collapse all",
+    "filter": "Filter folders…",
+    "matchSummary": "{count, plural, one {1 match} other {# matches}}",
+    "noMatches": "No folders match \"{q}\""
+  },
+  "categories": {
+    "explainerTitle": "What is a category?",
+    "explainerBody": "Categories are tags you apply to documents — like Contracts or Reports — that complement folders. After creating one, attach it from a document's detail page or filter the Documents list by it.",
+    "browseDocuments": "Browse documents",
+    "learnFolders": "Manage folders",
+    "newButton": "New category",
+    "usedBy": "Used by {count, plural, one {1 document} other {# documents}}",
+    "deleteWithUsage": "This category is used by {count} documents. Deleting it removes the tag from those documents — they are not deleted. Continue?",
+    "empty": "No categories yet — create your first one."
   },
   "departments": {
     "title": "Departments",

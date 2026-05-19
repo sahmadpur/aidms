@@ -218,7 +218,22 @@
     "empty": "Bu qovluq boşdur.",
     "root": "Kök",
     "parent": "Ana qovluq",
-    "none": "Ana qovluq yoxdur"
+    "none": "Ana qovluq yoxdur",
+    "expandAll": "Hamısını aç",
+    "collapseAll": "Hamısını yığ",
+    "filter": "Qovluqları süz…",
+    "matchSummary": "{count, plural, one {1 uyğunluq} other {# uyğunluq}}",
+    "noMatches": "«{q}» üzrə qovluq tapılmadı"
+  },
+  "categories": {
+    "explainerTitle": "Kateqoriya nədir?",
+    "explainerBody": "Kateqoriyalar sənədlərə tətbiq olunan etiketlərdir — məsələn, Müqavilələr və ya Hesabatlar — qovluqları tamamlayır. Yaratdıqdan sonra sənədin səhifəsindən ona əlavə edin və ya Sənədlər siyahısında süzgəcdə istifadə edin.",
+    "browseDocuments": "Sənədlərə bax",
+    "learnFolders": "Qovluqları idarə et",
+    "newButton": "Yeni kateqoriya",
+    "usedBy": "{count, plural, one {1 sənəddə istifadə olunur} other {# sənəddə istifadə olunur}}",
+    "deleteWithUsage": "Bu kateqoriya {count} sənəddə istifadə olunur. Silinsə, etiket həmin sənədlərdən götürüləcək — sənədlər silinmir. Davam edilsin?",
+    "empty": "Hələ kateqoriya yoxdur — birincisini yaradın."
   },
   "departments": {
     "title": "Şöbələr",

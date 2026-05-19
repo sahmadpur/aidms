@@ -152,6 +152,13 @@
     "viewOcr": "OCR mətnini bax",
     "collapsePanel": "Paneli yığ",
     "expandPanel": "Paneli aç",
+    "rail": {
+      "discussionTab": "Müzakirə",
+      "ocrTab": "Tanınmış mətn",
+      "collapse": "Paneli yığ",
+      "expand": "Paneli aç",
+      "mentionsCount": "{count} @ sizə"
+    },
     "reprocess": "Yenidən işlə",
     "confirmDelete": "Bu sənədi silmək istədiyinizə əminsiniz?",
     "searchPlaceholder": "Ad, məzmun və ya açar söz ilə axtarın…",

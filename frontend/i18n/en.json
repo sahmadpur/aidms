@@ -152,6 +152,13 @@
     "viewOcr": "View OCR Text",
     "collapsePanel": "Collapse panel",
     "expandPanel": "Show panel",
+    "rail": {
+      "discussionTab": "Discussion",
+      "ocrTab": "Recognized Text",
+      "collapse": "Collapse panel",
+      "expand": "Expand panel",
+      "mentionsCount": "{count} @ you"
+    },
     "reprocess": "Reprocess",
     "confirmDelete": "Are you sure you want to delete this document?",
     "searchPlaceholder": "Search by title, content, keyword…",

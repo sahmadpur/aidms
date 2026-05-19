@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { useParams, useRouter, useSearchParams } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
@@ -15,6 +15,7 @@ import {
   ScanText,
   Trash2,
 } from "lucide-react";
+import type { Comment } from "@/lib/types";
 import DocumentViewer from "@/components/DocumentViewer";
 import OCRTextPanel from "@/components/OCRTextPanel";
 import CommentsPanel from "@/components/CommentsPanel";
@@ -47,26 +48,23 @@ export default function DocumentDetailPage() {
   const id = params.id as string;
 
   const searchParams = useSearchParams();
-  const initialRail =
-    searchParams.get("tab") === "ocr"
-      ? "ocr"
-      : searchParams.get("tab") === "pdf"
-      ? null
-      : "comments";
+  const tabParam = searchParams.get("tab");
   const [railTab, setRailTab] = useState<"comments" | "ocr">(
-    initialRail === "ocr" ? "ocr" : "comments"
+    tabParam === "ocr" ? "ocr" : "comments"
   );
-  const [railOpen, setRailOpen] = useState<boolean>(initialRail !== null);
+  const [railMode, setRailMode] = useState<"expanded" | "collapsed">(
+    tabParam === "pdf" ? "collapsed" : "expanded"
+  );
   useEffect(() => {
     const t = searchParams.get("tab");
     if (t === "ocr") {
       setRailTab("ocr");
-      setRailOpen(true);
+      setRailMode("expanded");
     } else if (t === "comments") {
       setRailTab("comments");
-      setRailOpen(true);
+      setRailMode("expanded");
     } else if (t === "pdf") {
-      setRailOpen(false);
+      setRailMode("collapsed");
     }
   }, [searchParams]);
   const [editing, setEditing] = useState(false);
@@ -79,6 +77,25 @@ export default function DocumentDetailPage() {
     doc?.ocr_status === "completed" ? `/documents/${id}/ocr-text` : null,
     fetcher
   );
+  // Dedupe: CommentsPanel keys off the same URL, SWR shares the response.
+  const { data: comments = [] } = useSWR<Comment[]>(
+    `/documents/${id}/comments`,
+    fetcher,
+  );
+
+  const commentCount = comments.length;
+  const mentionsMeCount = useMemo(() => {
+    if (!me) return 0;
+    const needle = `(${me.id})`;
+    return comments.reduce(
+      (n, c) => (c.body.includes(needle) ? n + 1 : n),
+      0,
+    );
+  }, [comments, me]);
+  const ocrWordCount = useMemo(() => {
+    const text = ocrData?.ocr_text?.trim() ?? "";
+    return text ? text.split(/\s+/).length : 0;
+  }, [ocrData?.ocr_text]);
   const { data: folders } = useFolders();
   const { data: departments = [] } = useSWR<Department[]>("/admin/departments", fetcher, {
     revalidateOnFocus: false,
@@ -310,27 +327,47 @@ export default function DocumentDetailPage() {
           <DocumentViewer fileUrl={fileUrl} />
         </div>
 
-        {railOpen ? (
+        {railMode === "expanded" ? (
           <aside className="w-[420px] flex-shrink-0 bg-surface-card border border-edge-soft rounded-[10px] overflow-hidden flex flex-col">
-            <div className="flex items-center border-b border-edge-soft pl-2 pr-1">
+            <div className="flex items-stretch border-b border-edge-soft">
               <RailTab
                 active={railTab === "comments"}
                 onClick={() => setRailTab("comments")}
-                icon={<MessageSquare className="w-3.5 h-3.5" />}
-                label={t("commentsPanel.title")}
+                icon={<MessageSquare className="w-[18px] h-[18px]" />}
+                label={t("documents.rail.discussionTab")}
+                badge={
+                  mentionsMeCount > 0
+                    ? {
+                        kind: "accent",
+                        text: t("documents.rail.mentionsCount", {
+                          count: mentionsMeCount,
+                        }),
+                      }
+                    : commentCount > 0
+                    ? { kind: "neutral", text: String(commentCount) }
+                    : null
+                }
               />
               <RailTab
                 active={railTab === "ocr"}
                 onClick={() => setRailTab("ocr")}
-                icon={<ScanText className="w-3.5 h-3.5" />}
-                label={t("ocrPanel.title")}
+                icon={<ScanText className="w-[18px] h-[18px]" />}
+                label={t("documents.rail.ocrTab")}
+                badge={
+                  doc.ocr_status === "completed" && ocrWordCount > 0
+                    ? {
+                        kind: "neutral",
+                        text: formatCount(ocrWordCount) + " w",
+                      }
+                    : null
+                }
               />
               <div className="flex-1" />
               <button
-                onClick={() => setRailOpen(false)}
-                className="p-1.5 rounded-[5px] text-gray-400 hover:text-brand hover:bg-surface-hover"
-                title={t("documents.collapsePanel")}
-                aria-label={t("documents.collapsePanel")}
+                onClick={() => setRailMode("collapsed")}
+                className="px-3 text-ink-soft hover:text-brand hover:bg-surface-hover transition-colors"
+                title={t("documents.rail.collapse")}
+                aria-label={t("documents.rail.collapse")}
               >
                 <PanelRightClose className="w-4 h-4" />
               </button>
@@ -349,92 +386,142 @@ export default function DocumentDetailPage() {
             </div>
           </aside>
         ) : (
-          <div className="flex-shrink-0 flex flex-col gap-2">
-            <RailExpandButton
-              icon={<MessageSquare className="w-4 h-4" />}
-              label={t("commentsPanel.title")}
+          <aside className="w-[64px] flex-shrink-0 bg-surface-card border border-edge-soft rounded-[10px] flex flex-col items-stretch p-1.5 gap-1.5">
+            <RailTile
+              active={false}
+              icon={<MessageSquare className="w-[20px] h-[20px]" />}
+              label={t("documents.rail.discussionTab")}
+              badge={
+                mentionsMeCount > 0
+                  ? {
+                      kind: "accent",
+                      text: String(mentionsMeCount),
+                    }
+                  : commentCount > 0
+                  ? { kind: "neutral", text: String(commentCount) }
+                  : null
+              }
               onClick={() => {
                 setRailTab("comments");
-                setRailOpen(true);
+                setRailMode("expanded");
               }}
             />
-            <RailExpandButton
-              icon={<ScanText className="w-4 h-4" />}
-              label={t("ocrPanel.title")}
+            <RailTile
+              active={false}
+              icon={<ScanText className="w-[20px] h-[20px]" />}
+              label={t("documents.rail.ocrTab")}
+              badge={
+                doc.ocr_status === "completed" && ocrWordCount > 0
+                  ? { kind: "neutral", text: formatCount(ocrWordCount) }
+                  : null
+              }
               onClick={() => {
                 setRailTab("ocr");
-                setRailOpen(true);
+                setRailMode("expanded");
               }}
             />
-            <RailExpandButton
-              icon={<PanelRightOpen className="w-4 h-4" />}
-              label={t("documents.expandPanel")}
-              onClick={() => setRailOpen(true)}
-              compact
-            />
-          </div>
+            <div className="flex-1" />
+            <button
+              onClick={() => setRailMode("expanded")}
+              title={t("documents.rail.expand")}
+              aria-label={t("documents.rail.expand")}
+              className="w-full h-9 rounded-[6px] inline-flex items-center justify-center text-ink-soft hover:text-brand hover:bg-surface-hover transition-colors"
+            >
+              <PanelRightOpen className="w-4 h-4" />
+            </button>
+          </aside>
         )}
       </div>
     </div>
   );
 }
 
+type RailBadge = { kind: "accent" | "neutral"; text: string } | null;
+
 function RailTab({
   active,
   onClick,
   icon,
   label,
+  badge,
 }: {
   active: boolean;
   onClick: () => void;
   icon: React.ReactNode;
   label: string;
+  badge: RailBadge;
 }) {
   return (
     <button
       onClick={onClick}
-      className={`px-3 py-2.5 text-[12.5px] font-medium inline-flex items-center gap-1.5 border-b-2 -mb-px transition-colors ${
+      className={`h-[44px] px-4 text-[14px] font-semibold inline-flex items-center gap-2 border-b-[3px] -mb-px transition-colors ${
         active
-          ? "border-brand-accent text-brand"
-          : "border-transparent text-gray-500 hover:text-gray-800"
+          ? "border-brand-accent text-brand-deep"
+          : "border-transparent text-ink-soft hover:text-ink"
       }`}
     >
-      {icon}
+      <span className={active ? "text-brand" : "text-ink-soft"}>{icon}</span>
       {label}
+      {badge && (
+        <span
+          className={`ml-1 px-1.5 py-[1px] rounded-full text-[10.5px] font-medium tabular-nums ${
+            badge.kind === "accent"
+              ? "bg-brand-accent text-brand-pale"
+              : "bg-surface-chipActive text-brand-deep"
+          }`}
+        >
+          {badge.text}
+        </span>
+      )}
     </button>
   );
 }
 
-function RailExpandButton({
+function RailTile({
+  active,
   icon,
   label,
   onClick,
-  compact,
+  badge,
 }: {
+  active: boolean;
   icon: React.ReactNode;
   label: string;
   onClick: () => void;
-  compact?: boolean;
+  badge: RailBadge;
 }) {
   return (
     <button
       onClick={onClick}
       title={label}
-      className={`group bg-surface-card border border-edge-soft rounded-[10px] hover:border-edge-chip hover:bg-surface-hover transition-colors text-gray-500 hover:text-brand inline-flex flex-col items-center justify-center w-10 ${
-        compact ? "py-2" : "py-3 gap-2"
+      className={`group relative w-full aspect-square rounded-[8px] inline-flex flex-col items-center justify-center gap-1 transition-colors ${
+        active
+          ? "bg-surface-chipActive text-brand-deep"
+          : "text-ink-soft hover:text-brand hover:bg-surface-hover"
       }`}
     >
       {icon}
-      {!compact && (
+      <span className="text-[9px] font-medium uppercase tracking-[0.05em]">
+        {label.split(" ")[0]}
+      </span>
+      {badge && (
         <span
-          className="text-[10.5px] tracking-wider uppercase whitespace-nowrap"
-          style={{ writingMode: "vertical-rl", transform: "rotate(180deg)" }}
+          className={`absolute top-1 right-1 min-w-[16px] h-[16px] px-1 rounded-full text-[9px] font-semibold inline-flex items-center justify-center tabular-nums ${
+            badge.kind === "accent"
+              ? "bg-brand-accent text-brand-pale"
+              : "bg-edge-chip text-ink"
+          }`}
         >
-          {label}
+          {badge.text}
         </span>
       )}
     </button>
   );
+}
+
+function formatCount(n: number): string {
+  if (n >= 1000) return (n / 1000).toFixed(n >= 10000 ? 0 : 1) + "k";
+  return String(n);
 }
 
 function MetaField({ label, children }: { label: string; children: React.ReactNode }) {

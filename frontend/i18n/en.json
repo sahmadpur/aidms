@@ -203,6 +203,8 @@
     "sources": "Sources",
     "deleteSession": "Delete conversation",
     "kbdHint": "⌘ Enter to send · Shift Enter for new line",
+    "errorOverloaded": "The AI service is busy. Please try again in a moment.",
+    "errorApi": "Something went wrong with the AI service.",
     "transcript": {
       "youLabel": "You",
       "archiveLabel": "Archive"

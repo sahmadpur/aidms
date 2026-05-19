@@ -16,6 +16,9 @@ export interface Message {
   role: "user" | "assistant";
   content: string;
   citations?: Citation[];
+  /** Set when the upstream API failed mid-stream. The renderer treats this
+   * as an inline notice rather than a normal assistant message. */
+  errorKind?: "overloaded" | "api_error";
 }
 
 export function useChat(initialSessionId: string | null = null) {
@@ -95,6 +98,18 @@ export function useChat(initialSessionId: string | null = null) {
                 updated[updated.length - 1] = {
                   ...updated[updated.length - 1],
                   citations: data.citations,
+                };
+                return updated;
+              });
+            }
+
+            if (data.type === "error") {
+              setMessages((prev) => {
+                const updated = [...prev];
+                updated[updated.length - 1] = {
+                  ...updated[updated.length - 1],
+                  content: data.message ?? "Upstream AI service failed.",
+                  errorKind: data.kind === "overloaded" ? "overloaded" : "api_error",
                 };
                 return updated;
               });

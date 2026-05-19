@@ -203,6 +203,8 @@
     "sources": "Источники",
     "deleteSession": "Удалить разговор",
     "kbdHint": "⌘ Enter отправить · Shift Enter новая строка",
+    "errorOverloaded": "Сервис ИИ перегружен. Попробуйте через мгновение.",
+    "errorApi": "Сервис ИИ сообщил об ошибке.",
     "transcript": {
       "youLabel": "Вы",
       "archiveLabel": "Архив"

@@ -172,19 +172,52 @@ async def stream_chat_response(
         }
     ]
 
-    # 3. Stream Claude response
+    # 3. Stream Claude response. Catch upstream API errors so the SSE
+    # endpoint never disconnects silently — the frontend can render the
+    # message inline instead of leaving the user staring at a blinking cursor.
     full_response = ""
     model_name = await get_chat_model(db)
 
-    async with claude_client.messages.stream(
-        model=model_name,
-        max_tokens=2048,
-        system=SYSTEM_PROMPT,
-        messages=messages,
-    ) as stream:
-        async for text_chunk in stream.text_stream:
-            full_response += text_chunk
-            yield f"data: {json.dumps({'type': 'text_delta', 'text': text_chunk})}\n\n"
+    try:
+        async with claude_client.messages.stream(
+            model=model_name,
+            max_tokens=2048,
+            system=SYSTEM_PROMPT,
+            messages=messages,
+        ) as stream:
+            async for text_chunk in stream.text_stream:
+                full_response += text_chunk
+                yield f"data: {json.dumps({'type': 'text_delta', 'text': text_chunk})}\n\n"
+    except anthropic.APIStatusError as exc:
+        kind = "overloaded" if exc.status_code in (529,) else "api_error"
+        # Friendly hint mapped from Anthropic's machine-readable type when present.
+        body = getattr(exc, "body", None) or {}
+        err = (body.get("error") or {}) if isinstance(body, dict) else {}
+        message = err.get("message") or "Upstream AI service is unavailable."
+        yield (
+            "data: "
+            + json.dumps({
+                "type": "error",
+                "kind": kind,
+                "status": exc.status_code,
+                "message": message,
+            })
+            + "\n\n"
+        )
+        yield "data: [DONE]\n\n"
+        return
+    except anthropic.APIError as exc:
+        yield (
+            "data: "
+            + json.dumps({
+                "type": "error",
+                "kind": "api_error",
+                "message": str(exc) or "Upstream AI service failed.",
+            })
+            + "\n\n"
+        )
+        yield "data: [DONE]\n\n"
+        return
 
     # 4. Narrow citations to documents Claude actually cited in its response.
     # Match the inline citation format "[Source: <title>, Page <n>]" and keep

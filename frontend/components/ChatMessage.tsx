@@ -2,6 +2,7 @@
 
 import { useTranslations } from "next-intl";
 import Link from "next/link";
+import { AlertTriangle } from "lucide-react";
 import type { Message } from "@/lib/useChat";
 
 interface Props {
@@ -20,6 +21,26 @@ export default function ChatMessage({ message, timestamp }: Props) {
   const isUser = message.role === "user";
   const time = timestamp ?? "";
   const label = isUser ? t("transcript.youLabel") : t("transcript.archiveLabel");
+
+  // Upstream API failure — render as a calm inline notice instead of a
+  // normal assistant turn so the user knows it's a service hiccup, not them.
+  if (message.errorKind) {
+    return (
+      <div className="mx-4 px-4 py-3 rounded-[8px] bg-approval-pending-bg border border-approval-pending-edge text-approval-pending-fg">
+        <div className="flex items-start gap-2">
+          <AlertTriangle className="w-4 h-4 mt-[1px] flex-shrink-0" />
+          <div className="flex-1 text-[13px] leading-[1.55]">
+            <p className="font-medium">
+              {message.errorKind === "overloaded"
+                ? t("errorOverloaded")
+                : t("errorApi")}
+            </p>
+            <p className="mt-0.5 opacity-80">{message.content}</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div

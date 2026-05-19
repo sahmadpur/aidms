@@ -203,6 +203,8 @@
     "sources": "Mənbələr",
     "deleteSession": "Chatı sil",
     "kbdHint": "⌘ Enter göndər · Shift Enter yeni sətir",
+    "errorOverloaded": "AI xidməti yüklənib. Bir az sonra yenidən cəhd edin.",
+    "errorApi": "AI xidmətində xəta baş verdi.",
     "transcript": {
       "youLabel": "Siz",
       "archiveLabel": "Arxiv"

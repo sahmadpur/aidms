@@ -92,9 +92,11 @@ export default function ChatSessionPage() {
           </div>
         </div>
 
-        <div className="flex-1 bg-surface-card border border-edge-soft rounded-[10px] overflow-hidden">
-          <ChatWindow messages={messages} onSend={sendMessage} streaming={streaming} />
-        </div>
+        <main className="flex-1 flex justify-center min-w-0">
+          <div className="w-full max-w-[760px] bg-surface-card border border-edge-soft rounded-[10px] overflow-hidden">
+            <ChatWindow messages={messages} onSend={sendMessage} streaming={streaming} />
+          </div>
+        </main>
       </div>
     </>
   );

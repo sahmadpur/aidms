@@ -66,6 +66,7 @@ async def _retrieve_chunks(
             dc.page_number,
             d.id::text       AS document_id,
             d.title          AS document_title,
+            d.display_id     AS document_display_id,
             ROW_NUMBER() OVER (ORDER BY dc.embedding <=> '{embedding_str}'::vector) AS sem_rank
         FROM document_chunks dc
         JOIN documents d ON d.id = dc.document_id
@@ -93,6 +94,7 @@ async def _retrieve_chunks(
                 dc.page_number,
                 d.id::text   AS document_id,
                 d.title      AS document_title,
+                d.display_id AS document_display_id,
                 ROW_NUMBER() OVER (
                     ORDER BY ts_rank(to_tsvector('simple', dc.chunk_text),
                                      to_tsquery('simple', :fts_or_query)) DESC
@@ -155,6 +157,7 @@ async def stream_chat_response(
             {
                 "document_id": chunk["document_id"],
                 "document_title": chunk["document_title"],
+                "document_display_id": chunk.get("document_display_id"),
                 "page_number": chunk["page_number"],
                 "chunk_text": chunk["chunk_text"][:200],
             }

@@ -7,6 +7,7 @@ import { API_URL } from "./api";
 export interface Citation {
   document_id: string;
   document_title: string;
+  document_display_id?: string | null;
   page_number: number;
   chunk_text: string;
 }

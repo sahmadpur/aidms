@@ -189,12 +189,17 @@
   "chat": {
     "title": "ИИ Чат",
     "newChat": "Новый чат",
-    "placeholder": "Задайте вопрос о ваших документах...",
+    "placeholder": "Спросите архив — со ссылками на источники",
     "sessions": "История чатов",
     "noSessions": "Пока нет разговоров.",
     "thinking": "Думает...",
     "sources": "Источники",
-    "deleteSession": "Удалить разговор"
+    "deleteSession": "Удалить разговор",
+    "kbdHint": "⌘ Enter отправить · Shift Enter новая строка",
+    "transcript": {
+      "youLabel": "Вы",
+      "archiveLabel": "Архив"
+    }
   },
   "folders": {
     "title": "Папки",

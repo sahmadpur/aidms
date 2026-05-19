@@ -1,8 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { clsx } from "clsx";
-import { avatarUrl, initials } from "@/lib/useMe";
+import api from "@/lib/api";
+import { initials } from "@/lib/useMe";
 
 type AvatarUser = {
   id: string;
@@ -30,8 +31,12 @@ const SIZE_TEXT: Record<"xs" | "sm" | "md" | "lg" | "xl", string> = {
 /**
  * Round avatar that prefers the uploaded image and falls back to a
  * brand-coloured initials chip when the user has no avatar (or the
- * image fails to load). Use everywhere we previously rendered initials
- * directly so a single component owns the fallback logic.
+ * image fails to load).
+ *
+ * The avatar endpoint requires a Bearer token, but browser <img> tags
+ * don't go through our axios interceptor — so we fetch the image as a
+ * blob (auth header attached) and render the object URL. Same pattern
+ * used by DocumentViewer for PDF files.
  */
 export function Avatar({
   user,
@@ -42,9 +47,37 @@ export function Avatar({
   size?: "xs" | "sm" | "md" | "lg" | "xl";
   className?: string;
 }) {
-  const [errored, setErrored] = useState(false);
-  const url = user ? avatarUrl(user) : null;
   const px = SIZE_PX[size];
+  const [blobUrl, setBlobUrl] = useState<string | null>(null);
+
+  // Cache-bust the request when avatar_url or updated_at changes — that's
+  // how a new upload invalidates the previous blob URL.
+  const key = user?.avatar_url ? `${user.id}@${user.updated_at}` : null;
+
+  useEffect(() => {
+    if (!user || !user.avatar_url) {
+      setBlobUrl(null);
+      return;
+    }
+    let cancelled = false;
+    let createdUrl: string | null = null;
+    api
+      .get(`/users/${user.id}/avatar`, { responseType: "blob" })
+      .then((res) => {
+        if (cancelled) return;
+        createdUrl = URL.createObjectURL(res.data);
+        setBlobUrl(createdUrl);
+      })
+      .catch(() => {
+        if (cancelled) return;
+        setBlobUrl(null);
+      });
+    return () => {
+      cancelled = true;
+      if (createdUrl) URL.revokeObjectURL(createdUrl);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [key]);
 
   const base = clsx(
     "rounded-full flex items-center justify-center flex-shrink-0 overflow-hidden bg-brand-chip text-brand-pale font-semibold",
@@ -52,19 +85,15 @@ export function Avatar({
     className,
   );
 
-  if (url && !errored) {
+  if (blobUrl) {
     return (
-      <span
-        className={base}
-        style={{ width: px, height: px }}
-      >
+      <span className={base} style={{ width: px, height: px }}>
         <img
-          src={url}
+          src={blobUrl}
           alt={user?.full_name ?? ""}
           width={px}
           height={px}
           className="w-full h-full object-cover"
-          onError={() => setErrored(true)}
         />
       </span>
     );

@@ -231,7 +231,7 @@ export default function OCRTextPanel({
       />
       <div
         ref={scrollerRef}
-        className="flex-1 overflow-auto bg-[linear-gradient(180deg,#fff_0%,#fbfdf6_100%)]"
+        className="flex-1 overflow-auto bg-surface-card"
       >
         {view === "reading" ? (
           <ReadingView segments={segments} activeMatch={activeMatch} />
@@ -270,7 +270,7 @@ interface ChromeProps {
 function PanelChrome(p: ChromeProps) {
   const t = useTranslations();
   return (
-    <div className="border-b border-edge-soft bg-white">
+    <div className="border-b border-edge-soft bg-surface-card">
       <div className="flex items-center gap-3 px-4 py-2.5">
         <div className="flex items-center gap-2 min-w-0">
           <FileText className="w-3.5 h-3.5 text-brand" />
@@ -324,7 +324,7 @@ function PanelChrome(p: ChromeProps) {
               <button
                 onClick={p.onPrev}
                 disabled={p.matchCount === 0}
-                className="p-0.5 rounded hover:bg-white text-gray-500 disabled:opacity-30"
+                className="p-0.5 rounded hover:bg-surface-card text-gray-500 disabled:opacity-30"
                 aria-label={t("ocrPanel.prevMatch")}
               >
                 <ChevronUp className="w-3.5 h-3.5" />
@@ -332,7 +332,7 @@ function PanelChrome(p: ChromeProps) {
               <button
                 onClick={p.onNext}
                 disabled={p.matchCount === 0}
-                className="p-0.5 rounded hover:bg-white text-gray-500 disabled:opacity-30"
+                className="p-0.5 rounded hover:bg-surface-card text-gray-500 disabled:opacity-30"
                 aria-label={t("ocrPanel.nextMatch")}
               >
                 <ChevronDown className="w-3.5 h-3.5" />
@@ -342,7 +342,7 @@ function PanelChrome(p: ChromeProps) {
                   p.onQueryChange("");
                   p.onSearchToggle();
                 }}
-                className="p-0.5 rounded hover:bg-white text-gray-400"
+                className="p-0.5 rounded hover:bg-surface-card text-gray-400"
                 aria-label={t("common.close")}
               >
                 <X className="w-3.5 h-3.5" />
@@ -434,7 +434,7 @@ function ViewToggleButton({
       disabled={disabled}
       className={`px-2 py-0.5 rounded-[4px] text-[11px] inline-flex items-center gap-1 transition-colors ${
         active
-          ? "bg-white text-brand shadow-[0_1px_2px_rgba(45,80,22,0.08)]"
+          ? "bg-surface-card text-brand shadow-[0_1px_2px_rgba(45,80,22,0.08)]"
           : "text-gray-500 hover:text-brand"
       } disabled:opacity-40`}
     >
@@ -519,7 +519,7 @@ function RawView({
     <div className="font-mono text-[12px] leading-[1.65] text-ink">
       <div className="flex">
         <div
-          className="select-none text-right pr-3 pl-4 py-6 text-gray-400 bg-[#f7f9f3] border-r border-edge-soft"
+          className="select-none text-right pr-3 pl-4 py-6 text-ink-soft bg-surface-hover border-r border-edge-soft"
           style={{ minWidth: `${gutterWidth + 4}ch` }}
           aria-hidden
         >
@@ -602,7 +602,7 @@ function EmptyOCR({
           {isWorking ? (
             <Loader2 className="w-6 h-6 text-brand animate-spin" />
           ) : failed ? (
-            <X className="w-6 h-6 text-[#c94949]" />
+            <X className="w-6 h-6 text-dot-failed" />
           ) : (
             <FileText className="w-6 h-6 text-brand" />
           )}
@@ -610,7 +610,7 @@ function EmptyOCR({
         <h3 className="font-display text-[18px] text-brand-deep mb-1.5">
           {heading}
         </h3>
-        <p className="text-[12.5px] text-gray-600 leading-relaxed">{body}</p>
+        <p className="text-[12.5px] text-ink-soft leading-relaxed">{body}</p>
       </div>
     </div>
   );

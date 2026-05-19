@@ -156,18 +156,18 @@ export default function DocumentUploader({ onUploadComplete }: Props) {
         {...getRootProps()}
         className={`border-2 border-dashed rounded-xl p-8 text-center cursor-pointer transition-colors ${
           isDragActive
-            ? "border-primary-500 bg-primary-50"
-            : "border-gray-300 hover:border-primary-400 hover:bg-gray-50"
+            ? "border-brand-accent bg-surface-chipActive"
+            : "border-edge-chip hover:border-brand-accent hover:bg-surface-hover"
         }`}
       >
         <input {...getInputProps()} />
-        <Upload className="mx-auto w-8 h-8 text-gray-400 mb-3" />
-        <p className="text-gray-600 font-medium">{t("upload.drag")}</p>
-        <p className="text-sm text-gray-400 mt-1">
+        <Upload className="mx-auto w-8 h-8 text-ink-soft mb-3" />
+        <p className="text-ink-soft font-medium">{t("upload.drag")}</p>
+        <p className="text-sm text-ink-soft mt-1">
           {t("upload.or")}{" "}
-          <span className="text-primary-600 font-medium">{t("upload.browse")}</span>
+          <span className="text-brand font-medium">{t("upload.browse")}</span>
         </p>
-        <p className="text-xs text-gray-400 mt-2">
+        <p className="text-xs text-ink-soft mt-2">
           {t("upload.pdfOnly")} · {t("upload.maxSize")}
         </p>
       </div>
@@ -177,20 +177,20 @@ export default function DocumentUploader({ onUploadComplete }: Props) {
           {files.map((f, i) => (
             <li
               key={i}
-              className="flex items-center gap-3 bg-white border border-gray-200 rounded-lg px-4 py-3"
+              className="flex items-center gap-3 bg-surface-card border border-edge-soft rounded-lg px-4 py-3"
             >
               <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium text-gray-800 truncate">{f.file.name}</p>
+                <p className="text-sm font-medium text-ink truncate">{f.file.name}</p>
 
                 {f.status === "uploading" && (
                   <div className="mt-1.5">
-                    <div className="h-1.5 bg-gray-200 rounded-full overflow-hidden">
+                    <div className="h-1.5 bg-surface-hover rounded-full overflow-hidden">
                       <div
-                        className="h-full bg-primary-500 rounded-full transition-all"
+                        className="h-full bg-brand-accent rounded-full transition-all"
                         style={{ width: `${f.progress}%` }}
                       />
                     </div>
-                    <p className="text-xs text-gray-400 mt-1">{f.progress}%</p>
+                    <p className="text-xs text-ink-soft mt-1">{f.progress}%</p>
                   </div>
                 )}
 
@@ -201,13 +201,13 @@ export default function DocumentUploader({ onUploadComplete }: Props) {
                 )}
 
                 {f.status === "error" && (
-                  <p className="text-xs text-red-600 mt-1">{f.error}</p>
+                  <p className="text-xs text-danger-fg mt-1">{f.error}</p>
                 )}
               </div>
 
               <div className="flex-shrink-0">
                 {f.status === "uploading" && (
-                  <Loader2 className="w-4 h-4 text-primary-500 animate-spin" />
+                  <Loader2 className="w-4 h-4 text-brand-accent animate-spin" />
                 )}
                 {f.status === "done" && (
                   <CheckCircle className="w-4 h-4 text-green-500" />

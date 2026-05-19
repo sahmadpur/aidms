@@ -3,14 +3,222 @@
 @tailwind utilities;
 
 @layer base {
+  :root,
+  [data-theme="light"] {
+    /* Brand — accents, nav text */
+    --brand: 45 80 22;            /* #2d5016 */
+    --brand-hover: 58 107 30;     /* #3a6b1e */
+    --brand-deep: 28 51 13;       /* #1c330d */
+    --brand-accent: 125 181 66;   /* #7db542 */
+    --brand-light: 197 228 154;   /* #c5e49a */
+    --brand-pale: 232 245 208;    /* #e8f5d0 */
+    --brand-chip: 74 140 28;      /* #4a8c1c */
+
+    /* Paper — auth / cream chrome */
+    --paper: 246 240 223;         /* #f6f0df */
+    --paper-dim: 235 227 202;     /* #ebe3ca */
+    --paper-edge: 217 207 176;    /* #d9cfb0 */
+
+    /* Ink — body text */
+    --ink: 27 32 27;              /* #1b201b */
+    --ink-soft: 74 84 74;         /* #4a544a */
+
+    /* Surface scale */
+    --surface: 244 246 243;       /* #f4f6f3 page bg */
+    --surface-card: 255 255 255;
+    --surface-hover: 247 251 240; /* #f7fbf0 */
+    --surface-thead: 240 247 232; /* #f0f7e8 */
+    --surface-chip-active: 234 243 222; /* #eaf3de */
+
+    /* Edges */
+    --edge-soft: 221 232 208;     /* #dde8d0 */
+    --edge-chip: 200 221 176;     /* #c8ddb0 */
+    --edge-focus: 74 140 28;      /* #4a8c1c */
+
+    /* Status dots */
+    --dot-done: 99 153 34;
+    --dot-progress: 239 159 39;
+    --dot-pending: 170 170 170;
+    --dot-failed: 201 73 73;
+
+    /* Approval (was bare Tailwind named colors) */
+    --approval-pending-bg: 255 251 235;
+    --approval-pending-fg: 180 83 9;
+    --approval-pending-edge: 253 230 138;
+    --approval-approved-bg: 236 253 245;
+    --approval-approved-fg: 4 120 87;
+    --approval-approved-edge: 167 243 208;
+    --approval-rejected-bg: 255 241 242;
+    --approval-rejected-fg: 159 18 57;
+    --approval-rejected-edge: 254 205 211;
+    --approval-revision-bg: 240 249 255;
+    --approval-revision-fg: 3 105 161;
+    --approval-revision-edge: 186 230 253;
+
+    /* Doc-type badges */
+    --badge-contract-bg: 230 241 251; --badge-contract-fg: 24 95 165;
+    --badge-invoice-bg: 250 238 218;  --badge-invoice-fg: 133 79 11;
+    --badge-report-bg: 234 243 222;   --badge-report-fg: 59 109 17;
+    --badge-letter-bg: 251 234 240;   --badge-letter-fg: 153 53 86;
+    --badge-permit-bg: 238 237 254;   --badge-permit-fg: 83 74 183;
+    --badge-other-bg: 241 241 241;    --badge-other-fg: 85 85 85;
+
+    /* Destructive button chrome */
+    --danger-bg: 253 241 241;
+    --danger-fg: 201 73 73;
+    --danger-edge: 224 180 180;
+
+    /* @mention row highlight */
+    --mention-row-bg: 251 251 239;
+
+    /* Sidebar — its own tokens so it's not coupled to brand inversion */
+    --sidebar-bg: 45 80 22;       /* dark forest green (same as light brand) */
+    --sidebar-fg: 232 245 208;    /* cream — high-emphasis text on sidebar */
+    --sidebar-fg-soft: 197 228 154; /* soft sage-cream — inactive nav */
+    --sidebar-chip: 74 140 28;    /* avatar bg */
+
+    /* Page default text */
+    --text-default: 26 26 26;
+  }
+
+  [data-theme="dark"] {
+    /* ----------------------------------------------------------------
+     * Dark theme — neutral cool slate surfaces, refined sage primary,
+     * crisp cream-white text. The sage is a muted echo of the light
+     * theme's #2d5016 / #7db542 — same family, restrained for dark
+     * surfaces so it doesn't overwhelm when used widely.
+     *
+     * Inversion: in light mode --brand is dark and --brand-pale is
+     * light (dark text on white, light text on dark button). In dark
+     * mode that flips — --brand is light (links read on dark surfaces)
+     * and --brand-pale is dark (text-on-brand-button stays readable).
+     * ---------------------------------------------------------------- */
+
+    /* Primary — refined sage-green (muted echo of light theme's green) */
+    --brand: 145 188 160;         /* #91bca0 — calm sage, AA on dark surfaces */
+    --brand-hover: 165 205 180;   /* #a5cdb4 lifted */
+    --brand-deep: 220 232 224;    /* #dce8e0 near-white sage for headers */
+    --brand-accent: 145 188 160;
+    --brand-light: 204 224 210;   /* #cce0d2 soft sage */
+    --brand-pale: 18 28 22;       /* #121c16 — DARK forest, text on bg-brand */
+    --brand-chip: 78 112 92;      /* #4e705c medium-dark sage container */
+
+    /* Paper — deeper than page, for sidebar/chrome */
+    --paper: 17 22 28;            /* #11161c */
+    --paper-dim: 13 17 22;        /* #0d1116 */
+    --paper-edge: 38 46 56;       /* #262e38 */
+
+    /* Ink — crisp cream-white text */
+    --ink: 232 234 230;           /* #e8eae6 near-white, slight warmth */
+    --ink-soft: 152 160 170;      /* #98a0aa cool gray secondary */
+
+    /* Surface tonal elevation — neutral cool slate, no warm tint */
+    --surface: 14 18 24;             /* #0e1218 page bg */
+    --surface-card: 22 28 36;        /* #161c24 cards / tables / inputs */
+    --surface-hover: 32 40 50;       /* #202832 elevated / row hover */
+    --surface-thead: 18 23 30;       /* #12171e table head */
+    --surface-chip-active: 38 56 46; /* #26382e subtle sage tint — active filter */
+
+    /* Edges — split for hierarchy */
+    --edge-soft: 36 43 53;        /* #242b35 subtle dividers */
+    --edge-chip: 68 78 92;        /* #444e5c visible input/btn borders */
+    --edge-focus: 145 188 160;    /* sage focus ring */
+
+    /* Status dots — semantic, dark-tuned */
+    --dot-done: 145 200 158;      /* #91c89e sage */
+    --dot-progress: 230 178 110;  /* #e6b26e amber */
+    --dot-pending: 132 140 154;   /* #848c9a cool gray */
+    --dot-failed: 232 134 130;    /* #e88682 coral */
+
+    /* Approval — M3 container / on-container pairings */
+    --approval-pending-bg: 60 46 18;    --approval-pending-fg: 244 212 138;  --approval-pending-edge: 110 86 36;
+    --approval-approved-bg: 24 50 32;   --approval-approved-fg: 162 220 178; --approval-approved-edge: 48 90 64;
+    --approval-rejected-bg: 70 26 28;   --approval-rejected-fg: 252 168 162; --approval-rejected-edge: 130 56 56;
+    --approval-revision-bg: 18 44 60;   --approval-revision-fg: 140 200 230; --approval-revision-edge: 44 84 110;
+
+    /* Doc-type badges — dark container / soft on-container per hue */
+    --badge-contract-bg: 24 42 72;   --badge-contract-fg: 158 192 240;
+    --badge-invoice-bg: 64 46 18;    --badge-invoice-fg: 240 198 130;
+    --badge-report-bg: 32 56 32;     --badge-report-fg: 170 218 162;
+    --badge-letter-bg: 70 28 50;     --badge-letter-fg: 244 180 208;
+    --badge-permit-bg: 36 36 68;     --badge-permit-fg: 188 184 236;
+    --badge-other-bg: 50 56 64;      --badge-other-fg: 196 200 210;
+
+    /* Destructive — warm coral on dark oxblood */
+    --danger-bg: 76 26 28;        /* #4c1a1c */
+    --danger-fg: 244 162 158;     /* #f4a29e */
+    --danger-edge: 128 54 54;     /* #803636 */
+
+    /* @mention row — subtle sage tint */
+    --mention-row-bg: 24 36 28;   /* #18241c */
+
+    /* Sidebar — deep forest-slate, always pairs with cream text */
+    --sidebar-bg: 14 22 18;       /* #0e1612 — distinct from page bg, hint of green */
+    --sidebar-fg: 232 234 230;    /* cream */
+    --sidebar-fg-soft: 168 190 178; /* muted sage-cream for inactive nav */
+    --sidebar-chip: 78 112 92;    /* medium-dark sage avatar bg */
+
+    --text-default: 232 234 230;
+  }
+
   html {
     font-family: Calibri, Aptos, "Segoe UI", Arial, sans-serif;
-    background: #f4f6f3;
-    color: #1a1a1a;
+    background: rgb(var(--surface));
+    color: rgb(var(--text-default));
   }
   body {
     min-height: 100vh;
   }
+
+  /* --------------------------------------------------------------------
+   * Dark-mode flip for Tailwind's named gray scale. Components widely
+   * use `text-gray-500/600/700/900` for body text — in light mode that
+   * goes darker as the number rises (so gray-900 = darkest text). In
+   * dark mode we want the inverse: gray-900 should be the BRIGHTEST
+   * text (primary body), gray-500 medium, gray-300/200 subtle. Without
+   * this, all that body text would render as near-black on dark.
+   *
+   * Similarly bg-gray-50/100/200 flip from "lifted-just-above-white"
+   * to "lifted-just-above-page-dark", and border-gray-* gain the
+   * minimum visibility they need on a dark surface.
+   * ------------------------------------------------------------------ */
+  [data-theme="dark"] .text-gray-50  { color: rgb(17 22 28 / var(--tw-text-opacity, 1)); }
+  [data-theme="dark"] .text-gray-100 { color: rgb(24 30 38 / var(--tw-text-opacity, 1)); }
+  [data-theme="dark"] .text-gray-200 { color: rgb(36 43 53 / var(--tw-text-opacity, 1)); }
+  [data-theme="dark"] .text-gray-300 { color: rgb(82 92 108 / var(--tw-text-opacity, 1)); }
+  [data-theme="dark"] .text-gray-400 { color: rgb(132 142 156 / var(--tw-text-opacity, 1)); }
+  [data-theme="dark"] .text-gray-500 { color: rgb(168 176 188 / var(--tw-text-opacity, 1)); }
+  [data-theme="dark"] .text-gray-600 { color: rgb(190 198 210 / var(--tw-text-opacity, 1)); }
+  [data-theme="dark"] .text-gray-700 { color: rgb(210 216 226 / var(--tw-text-opacity, 1)); }
+  [data-theme="dark"] .text-gray-800 { color: rgb(224 230 236 / var(--tw-text-opacity, 1)); }
+  [data-theme="dark"] .text-gray-900 { color: rgb(232 234 230 / var(--tw-text-opacity, 1)); }
+
+  [data-theme="dark"] .bg-gray-50  { background-color: rgb(22 28 36 / var(--tw-bg-opacity, 1)); }
+  [data-theme="dark"] .bg-gray-100 { background-color: rgb(28 34 42 / var(--tw-bg-opacity, 1)); }
+  [data-theme="dark"] .bg-gray-200 { background-color: rgb(36 43 53 / var(--tw-bg-opacity, 1)); }
+  [data-theme="dark"] .bg-gray-300 { background-color: rgb(58 66 78 / var(--tw-bg-opacity, 1)); }
+
+  [data-theme="dark"] .border-gray-100 { border-color: rgb(28 34 42 / var(--tw-border-opacity, 1)); }
+  [data-theme="dark"] .border-gray-200 { border-color: rgb(36 43 53 / var(--tw-border-opacity, 1)); }
+  [data-theme="dark"] .border-gray-300 { border-color: rgb(58 66 78 / var(--tw-border-opacity, 1)); }
+  [data-theme="dark"] .border-gray-400 { border-color: rgb(82 92 108 / var(--tw-border-opacity, 1)); }
+
+  [data-theme="dark"] .hover\:bg-gray-50:hover  { background-color: rgb(28 34 42); }
+  [data-theme="dark"] .hover\:bg-gray-100:hover { background-color: rgb(36 43 53); }
+  [data-theme="dark"] .hover\:text-gray-700:hover { color: rgb(210 216 226); }
+  [data-theme="dark"] .hover\:text-gray-800:hover { color: rgb(224 230 236); }
+  [data-theme="dark"] .hover\:text-gray-900:hover { color: rgb(232 234 230); }
+
+  /* Tailwind named-color flips for status colors used in components */
+  [data-theme="dark"] .text-red-500 { color: rgb(232 134 130); }
+  [data-theme="dark"] .text-red-600 { color: rgb(244 162 158); }
+  [data-theme="dark"] .text-green-500 { color: rgb(145 200 158); }
+  [data-theme="dark"] .text-green-700 { color: rgb(170 220 178); }
+  [data-theme="dark"] .bg-red-50 { background-color: rgb(64 22 22 / var(--tw-bg-opacity, 1)); }
+  [data-theme="dark"] .bg-green-100 { background-color: rgb(20 50 30 / var(--tw-bg-opacity, 1)); }
+  [data-theme="dark"] .bg-red-100 { background-color: rgb(70 26 28 / var(--tw-bg-opacity, 1)); }
+  [data-theme="dark"] .hover\:text-red-500:hover { color: rgb(232 134 130); }
+  [data-theme="dark"] .hover\:bg-red-50:hover { background-color: rgb(64 22 22); }
 }
 
 @layer utilities {

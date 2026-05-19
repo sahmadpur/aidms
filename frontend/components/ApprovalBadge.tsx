@@ -2,10 +2,10 @@ import { clsx } from "clsx";
 import type { ApprovalStatus } from "@/lib/types";
 
 const styles: Record<ApprovalStatus, string> = {
-  pending: "bg-amber-50 text-amber-700 border-amber-200",
-  approved: "bg-emerald-50 text-emerald-700 border-emerald-200",
-  rejected: "bg-rose-50 text-rose-700 border-rose-200",
-  revision_requested: "bg-sky-50 text-sky-700 border-sky-200",
+  pending: "bg-approval-pending-bg text-approval-pending-fg border-approval-pending-edge",
+  approved: "bg-approval-approved-bg text-approval-approved-fg border-approval-approved-edge",
+  rejected: "bg-approval-rejected-bg text-approval-rejected-fg border-approval-rejected-edge",
+  revision_requested: "bg-approval-revision-bg text-approval-revision-fg border-approval-revision-edge",
 };
 
 export function ApprovalBadge({

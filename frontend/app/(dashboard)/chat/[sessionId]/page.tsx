@@ -60,7 +60,7 @@ export default function ChatSessionPage() {
           <div className="p-3 border-b border-edge-soft">
             <button
               onClick={() => router.push("/chat")}
-              className="w-full flex items-center justify-center gap-2 text-sm py-1.5 bg-surface-chipActive text-[#3b6d11] rounded-[6px] hover:bg-[#dcebc4] font-medium"
+              className="w-full flex items-center justify-center gap-2 text-sm py-1.5 bg-surface-chipActive text-brand-deep rounded-[6px] hover:bg-brand-pale font-medium"
             >
               <Plus className="w-3.5 h-3.5" />
               {t("newChat")}
@@ -76,8 +76,8 @@ export default function ChatSessionPage() {
                 }`}
               >
                 <div className="flex items-center gap-2 min-w-0">
-                  <MessageSquare className={`w-3.5 h-3.5 flex-shrink-0 ${s.id === sessionId ? "text-[#3b6d11]" : "text-gray-400"}`} />
-                  <span className={`text-xs truncate ${s.id === sessionId ? "text-[#3b6d11] font-medium" : "text-gray-700"}`}>
+                  <MessageSquare className={`w-3.5 h-3.5 flex-shrink-0 ${s.id === sessionId ? "text-brand-deep" : "text-ink-soft"}`} />
+                  <span className={`text-xs truncate ${s.id === sessionId ? "text-brand-deep font-medium" : "text-ink"}`}>
                     {s.title}
                   </span>
                 </div>

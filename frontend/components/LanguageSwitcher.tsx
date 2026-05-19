@@ -19,7 +19,7 @@ export default function LanguageSwitcher() {
   }
 
   return (
-    <div className="inline-flex items-center gap-0 border border-edge-chip rounded-full p-[2px] bg-white">
+    <div className="inline-flex items-center gap-0 border border-edge-chip rounded-full p-[2px] bg-surface-card">
       {LOCALES.map(({ value, label }) => (
         <button
           key={value}

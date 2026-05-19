@@ -27,7 +27,7 @@ export default function SearchBar({ onSearch, loading }: Props) {
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           placeholder={t("search.placeholder")}
-          className="w-full pl-10 pr-4 py-2 border border-edge-chip rounded-[6px] text-[13px] bg-surface-hover outline-none focus:border-edge-focus focus:bg-white"
+          className="w-full pl-10 pr-4 py-2 border border-edge-chip rounded-[6px] text-[13px] bg-surface-hover outline-none focus:border-edge-focus focus:bg-surface-card"
         />
       </div>
       <button

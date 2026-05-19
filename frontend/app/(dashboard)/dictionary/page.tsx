@@ -95,7 +95,7 @@ export default function DictionaryPage() {
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder={t("dictionary.search")}
-            className="w-full pl-8 pr-3 py-1.5 border border-edge-chip rounded-[6px] text-[12px] bg-white outline-none focus:border-edge-focus"
+            className="w-full pl-8 pr-3 py-1.5 border border-edge-chip rounded-[6px] text-[12px] bg-surface-card outline-none focus:border-edge-focus"
           />
         </div>
       </TopBar>
@@ -139,7 +139,7 @@ export default function DictionaryPage() {
                       <span className="text-[13.5px] font-semibold text-gray-900">
                         {main.term}
                       </span>
-                      <span className="inline-block px-1.5 py-0.5 rounded bg-surface-chipActive text-[#3b6d11] text-[10px] font-medium">
+                      <span className="inline-block px-1.5 py-0.5 rounded bg-surface-chipActive text-brand-deep text-[10px] font-medium">
                         {scopeLabel(e.scope)}
                       </span>
                     </div>

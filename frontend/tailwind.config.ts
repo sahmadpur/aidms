@@ -1,62 +1,95 @@
 import type { Config } from "tailwindcss";
 
+const rgb = (v: string) => `rgb(var(${v}) / <alpha-value>)`;
+
 const config: Config = {
   content: [
     "./app/**/*.{js,ts,jsx,tsx,mdx}",
     "./components/**/*.{js,ts,jsx,tsx,mdx}",
   ],
+  darkMode: ["class", "[data-theme='dark']"],
   theme: {
     extend: {
       colors: {
         brand: {
-          DEFAULT: "#2d5016", // sidebar bg
-          hover: "#3a6b1e",
-          deep: "#1c330d", // darker than DEFAULT, for editorial panels
-          accent: "#7db542", // active marker / section headings
-          light: "#c5e49a", // nav label
-          pale: "#e8f5d0", // logo / active nav text
-          chip: "#4a8c1c", // user-avatar bg
+          DEFAULT: rgb("--brand"),
+          hover: rgb("--brand-hover"),
+          deep: rgb("--brand-deep"),
+          accent: rgb("--brand-accent"),
+          light: rgb("--brand-light"),
+          pale: rgb("--brand-pale"),
+          chip: rgb("--brand-chip"),
         },
         paper: {
-          DEFAULT: "#f6f0df", // warm cream auth background
-          dim: "#ebe3ca",     // slightly darker cream for subtle contrast
-          edge: "#d9cfb0",    // paper-toned hairline border
+          DEFAULT: rgb("--paper"),
+          dim: rgb("--paper-dim"),
+          edge: rgb("--paper-edge"),
         },
         ink: {
-          DEFAULT: "#1b201b", // near black with green tint
-          soft: "#4a544a",    // secondary ink
+          DEFAULT: rgb("--ink"),
+          soft: rgb("--ink-soft"),
         },
         surface: {
-          DEFAULT: "#f4f6f3", // page background
-          card: "#ffffff",
-          hover: "#f7fbf0", // table row hover / subtle btn hover
-          thead: "#f0f7e8", // table head
-          chipActive: "#eaf3de", // active filter chip
+          DEFAULT: rgb("--surface"),
+          card: rgb("--surface-card"),
+          hover: rgb("--surface-hover"),
+          thead: rgb("--surface-thead"),
+          chipActive: rgb("--surface-chip-active"),
         },
         edge: {
-          soft: "#dde8d0", // top bar + table border
-          chip: "#c8ddb0", // input + btn border
-          focus: "#4a8c1c", // focus outline
+          soft: rgb("--edge-soft"),
+          chip: rgb("--edge-chip"),
+          focus: rgb("--edge-focus"),
         },
         badge: {
-          contract: { bg: "#e6f1fb", fg: "#185fa5" },
-          invoice: { bg: "#faeeda", fg: "#854f0b" },
-          report: { bg: "#eaf3de", fg: "#3b6d11" },
-          letter: { bg: "#fbeaf0", fg: "#993556" },
-          permit: { bg: "#eeedfe", fg: "#534ab7" },
-          other: { bg: "#f1f1f1", fg: "#555555" },
+          contract: { bg: rgb("--badge-contract-bg"), fg: rgb("--badge-contract-fg") },
+          invoice: { bg: rgb("--badge-invoice-bg"), fg: rgb("--badge-invoice-fg") },
+          report: { bg: rgb("--badge-report-bg"), fg: rgb("--badge-report-fg") },
+          letter: { bg: rgb("--badge-letter-bg"), fg: rgb("--badge-letter-fg") },
+          permit: { bg: rgb("--badge-permit-bg"), fg: rgb("--badge-permit-fg") },
+          other: { bg: rgb("--badge-other-bg"), fg: rgb("--badge-other-fg") },
+        },
+        approval: {
+          pending: {
+            bg: rgb("--approval-pending-bg"),
+            fg: rgb("--approval-pending-fg"),
+            edge: rgb("--approval-pending-edge"),
+          },
+          approved: {
+            bg: rgb("--approval-approved-bg"),
+            fg: rgb("--approval-approved-fg"),
+            edge: rgb("--approval-approved-edge"),
+          },
+          rejected: {
+            bg: rgb("--approval-rejected-bg"),
+            fg: rgb("--approval-rejected-fg"),
+            edge: rgb("--approval-rejected-edge"),
+          },
+          revision: {
+            bg: rgb("--approval-revision-bg"),
+            fg: rgb("--approval-revision-fg"),
+            edge: rgb("--approval-revision-edge"),
+          },
+        },
+        danger: {
+          bg: rgb("--danger-bg"),
+          fg: rgb("--danger-fg"),
+          edge: rgb("--danger-edge"),
         },
         dot: {
-          done: "#639922",
-          progress: "#ef9f27",
-          pending: "#aaaaaa",
-          failed: "#c94949",
+          done: rgb("--dot-done"),
+          progress: rgb("--dot-progress"),
+          pending: rgb("--dot-pending"),
+          failed: rgb("--dot-failed"),
         },
-        primary: {
-          50: "#eff6ff",
-          500: "#3b82f6",
-          600: "#2563eb",
-          700: "#1d4ed8",
+        mention: {
+          row: rgb("--mention-row-bg"),
+        },
+        sidebar: {
+          DEFAULT: rgb("--sidebar-bg"),
+          fg: rgb("--sidebar-fg"),
+          fgSoft: rgb("--sidebar-fg-soft"),
+          chip: rgb("--sidebar-chip"),
         },
       },
       fontFamily: {

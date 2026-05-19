@@ -196,7 +196,7 @@ export default function AdminDictionaryPage() {
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder={t("dictionary.search")}
-            className="w-full pl-8 pr-3 py-1.5 border border-edge-chip rounded-[6px] text-[12px] bg-white outline-none focus:border-edge-focus"
+            className="w-full pl-8 pr-3 py-1.5 border border-edge-chip rounded-[6px] text-[12px] bg-surface-card outline-none focus:border-edge-focus"
           />
         </div>
         <TopBarButton onClick={() => setShowScopesModal(true)}>
@@ -241,7 +241,7 @@ export default function AdminDictionaryPage() {
                     <span className="text-[13px] font-medium text-gray-900">
                       {e.term_en}
                     </span>
-                    <span className="inline-block px-1.5 py-0.5 rounded bg-surface-chipActive text-[#3b6d11] text-[10px] font-medium">
+                    <span className="inline-block px-1.5 py-0.5 rounded bg-surface-chipActive text-brand-deep text-[10px] font-medium">
                       {scopeLabel(e.scope)}
                     </span>
                   </div>
@@ -293,7 +293,7 @@ export default function AdminDictionaryPage() {
                 <select
                   value={form.scope}
                   onChange={(e) => setForm({ ...form, scope: e.target.value })}
-                  className="w-full px-2.5 py-1.5 border border-edge-chip rounded-[5px] text-[13px] bg-surface-hover outline-none focus:border-edge-focus focus:bg-white"
+                  className="w-full px-2.5 py-1.5 border border-edge-chip rounded-[5px] text-[13px] bg-surface-hover outline-none focus:border-edge-focus focus:bg-surface-card"
                 >
                   {scopes.length === 0 && (
                     <option value={form.scope}>{form.scope}</option>
@@ -316,7 +316,7 @@ export default function AdminDictionaryPage() {
                       required
                       value={form[field]}
                       onChange={(e) => setForm({ ...form, [field]: e.target.value })}
-                      className="w-full px-2.5 py-1.5 border border-edge-chip rounded-[5px] text-[13px] bg-surface-hover outline-none focus:border-edge-focus focus:bg-white"
+                      className="w-full px-2.5 py-1.5 border border-edge-chip rounded-[5px] text-[13px] bg-surface-hover outline-none focus:border-edge-focus focus:bg-surface-card"
                     />
                   </label>
                 ))}
@@ -332,7 +332,7 @@ export default function AdminDictionaryPage() {
                     rows={3}
                     value={form[field]}
                     onChange={(e) => setForm({ ...form, [field]: e.target.value })}
-                    className="w-full px-2.5 py-1.5 border border-edge-chip rounded-[5px] text-[13px] bg-surface-hover outline-none focus:border-edge-focus focus:bg-white resize-y"
+                    className="w-full px-2.5 py-1.5 border border-edge-chip rounded-[5px] text-[13px] bg-surface-hover outline-none focus:border-edge-focus focus:bg-surface-card resize-y"
                   />
                 </label>
               ))}
@@ -341,7 +341,7 @@ export default function AdminDictionaryPage() {
               <button
                 type="button"
                 onClick={() => setShowModal(false)}
-                className="px-3.5 py-1.5 text-[12px] bg-white border border-edge-chip text-gray-700 rounded-[6px] hover:bg-gray-50"
+                className="px-3.5 py-1.5 text-[12px] bg-surface-card border border-edge-chip text-gray-700 rounded-[6px] hover:bg-gray-50"
               >
                 {t("common.cancel")}
               </button>
@@ -383,28 +383,28 @@ export default function AdminDictionaryPage() {
                     placeholder={t("dictionary.scopeKey")}
                     value={scopeForm.key}
                     onChange={(e) => setScopeForm({ ...scopeForm, key: e.target.value })}
-                    className="px-2.5 py-1.5 border border-edge-chip rounded-[5px] text-[12px] bg-white outline-none focus:border-edge-focus font-mono"
+                    className="px-2.5 py-1.5 border border-edge-chip rounded-[5px] text-[12px] bg-surface-card outline-none focus:border-edge-focus font-mono"
                   />
                   <input
                     required
                     placeholder={t("dictionary.scopeName_en")}
                     value={scopeForm.name_en}
                     onChange={(e) => setScopeForm({ ...scopeForm, name_en: e.target.value })}
-                    className="px-2.5 py-1.5 border border-edge-chip rounded-[5px] text-[12px] bg-white outline-none focus:border-edge-focus"
+                    className="px-2.5 py-1.5 border border-edge-chip rounded-[5px] text-[12px] bg-surface-card outline-none focus:border-edge-focus"
                   />
                   <input
                     required
                     placeholder={t("dictionary.scopeName_az")}
                     value={scopeForm.name_az}
                     onChange={(e) => setScopeForm({ ...scopeForm, name_az: e.target.value })}
-                    className="px-2.5 py-1.5 border border-edge-chip rounded-[5px] text-[12px] bg-white outline-none focus:border-edge-focus"
+                    className="px-2.5 py-1.5 border border-edge-chip rounded-[5px] text-[12px] bg-surface-card outline-none focus:border-edge-focus"
                   />
                   <input
                     required
                     placeholder={t("dictionary.scopeName_ru")}
                     value={scopeForm.name_ru}
                     onChange={(e) => setScopeForm({ ...scopeForm, name_ru: e.target.value })}
-                    className="px-2.5 py-1.5 border border-edge-chip rounded-[5px] text-[12px] bg-white outline-none focus:border-edge-focus"
+                    className="px-2.5 py-1.5 border border-edge-chip rounded-[5px] text-[12px] bg-surface-card outline-none focus:border-edge-focus"
                   />
                 </div>
                 <p className="text-[10px] text-gray-500">{t("dictionary.scopeKeyHint")}</p>
@@ -427,7 +427,7 @@ export default function AdminDictionaryPage() {
                 {scopes.map((s) => (
                   <li
                     key={s.id}
-                    className="flex items-center justify-between bg-white border border-edge-soft rounded-[6px] px-3 py-2"
+                    className="flex items-center justify-between bg-surface-card border border-edge-soft rounded-[6px] px-3 py-2"
                   >
                     <div className="min-w-0">
                       <div className="text-[12.5px] text-gray-900 font-medium">

@@ -166,7 +166,7 @@ export default function AdminDepartmentsPage() {
                     required
                     value={form[field]}
                     onChange={(e) => setForm({ ...form, [field]: e.target.value })}
-                    className="w-full px-2.5 py-1.5 border border-edge-chip rounded-[5px] text-[13px] bg-surface-hover outline-none focus:border-edge-focus focus:bg-white"
+                    className="w-full px-2.5 py-1.5 border border-edge-chip rounded-[5px] text-[13px] bg-surface-hover outline-none focus:border-edge-focus focus:bg-surface-card"
                   />
                 </label>
               ))}
@@ -174,7 +174,7 @@ export default function AdminDepartmentsPage() {
                 <span className="block text-[11px] font-medium text-gray-600 mb-1">
                   {t("departments.managers")}
                 </span>
-                <div className="border border-edge-chip rounded-[5px] max-h-[200px] overflow-y-auto bg-white">
+                <div className="border border-edge-chip rounded-[5px] max-h-[200px] overflow-y-auto bg-surface-card">
                   {users
                     .filter((u) => u.is_active)
                     .map((u) => (
@@ -203,7 +203,7 @@ export default function AdminDepartmentsPage() {
               <button
                 type="button"
                 onClick={() => setShowModal(false)}
-                className="px-3.5 py-1.5 text-[12px] bg-white border border-edge-chip text-gray-700 rounded-[6px] hover:bg-gray-50"
+                className="px-3.5 py-1.5 text-[12px] bg-surface-card border border-edge-chip text-gray-700 rounded-[6px] hover:bg-gray-50"
               >
                 {t("common.cancel")}
               </button>

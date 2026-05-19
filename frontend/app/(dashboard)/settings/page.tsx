@@ -97,7 +97,7 @@ export default function SettingsPage() {
               value={fullName}
               onChange={(e) => setFullName(e.target.value)}
               required
-              className="w-full px-2.5 py-1.5 border border-edge-chip rounded-[5px] text-[13px] bg-surface-hover outline-none focus:border-edge-focus focus:bg-white"
+              className="w-full px-2.5 py-1.5 border border-edge-chip rounded-[5px] text-[13px] bg-surface-hover outline-none focus:border-edge-focus focus:bg-surface-card"
             />
           </Field>
           <Field label={t("settings.language")}>
@@ -125,7 +125,7 @@ export default function SettingsPage() {
               t("settings.updateProfile")
             )}
           </button>
-          {profileMsg && <p className="text-[12px] text-[#3b6d11]">{profileMsg}</p>}
+          {profileMsg && <p className="text-[12px] text-brand-deep">{profileMsg}</p>}
         </form>
 
         {/* Password */}
@@ -137,7 +137,7 @@ export default function SettingsPage() {
               value={currentPw}
               onChange={(e) => setCurrentPw(e.target.value)}
               required
-              className="w-full px-2.5 py-1.5 border border-edge-chip rounded-[5px] text-[13px] bg-surface-hover outline-none focus:border-edge-focus focus:bg-white"
+              className="w-full px-2.5 py-1.5 border border-edge-chip rounded-[5px] text-[13px] bg-surface-hover outline-none focus:border-edge-focus focus:bg-surface-card"
             />
           </Field>
           <Field label={t("settings.newPassword")}>
@@ -147,7 +147,7 @@ export default function SettingsPage() {
               onChange={(e) => setNewPw(e.target.value)}
               required
               minLength={8}
-              className="w-full px-2.5 py-1.5 border border-edge-chip rounded-[5px] text-[13px] bg-surface-hover outline-none focus:border-edge-focus focus:bg-white"
+              className="w-full px-2.5 py-1.5 border border-edge-chip rounded-[5px] text-[13px] bg-surface-hover outline-none focus:border-edge-focus focus:bg-surface-card"
             />
           </Field>
           <button
@@ -164,7 +164,7 @@ export default function SettingsPage() {
               t("settings.changePassword")
             )}
           </button>
-          {pwMsg && <p className="text-[12px] text-[#3b6d11]">{pwMsg}</p>}
+          {pwMsg && <p className="text-[12px] text-brand-deep">{pwMsg}</p>}
           {pwErr && <p className="text-[12px] text-red-600">{pwErr}</p>}
         </form>
       </div>

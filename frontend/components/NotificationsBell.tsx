@@ -86,7 +86,7 @@ export default function NotificationsBell() {
       </button>
 
       {open && (
-        <div className="absolute right-0 mt-2 w-[340px] bg-white border border-edge-soft rounded-lg shadow-lg z-40">
+        <div className="absolute right-0 mt-2 w-[340px] bg-surface-card border border-edge-soft rounded-lg shadow-lg z-40">
           <div className="flex items-center justify-between px-3 py-2 border-b border-edge-soft">
             <span className="text-[13px] font-semibold text-brand">
               {t("notifications.title")}
@@ -94,7 +94,7 @@ export default function NotificationsBell() {
             {unread > 0 && (
               <button
                 onClick={markAllRead}
-                className="text-[11px] text-[#3b6d11] hover:underline flex items-center gap-1"
+                className="text-[11px] text-brand-deep hover:underline flex items-center gap-1"
               >
                 <Check className="w-3 h-3" />
                 {t("notifications.markAllRead")}
@@ -117,7 +117,7 @@ export default function NotificationsBell() {
                   key={n.id}
                   onClick={() => openNotification(n)}
                   className={`w-full text-left px-3 py-2 border-b border-edge-soft last:border-b-0 hover:bg-surface-hover ${
-                    n.is_read ? "" : "bg-[#f7fbf0]"
+                    n.is_read ? "" : "bg-surface-hover"
                   }`}
                 >
                   <p className="text-[12.5px] text-gray-800 leading-snug">

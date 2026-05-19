@@ -130,7 +130,7 @@ export default function AuditLogPage() {
       header: t("auditLog.action"),
       width: "180px",
       render: (r) => (
-        <span className="inline-block px-2 py-0.5 rounded bg-surface-chipActive text-[#3b6d11] text-[11px] font-medium">
+        <span className="inline-block px-2 py-0.5 rounded bg-surface-chipActive text-brand-deep text-[11px] font-medium">
           {r.action}
         </span>
       ),
@@ -211,7 +211,7 @@ export default function AuditLogPage() {
             <button
               disabled={page <= 1}
               onClick={() => setOffset(Math.max(0, offset - limit))}
-              className="px-2 py-0.5 rounded border border-edge-chip text-[#3b6d11] disabled:opacity-40 hover:bg-surface-chipActive"
+              className="px-2 py-0.5 rounded border border-edge-chip text-brand-deep disabled:opacity-40 hover:bg-surface-chipActive"
             >
               ‹ {t("common.prev")}
             </button>
@@ -221,7 +221,7 @@ export default function AuditLogPage() {
             <button
               disabled={page >= totalPages}
               onClick={() => setOffset(offset + limit)}
-              className="px-2 py-0.5 rounded border border-edge-chip text-[#3b6d11] disabled:opacity-40 hover:bg-surface-chipActive"
+              className="px-2 py-0.5 rounded border border-edge-chip text-brand-deep disabled:opacity-40 hover:bg-surface-chipActive"
             >
               {t("common.next")} ›
             </button>

@@ -187,7 +187,7 @@ export default function DocumentsPage() {
         render: (d) => (
           <Link
             href={`/documents/${d.id}`}
-            className="inline-block px-2 py-0.5 text-[11px] text-[#3b6d11] border border-edge-chip rounded hover:bg-surface-chipActive"
+            className="inline-block px-2 py-0.5 text-[11px] text-brand-deep border border-edge-chip rounded hover:bg-surface-chipActive"
           >
             {t("common.open")}
           </Link>
@@ -252,7 +252,7 @@ export default function DocumentsPage() {
             value={searchInput}
             onChange={(e) => handleSearchChange(e.target.value)}
             placeholder={t("documents.searchPlaceholder")}
-            className="w-full pl-8 pr-2.5 py-1.5 border border-edge-chip rounded-[6px] text-[13px] bg-surface-hover outline-none focus:border-edge-focus focus:bg-white"
+            className="w-full pl-8 pr-2.5 py-1.5 border border-edge-chip rounded-[6px] text-[13px] bg-surface-hover outline-none focus:border-edge-focus focus:bg-surface-card"
           />
         </div>
         <TopBarButton>
@@ -335,7 +335,7 @@ export default function DocumentsPage() {
         {inboxMode && (
           <>
             <FilterDivider />
-            <span className="text-[11px] text-[#3b6d11] italic">
+            <span className="text-[11px] text-brand-deep italic">
               {t("inbox.filterHint")}
             </span>
           </>
@@ -405,7 +405,7 @@ function PageBtn({
       className={`px-2 py-0.5 rounded border text-[11px] transition-colors disabled:opacity-40 ${
         active
           ? "bg-brand text-brand-pale border-brand"
-          : "bg-transparent text-[#3b6d11] border-edge-chip hover:bg-surface-chipActive"
+          : "bg-transparent text-brand-deep border-edge-chip hover:bg-surface-chipActive"
       }`}
     >
       {children}

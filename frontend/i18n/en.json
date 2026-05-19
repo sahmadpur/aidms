@@ -1,4 +1,11 @@
 {
+  "theme": {
+    "label": "Theme",
+    "light": "Light",
+    "dark": "Dark",
+    "system": "System",
+    "tooltip": "Theme: {current} (click to switch)"
+  },
   "nav": {
     "library": "Library",
     "manage": "Manage",

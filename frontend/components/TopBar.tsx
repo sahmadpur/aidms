@@ -1,10 +1,14 @@
 import { ReactNode } from "react";
 import { clsx } from "clsx";
+import { ThemeToggle } from "@/components/theme/ThemeToggle";
 
 export function TopBar({ children }: { children: ReactNode }) {
   return (
     <div className="bg-surface-card border-b border-edge-soft px-[22px] py-2.5 flex items-center gap-2.5">
       {children}
+      <div className="ml-auto flex items-center gap-2.5">
+        <ThemeToggle />
+      </div>
     </div>
   );
 }
@@ -39,7 +43,7 @@ export function TopBarButton({
         "px-3.5 py-1.5 rounded-[6px] text-[12px] flex items-center gap-1.5 whitespace-nowrap transition-colors disabled:opacity-50",
         variant === "primary"
           ? "bg-brand text-brand-pale border border-brand hover:bg-brand-hover"
-          : "bg-white text-brand border border-edge-chip hover:bg-[#f0f7e6]"
+          : "bg-surface-card text-brand border border-edge-chip hover:bg-surface-chipActive"
       )}
     >
       {children}

@@ -19,8 +19,8 @@ export function FilterChip({
       className={clsx(
         "inline-flex items-center px-2.5 py-[3px] rounded-[20px] text-[11px] border whitespace-nowrap transition-colors",
         active
-          ? "bg-surface-chipActive text-[#3b6d11] border-[#b8d98a]"
-          : "bg-surface text-gray-600 border-gray-300 hover:border-brand-accent"
+          ? "bg-surface-chipActive text-brand-deep border-edge-chip"
+          : "bg-surface text-ink-soft border-edge-soft hover:border-brand-accent"
       )}
     >
       {children}
@@ -41,7 +41,7 @@ export function FilterSelect({
     <select
       value={value}
       onChange={(e) => onChange(e.target.value)}
-      className="px-2 py-1 border border-edge-chip rounded-[5px] text-[12px] bg-surface-hover text-gray-900 outline-none focus:border-edge-focus cursor-pointer"
+      className="px-2 py-1 border border-edge-chip rounded-[5px] text-[12px] bg-surface-hover text-ink outline-none focus:border-edge-focus cursor-pointer"
     >
       {children}
     </select>
@@ -49,7 +49,7 @@ export function FilterSelect({
 }
 
 export function FilterLabel({ children }: { children: ReactNode }) {
-  return <span className="text-[11px] text-gray-600 whitespace-nowrap">{children}</span>;
+  return <span className="text-[11px] text-ink-soft whitespace-nowrap">{children}</span>;
 }
 
 export function FilterDivider() {

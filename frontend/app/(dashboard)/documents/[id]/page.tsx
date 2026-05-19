@@ -184,7 +184,7 @@ export default function DocumentDetailPage() {
             {canWrite && doc.ocr_status !== "completed" && doc.ocr_status !== "processing" && (
               <button
                 onClick={handleReprocess}
-                className="px-3 py-1.5 text-[12px] bg-white border border-edge-chip text-brand rounded-[6px] hover:bg-[#f0f7e6] inline-flex items-center gap-1.5"
+                className="px-3 py-1.5 text-[12px] bg-surface-card border border-edge-chip text-brand rounded-[6px] hover:bg-surface-chipActive inline-flex items-center gap-1.5"
               >
                 <RefreshCw className="w-3 h-3" />
                 {t("documents.reprocess")}
@@ -200,7 +200,7 @@ export default function DocumentDetailPage() {
                 </button>
                 <button
                   onClick={() => { setEditing(false); setForm(null); }}
-                  className="px-3 py-1.5 text-[12px] bg-white border border-edge-chip text-gray-700 rounded-[6px] hover:bg-gray-50"
+                  className="px-3 py-1.5 text-[12px] bg-surface-card border border-edge-chip text-ink rounded-[6px] hover:bg-surface-hover"
                 >
                   {t("common.cancel")}
                 </button>
@@ -220,14 +220,14 @@ export default function DocumentDetailPage() {
                     });
                     setEditing(true);
                   }}
-                  className="px-3 py-1.5 text-[12px] bg-white border border-edge-chip text-brand rounded-[6px] hover:bg-[#f0f7e6]"
+                  className="px-3 py-1.5 text-[12px] bg-surface-card border border-edge-chip text-brand rounded-[6px] hover:bg-surface-chipActive"
                 >
                   {t("documents.edit")}
                 </button>
                 <button
                   onClick={handleDelete}
                   disabled={deleting}
-                  className="px-3 py-1.5 text-[12px] bg-white border border-[#e0b4b4] text-[#c94949] rounded-[6px] hover:bg-[#fdf1f1] inline-flex items-center gap-1.5 disabled:opacity-50"
+                  className="px-3 py-1.5 text-[12px] bg-surface-card border border-danger-edge text-danger-fg rounded-[6px] hover:bg-danger-bg inline-flex items-center gap-1.5 disabled:opacity-50"
                 >
                   <Trash2 className="w-3 h-3" />
                   {t("documents.delete")}

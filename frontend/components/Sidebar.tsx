@@ -96,8 +96,8 @@ function NavLink({ item, active, label }: { item: NavItem; active: boolean; labe
       className={clsx(
         "flex items-center gap-2.5 py-2.5 px-[18px] text-[13px] border-l-[3px] transition-colors select-none",
         active
-          ? "bg-white/[0.13] text-brand-pale border-brand-accent"
-          : "text-brand-light border-transparent hover:bg-white/[0.07]"
+          ? "bg-white/[0.13] text-sidebar-fg border-brand-accent"
+          : "text-sidebar-fgSoft border-transparent hover:bg-white/[0.07]"
       )}
     >
       <Icon className="w-[15px] h-[15px] opacity-85 flex-shrink-0" />
@@ -136,9 +136,9 @@ export default function Sidebar() {
       : null;
 
   return (
-    <aside className="w-[210px] min-w-[210px] flex-shrink-0 bg-brand flex flex-col h-screen sticky top-0">
+    <aside className="w-[210px] min-w-[210px] flex-shrink-0 bg-sidebar flex flex-col h-screen sticky top-0">
       <div className="px-[18px] py-5 border-b border-white/10">
-        <span className="text-base font-semibold text-brand-pale tracking-[0.3px]">
+        <span className="text-base font-semibold text-sidebar-fg tracking-[0.3px]">
           DocArchive
         </span>
         <sup className="text-[10px] text-brand-accent ml-[3px]">AI</sup>
@@ -165,7 +165,7 @@ export default function Sidebar() {
         ))}
         <button
           onClick={handleLogout}
-          className="w-full flex items-center gap-2.5 py-2.5 px-[18px] text-[13px] border-l-[3px] border-transparent text-brand-light hover:bg-white/[0.07] transition-colors text-left"
+          className="w-full flex items-center gap-2.5 py-2.5 px-[18px] text-[13px] border-l-[3px] border-transparent text-sidebar-fgSoft hover:bg-white/[0.07] transition-colors text-left"
         >
           <LogOut className="w-[15px] h-[15px] opacity-85 flex-shrink-0" />
           <span className="truncate">{t("logout")}</span>
@@ -175,11 +175,11 @@ export default function Sidebar() {
       <div className="px-[18px] py-3.5 border-t border-white/10">
         {me ? (
           <div className="flex items-center gap-2.5">
-            <div className="w-[30px] h-[30px] rounded-full bg-brand-chip flex items-center justify-center text-[11px] font-semibold text-brand-pale flex-shrink-0">
+            <div className="w-[30px] h-[30px] rounded-full bg-sidebar-chip flex items-center justify-center text-[11px] font-semibold text-sidebar-fg flex-shrink-0">
               {initials(me.full_name)}
             </div>
             <div className="min-w-0">
-              <div className="text-[12px] text-brand-light font-medium truncate">{me.full_name}</div>
+              <div className="text-[12px] text-sidebar-fgSoft font-medium truncate">{me.full_name}</div>
               <div className="text-[10px] text-brand-accent mt-[1px] truncate">
                 {tRoles(me.role)}
               </div>

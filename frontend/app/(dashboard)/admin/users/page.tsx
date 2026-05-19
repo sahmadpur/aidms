@@ -391,7 +391,7 @@ export default function AdminUsersPage() {
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             placeholder={t("admin.searchPlaceholder")}
-            className="pl-7 pr-2.5 py-1 text-[12px] border border-edge-chip rounded-[5px] bg-surface-hover focus:outline-none focus:border-edge-focus focus:bg-white w-[220px]"
+            className="pl-7 pr-2.5 py-1 text-[12px] border border-edge-chip rounded-[5px] bg-surface-hover focus:outline-none focus:border-edge-focus focus:bg-surface-card w-[220px]"
           />
         </div>
         <TopBarButton variant="primary" onClick={openCreate}>
@@ -497,7 +497,7 @@ export default function AdminUsersPage() {
                 <span className="block text-[11px] font-medium text-gray-600 mb-1">
                   {t("admin.assignedDepartments")}
                 </span>
-                <div className="border border-edge-chip rounded-[5px] max-h-[220px] overflow-y-auto bg-white divide-y divide-edge-soft">
+                <div className="border border-edge-chip rounded-[5px] max-h-[220px] overflow-y-auto bg-surface-card divide-y divide-edge-soft">
                   {departments.length === 0 && (
                     <div className="px-2.5 py-2 text-[11px] text-gray-400 italic">
                       {t("departments.empty") || "—"}
@@ -554,7 +554,7 @@ export default function AdminUsersPage() {
               <button
                 type="button"
                 onClick={close}
-                className="px-3.5 py-1.5 text-[12px] bg-white border border-edge-chip text-gray-700 rounded-[6px] hover:bg-gray-50"
+                className="px-3.5 py-1.5 text-[12px] bg-surface-card border border-edge-chip text-gray-700 rounded-[6px] hover:bg-gray-50"
               >
                 {t("common.cancel")}
               </button>
@@ -616,7 +616,7 @@ export default function AdminUsersPage() {
               <button
                 type="button"
                 onClick={close}
-                className="px-3.5 py-1.5 text-[12px] bg-white border border-edge-chip text-gray-700 rounded-[6px] hover:bg-gray-50"
+                className="px-3.5 py-1.5 text-[12px] bg-surface-card border border-edge-chip text-gray-700 rounded-[6px] hover:bg-gray-50"
               >
                 {t("common.cancel")}
               </button>
@@ -636,7 +636,7 @@ export default function AdminUsersPage() {
 }
 
 const inputCls =
-  "w-full px-2.5 py-1.5 border border-edge-chip rounded-[5px] text-[13px] bg-surface-hover outline-none focus:border-edge-focus focus:bg-white";
+  "w-full px-2.5 py-1.5 border border-edge-chip rounded-[5px] text-[13px] bg-surface-hover outline-none focus:border-edge-focus focus:bg-surface-card";
 
 function Field({
   label,

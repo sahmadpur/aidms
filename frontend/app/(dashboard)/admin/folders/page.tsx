@@ -75,7 +75,7 @@ export default function AdminFoldersPage() {
             {folders.map((f) => (
               <div
                 key={f.id}
-                className="flex items-center px-4 py-2.5 border-b border-[#eef3e8] last:border-b-0 hover:bg-surface-hover"
+                className="flex items-center px-4 py-2.5 border-b border-edge-soft last:border-b-0 hover:bg-surface-hover"
                 style={{ paddingLeft: 16 + (f.depth - 1) * 20 }}
               >
                 <Folder className="w-4 h-4 text-brand-accent flex-shrink-0" />
@@ -145,7 +145,7 @@ export default function AdminFoldersPage() {
                       if (editing) setEditing({ ...editing, [field]: e.target.value } as FolderNode);
                       else setForm({ ...form, [field]: e.target.value });
                     }}
-                    className="w-full px-2.5 py-1.5 border border-edge-chip rounded-[5px] text-[13px] bg-surface-hover outline-none focus:border-edge-focus focus:bg-white"
+                    className="w-full px-2.5 py-1.5 border border-edge-chip rounded-[5px] text-[13px] bg-surface-hover outline-none focus:border-edge-focus focus:bg-surface-card"
                   />
                 </Field>
               ))}
@@ -154,7 +154,7 @@ export default function AdminFoldersPage() {
               <button
                 type="button"
                 onClick={() => { setShowCreate(false); setEditing(null); }}
-                className="px-3.5 py-1.5 text-[12px] bg-white border border-edge-chip text-gray-700 rounded-[6px] hover:bg-gray-50"
+                className="px-3.5 py-1.5 text-[12px] bg-surface-card border border-edge-chip text-gray-700 rounded-[6px] hover:bg-gray-50"
               >
                 {t("common.cancel")}
               </button>

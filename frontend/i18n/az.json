@@ -1,4 +1,11 @@
 {
+  "theme": {
+    "label": "Mövzu",
+    "light": "İşıqlı",
+    "dark": "Tünd",
+    "system": "Sistem",
+    "tooltip": "Mövzu: {current} (dəyişdirmək üçün vurun)"
+  },
   "nav": {
     "library": "Kitabxana",
     "manage": "İdarəetmə",

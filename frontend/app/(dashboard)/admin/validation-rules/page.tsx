@@ -364,7 +364,7 @@ export default function AdminValidationRulesPage() {
                   required
                   value={form.name}
                   onChange={(e) => setForm({ ...form, name: e.target.value })}
-                  className="w-full px-2.5 py-1.5 border border-edge-chip rounded-[5px] text-[13px] bg-surface-hover outline-none focus:border-edge-focus focus:bg-white"
+                  className="w-full px-2.5 py-1.5 border border-edge-chip rounded-[5px] text-[13px] bg-surface-hover outline-none focus:border-edge-focus focus:bg-surface-card"
                 />
               </Field>
 
@@ -375,7 +375,7 @@ export default function AdminValidationRulesPage() {
                   onChange={(e) =>
                     setForm({ ...form, description: e.target.value })
                   }
-                  className="w-full px-2.5 py-1.5 border border-edge-chip rounded-[5px] text-[13px] bg-surface-hover outline-none focus:border-edge-focus focus:bg-white"
+                  className="w-full px-2.5 py-1.5 border border-edge-chip rounded-[5px] text-[13px] bg-surface-hover outline-none focus:border-edge-focus focus:bg-surface-card"
                 />
               </Field>
 
@@ -386,7 +386,7 @@ export default function AdminValidationRulesPage() {
                     onChange={(e) =>
                       setForm({ ...form, department_id: e.target.value })
                     }
-                    className="w-full px-2.5 py-1.5 border border-edge-chip rounded-[5px] text-[13px] bg-surface-hover outline-none focus:border-edge-focus focus:bg-white"
+                    className="w-full px-2.5 py-1.5 border border-edge-chip rounded-[5px] text-[13px] bg-surface-hover outline-none focus:border-edge-focus focus:bg-surface-card"
                   >
                     {isAdmin && (
                       <option value="">{t("validation.scope.global")}</option>
@@ -405,7 +405,7 @@ export default function AdminValidationRulesPage() {
                     onChange={(e) =>
                       setForm({ ...form, doc_type: e.target.value })
                     }
-                    className="w-full px-2.5 py-1.5 border border-edge-chip rounded-[5px] text-[13px] bg-surface-hover outline-none focus:border-edge-focus focus:bg-white"
+                    className="w-full px-2.5 py-1.5 border border-edge-chip rounded-[5px] text-[13px] bg-surface-hover outline-none focus:border-edge-focus focus:bg-surface-card"
                   >
                     <option value="">{t("validation.scope.anyType")}</option>
                     {DOC_TYPES.map((dt: DocType) => (
@@ -425,7 +425,7 @@ export default function AdminValidationRulesPage() {
                         target: e.target.value as ValidationTarget,
                       })
                     }
-                    className="w-full px-2.5 py-1.5 border border-edge-chip rounded-[5px] text-[13px] bg-surface-hover outline-none focus:border-edge-focus focus:bg-white"
+                    className="w-full px-2.5 py-1.5 border border-edge-chip rounded-[5px] text-[13px] bg-surface-hover outline-none focus:border-edge-focus focus:bg-surface-card"
                   >
                     {VALIDATION_TARGETS.map((target) => (
                       <option key={target} value={target}>
@@ -444,7 +444,7 @@ export default function AdminValidationRulesPage() {
                         operator: e.target.value as ValidationOperator,
                       })
                     }
-                    className="w-full px-2.5 py-1.5 border border-edge-chip rounded-[5px] text-[13px] bg-surface-hover outline-none focus:border-edge-focus focus:bg-white"
+                    className="w-full px-2.5 py-1.5 border border-edge-chip rounded-[5px] text-[13px] bg-surface-hover outline-none focus:border-edge-focus focus:bg-surface-card"
                   >
                     {VALIDATION_OPERATORS.map((op) => (
                       <option key={op} value={op}>
@@ -468,7 +468,7 @@ export default function AdminValidationRulesPage() {
                       })
                     }
                     disabled={!!editingId && !isAdmin}
-                    className="w-full px-2.5 py-1.5 border border-edge-chip rounded-[5px] text-[13px] bg-surface-hover outline-none focus:border-edge-focus focus:bg-white disabled:bg-gray-50 disabled:text-gray-500"
+                    className="w-full px-2.5 py-1.5 border border-edge-chip rounded-[5px] text-[13px] bg-surface-hover outline-none focus:border-edge-focus focus:bg-surface-card disabled:bg-gray-50 disabled:text-gray-500"
                   >
                     <option value="error">
                       {t("validation.severity.error")}
@@ -497,7 +497,7 @@ export default function AdminValidationRulesPage() {
               <button
                 type="button"
                 onClick={() => setShowModal(false)}
-                className="px-3.5 py-1.5 text-[12px] bg-white border border-edge-chip text-gray-700 rounded-[6px] hover:bg-gray-50"
+                className="px-3.5 py-1.5 text-[12px] bg-surface-card border border-edge-chip text-gray-700 rounded-[6px] hover:bg-gray-50"
               >
                 {t("common.cancel")}
               </button>
@@ -555,7 +555,7 @@ function ValueField({
           value={form.value_list}
           onChange={(e) => setForm({ ...form, value_list: e.target.value })}
           placeholder={t("validation.placeholder.list")}
-          className="w-full px-2.5 py-1.5 border border-edge-chip rounded-[5px] text-[13px] bg-surface-hover outline-none focus:border-edge-focus focus:bg-white"
+          className="w-full px-2.5 py-1.5 border border-edge-chip rounded-[5px] text-[13px] bg-surface-hover outline-none focus:border-edge-focus focus:bg-surface-card"
         />
         <p className="text-[10px] text-gray-500 mt-1">
           {t("validation.valueHint.list")}
@@ -572,7 +572,7 @@ function ValueField({
           min={1}
           value={form.value_int}
           onChange={(e) => setForm({ ...form, value_int: e.target.value })}
-          className="w-full px-2.5 py-1.5 border border-edge-chip rounded-[5px] text-[13px] bg-surface-hover outline-none focus:border-edge-focus focus:bg-white"
+          className="w-full px-2.5 py-1.5 border border-edge-chip rounded-[5px] text-[13px] bg-surface-hover outline-none focus:border-edge-focus focus:bg-surface-card"
         />
       </Field>
     );
@@ -594,7 +594,7 @@ function ValueField({
             ? t("validation.placeholder.regex")
             : t("validation.placeholder.text")
         }
-        className="w-full px-2.5 py-1.5 border border-edge-chip rounded-[5px] text-[13px] bg-surface-hover outline-none focus:border-edge-focus focus:bg-white font-mono"
+        className="w-full px-2.5 py-1.5 border border-edge-chip rounded-[5px] text-[13px] bg-surface-hover outline-none focus:border-edge-focus focus:bg-surface-card font-mono"
       />
       {form.operator === "regex" && (
         <p className="text-[10px] text-gray-500 mt-1">

@@ -213,7 +213,7 @@ export default function UploadModal({
                     {f.status === "error" && <p className="text-[11px] text-red-600 mt-0.5">{f.error}</p>}
                   </div>
                   {f.status === "uploading" && <Loader2 className="w-4 h-4 text-brand-accent animate-spin" />}
-                  {f.status === "done" && <CheckCircle className="w-4 h-4 text-[#639922]" />}
+                  {f.status === "done" && <CheckCircle className="w-4 h-4 text-dot-done" />}
                   {f.status === "error" && <AlertCircle className="w-4 h-4 text-red-500" />}
                   {f.status !== "uploading" && (
                     <button
@@ -232,7 +232,7 @@ export default function UploadModal({
         <div className="px-6 py-3 border-t border-edge-soft flex items-center justify-end gap-2">
           <button
             onClick={close}
-            className="px-3.5 py-1.5 rounded-[6px] text-[12px] bg-white border border-edge-chip text-brand hover:bg-[#f0f7e6]"
+            className="px-3.5 py-1.5 rounded-[6px] text-[12px] bg-surface-card border border-edge-chip text-brand hover:bg-surface-chipActive"
           >
             {t("common.cancel")}
           </button>

@@ -38,7 +38,7 @@ export default function SearchResults({ results, query }: Props) {
                       {t("page")} {r.page_number}
                     </span>
                   )}
-                  <span className="text-xs text-[#3b6d11] font-medium bg-surface-chipActive px-2 py-0.5 rounded-full">
+                  <span className="text-xs text-brand-deep font-medium bg-surface-chipActive px-2 py-0.5 rounded-full">
                     {Math.round(r.relevance_score * 100)}%
                   </span>
                 </div>

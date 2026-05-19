@@ -91,12 +91,12 @@ export default function ReportsPage() {
           <StatCard
             label={t("reports.indexed")}
             value={data.indexed.toLocaleString(locale)}
-            icon={<CheckCircle2 className="w-6 h-6 text-[#639922]" />}
+            icon={<CheckCircle2 className="w-6 h-6 text-dot-done" />}
           />
           <StatCard
             label={`${t("reports.pending")} + ${t("reports.processing")}`}
             value={(data.pending + data.processing).toLocaleString(locale)}
-            icon={<Clock className="w-6 h-6 text-[#ef9f27]" />}
+            icon={<Clock className="w-6 h-6 text-dot-progress" />}
           />
           <StatCard
             label={t("reports.failed")}
@@ -177,7 +177,7 @@ export default function ReportsPage() {
               {data.top_uploaders.map((u) => (
                 <li
                   key={u.user_id}
-                  className="flex items-center justify-between text-[12.5px] text-gray-800 border-b border-[#eef3e8] last:border-b-0 py-1.5"
+                  className="flex items-center justify-between text-[12.5px] text-ink border-b border-edge-soft last:border-b-0 py-1.5"
                 >
                   <span>{u.full_name}</span>
                   <span className="text-brand font-medium">{u.count}</span>
@@ -205,7 +205,7 @@ function BarRow({ label, value, max }: { label: React.ReactNode; value: number; 
   return (
     <div className="flex items-center gap-3">
       <div className="w-28 flex-shrink-0 truncate">{label}</div>
-      <div className="flex-1 relative h-4 bg-[#eef3e8] rounded overflow-hidden">
+      <div className="flex-1 relative h-4 bg-surface-thead rounded overflow-hidden">
         <div className="absolute inset-y-0 left-0 bg-brand-accent rounded" style={{ width: `${pct}%` }} />
       </div>
       <span className="w-10 text-right text-[12px] text-gray-700 font-medium">{value}</span>

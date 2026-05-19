@@ -155,7 +155,7 @@ export function ApprovalActions({
           onClick={() => setResubmitOpen(false)}
         >
           <div
-            className="bg-white rounded-lg shadow-xl max-w-md w-full p-5"
+            className="bg-surface-card rounded-lg shadow-xl max-w-md w-full p-5"
             onClick={(e) => e.stopPropagation()}
           >
             <h3 className="text-sm font-semibold text-brand mb-1">
@@ -221,7 +221,7 @@ export function ApprovalActions({
           onClick={() => setReasonDialog(null)}
         >
           <div
-            className="bg-white rounded-lg shadow-xl max-w-md w-full p-5"
+            className="bg-surface-card rounded-lg shadow-xl max-w-md w-full p-5"
             onClick={(e) => e.stopPropagation()}
           >
             <h3 className="text-sm font-semibold text-brand mb-1">
@@ -285,8 +285,8 @@ export function CommentButton({
   const t = useTranslations();
   const btn =
     size === "sm"
-      ? "inline-flex items-center gap-1 px-2 py-0.5 text-[11px] rounded border border-edge-chip text-[#3b6d11] hover:bg-surface-chipActive"
-      : "inline-flex items-center gap-1.5 px-3 py-1 text-[12px] rounded border border-edge-chip text-[#3b6d11] hover:bg-surface-chipActive";
+      ? "inline-flex items-center gap-1 px-2 py-0.5 text-[11px] rounded border border-edge-chip text-brand-deep hover:bg-surface-chipActive"
+      : "inline-flex items-center gap-1.5 px-3 py-1 text-[12px] rounded border border-edge-chip text-brand-deep hover:bg-surface-chipActive";
   return (
     <button className={btn} onClick={onClick} title={t("comments.add")}>
       <MessageSquare className="w-3 h-3" /> {t("comments.comment")}

@@ -43,7 +43,7 @@ export default function ChatPage() {
           <div className="p-3 border-b border-edge-soft">
             <button
               onClick={() => router.refresh()}
-              className="w-full flex items-center justify-center gap-2 text-sm py-1.5 bg-surface-chipActive text-[#3b6d11] rounded-[6px] hover:bg-[#dcebc4] font-medium"
+              className="w-full flex items-center justify-center gap-2 text-sm py-1.5 bg-surface-chipActive text-brand-deep rounded-[6px] hover:bg-brand-pale font-medium"
             >
               <Plus className="w-3.5 h-3.5" />
               {t("newChat")}

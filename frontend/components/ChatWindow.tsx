@@ -69,7 +69,7 @@ export default function ChatWindow({ messages, onSend, streaming }: Props) {
           placeholder={t("placeholder")}
           disabled={streaming}
           rows={1}
-          className="flex-1 resize-none px-3 py-2 border border-edge-chip rounded-[6px] bg-surface-hover outline-none focus:border-edge-focus focus:bg-white text-sm disabled:opacity-50 max-h-32"
+          className="flex-1 resize-none px-3 py-2 border border-edge-chip rounded-[6px] bg-surface-hover outline-none focus:border-edge-focus focus:bg-surface-card text-sm disabled:opacity-50 max-h-32"
           style={{ minHeight: "40px" }}
         />
         <button

@@ -299,7 +299,7 @@ export default function CommentsPanel({ documentId }: { documentId: string }) {
   return (
     <div className="flex h-full flex-col">
       {/* Header */}
-      <div className="flex items-center gap-3 px-4 py-2.5 border-b border-edge-soft bg-white">
+      <div className="flex items-center gap-3 px-4 py-2.5 border-b border-edge-soft bg-surface-card">
         <div className="flex items-center gap-2">
           <MessageSquare className="w-3.5 h-3.5 text-brand" />
           <span className="text-[12px] font-semibold tracking-wide text-brand">
@@ -318,7 +318,7 @@ export default function CommentsPanel({ documentId }: { documentId: string }) {
             className={`px-2 py-1 rounded-[5px] text-[11.5px] inline-flex items-center gap-1 border transition-colors ${
               onlyMentions
                 ? "bg-brand-pale border-edge-chip text-brand-deep"
-                : "bg-white border-edge-soft text-gray-600 hover:text-brand hover:border-edge-chip"
+                : "bg-surface-card border-edge-soft text-gray-600 hover:text-brand hover:border-edge-chip"
             }`}
             title={t("commentsPanel.onlyMentionsHelp")}
           >
@@ -393,7 +393,7 @@ export default function CommentsPanel({ documentId }: { documentId: string }) {
                 size="md"
                 className="mt-0.5 flex-shrink-0"
               />
-              <div className="flex-1 min-w-0 rounded-[8px] border border-edge-chip bg-white focus-within:border-edge-focus shadow-[0_1px_0_rgba(45,80,22,0.04)]">
+              <div className="flex-1 min-w-0 rounded-[8px] border border-edge-chip bg-surface-card focus-within:border-edge-focus shadow-[0_1px_0_rgba(45,80,22,0.04)]">
                 <textarea
                   ref={textareaRef}
                   value={body}
@@ -480,8 +480,8 @@ export default function CommentsPanel({ documentId }: { documentId: string }) {
                     <span
                       className={`text-[10.5px] tabular-nums ${
                         body.length >= COMPOSER_MAX
-                          ? "text-[#c94949]"
-                          : "text-gray-400"
+                          ? "text-dot-failed"
+                          : "text-ink-soft"
                       }`}
                     >
                       {body.length} / {COMPOSER_MAX}
@@ -501,7 +501,7 @@ export default function CommentsPanel({ documentId }: { documentId: string }) {
           )}
 
           {mentionQuery !== null && suggestions.length > 0 && (
-            <div className="absolute bottom-[calc(100%-6px)] left-12 max-w-xs w-[260px] bg-white border border-edge-soft rounded-[8px] shadow-[0_8px_24px_rgba(45,80,22,0.12)] z-10 max-h-[200px] overflow-y-auto">
+            <div className="absolute bottom-[calc(100%-6px)] left-12 max-w-xs w-[260px] bg-surface-card border border-edge-soft rounded-[8px] shadow-[0_8px_24px_rgba(45,80,22,0.12)] z-10 max-h-[200px] overflow-y-auto">
               <div className="px-2.5 py-1.5 text-[10px] uppercase tracking-wider text-gray-500 border-b border-edge-soft bg-surface-hover">
                 {t("commentsPanel.mentionPickerTitle")}
               </div>
@@ -570,7 +570,7 @@ function CommentRow({
   return (
     <li
       className={`group relative flex gap-3 py-2.5 pl-2 pr-3 rounded-[6px] hover:bg-surface-hover transition-colors ${
-        mentionsMe ? "bg-[#fbfbef]" : ""
+        mentionsMe ? "bg-mention-row" : ""
       }`}
     >
       {mentionsMe && (
@@ -606,7 +606,7 @@ function CommentRow({
           {canDelete && (
             <button
               onClick={onDelete}
-              className="ml-auto opacity-0 group-hover:opacity-100 focus:opacity-100 text-gray-400 hover:text-[#c94949] transition-opacity"
+              className="ml-auto opacity-0 group-hover:opacity-100 focus:opacity-100 text-ink-soft hover:text-dot-failed transition-opacity"
               title={t("common.delete")}
               aria-label={t("common.delete")}
             >

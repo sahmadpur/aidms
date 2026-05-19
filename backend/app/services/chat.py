@@ -6,11 +6,14 @@ streams Claude response as SSE → persists full message to DB.
 """
 
 import json
+import logging
 import re
 import uuid
 from collections.abc import AsyncGenerator
 
 import anthropic
+
+logger = logging.getLogger(__name__)
 from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -79,9 +82,12 @@ async def _retrieve_chunks(
     sem_rows = (await db.execute(semantic_sql)).mappings().all()
 
     # OR all words so a chunk matching ANY query word (e.g. just "Aliyev") is
-    # returned — plainto_tsquery would require ALL words to match. Strip
-    # tsquery operator characters (&|!():*<>) from each word first.
-    tokens = [re.sub(r"[&|!():*<>\s]", "", w) for w in query.split()]
+    # returned — plainto_tsquery would require ALL words to match. Keep only
+    # Unicode word characters per token; anything else (tsquery operators
+    # & | ! ( ) : * < >, but also punctuation like ? . , ' " \, which all
+    # break to_tsquery) is dropped. We accept the loss of fidelity here —
+    # the semantic leg picks up the slack on natural-language queries.
+    tokens = [re.sub(r"\W+", "", w, flags=re.UNICODE) for w in query.split()]
     tokens = [t for t in tokens if t]
     fts_or_query = " | ".join(tokens)
 
@@ -141,9 +147,26 @@ async def stream_chat_response(
       data: {"type": "citations", "citations": [...]}
       data: [DONE]
     """
-    # 1. Embed query and retrieve relevant chunks
-    [query_embedding] = await embed_texts([user_message])
-    chunks = await _retrieve_chunks(db, user_message, query_embedding)
+    # 1. Embed query and retrieve relevant chunks. Any failure here (OpenAI
+    # embedding outage, malformed input that slipped past sanitisation, etc.)
+    # is surfaced as an SSE error event so the frontend renders a friendly
+    # notice instead of the connection terminating mid-stream.
+    try:
+        [query_embedding] = await embed_texts([user_message])
+        chunks = await _retrieve_chunks(db, user_message, query_embedding)
+    except Exception as exc:  # noqa: BLE001
+        logger.exception("Chat retrieval failed: %s", exc)
+        yield (
+            "data: "
+            + json.dumps({
+                "type": "error",
+                "kind": "api_error",
+                "message": "Couldn't search the archive for your question. Please try rephrasing.",
+            })
+            + "\n\n"
+        )
+        yield "data: [DONE]\n\n"
+        return
 
     # 2. Build context string
     context_parts: list[str] = []

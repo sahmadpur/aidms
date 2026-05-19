@@ -20,6 +20,10 @@ class UserSelfResponse(BaseModel):
     role: str
     language_preference: str
     is_active: bool
+    avatar_url: Optional[str] = None
+    notify_mentions: bool = True
+    notify_doc_approvals: bool = True
+    notify_ocr_complete: bool = True
     managed_department_ids: list[uuid.UUID] = []
     created_at: datetime
     updated_at: datetime
@@ -30,6 +34,9 @@ class UserSelfResponse(BaseModel):
 class UserSelfUpdate(BaseModel):
     full_name: Optional[str] = None
     language_preference: Optional[str] = None
+    notify_mentions: Optional[bool] = None
+    notify_doc_approvals: Optional[bool] = None
+    notify_ocr_complete: Optional[bool] = None
 
     @field_validator("language_preference")
     @classmethod

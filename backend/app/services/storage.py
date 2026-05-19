@@ -68,6 +68,28 @@ async def upload_file(data: bytes, original_filename: str, content_type: str = "
     return key
 
 
+_AVATAR_EXTS = {"jpg", "jpeg", "png", "webp"}
+
+
+async def upload_avatar(data: bytes, user_id: uuid.UUID, content_type: str) -> str:
+    """Upload an avatar image to MinIO under avatars/{user_id}/{uuid}.jpg.
+
+    Always re-encoded as JPEG by the caller (PIL-normalized at 512px max),
+    so the on-disk format is uniform regardless of what the user uploaded.
+    Returns the object key.
+    """
+    client = get_client()
+    key = f"avatars/{user_id}/{uuid.uuid4()}.jpg"
+    client.put_object(
+        settings.minio_bucket_name,
+        key,
+        io.BytesIO(data),
+        length=len(data),
+        content_type=content_type,
+    )
+    return key
+
+
 def get_file_stream(object_key: str):
     """Return a readable stream from MinIO (sync — for use in background workers)."""
     client = get_client()

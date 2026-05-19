@@ -291,6 +291,11 @@
     "scopeName_ru": "Ad (Rusca)",
     "scopeError": "Sahə saxlanılmadı.",
     "confirmDeleteScope": "\"{name}\" sahəsini silmək istəyirsiniz? Mövcud qeydlər etiketlərini saxlayır, lakin siz onları yenidən təyin edənə qədər açar kimi görünəcək.",
+    "scopeAll": "Bütün qeydlər",
+    "searchPlaceholder": "Terminləri və izahları axtar…",
+    "noResultsFor": "«{q}» uyğunluq tapılmadı",
+    "renameScope": "Sahənin adını dəyiş",
+    "renameScopeHelp": "Sahənin adını dəyişəndə ondan istifadə edən bütün qeydlərdə etiket də yenilənir — heç bir qeyd başsız qalmır.",
     "scope": {
       "term": "Termin",
       "doc_type": "Sənəd növü",

@@ -81,6 +81,20 @@ class DictionaryScopeCreate(BaseModel):
         return _validate_scope_key(v)
 
 
+class DictionaryScopeUpdate(BaseModel):
+    key: Optional[str] = Field(default=None, min_length=1, max_length=32)
+    name_az: Optional[str] = Field(default=None, min_length=1, max_length=120)
+    name_ru: Optional[str] = Field(default=None, min_length=1, max_length=120)
+    name_en: Optional[str] = Field(default=None, min_length=1, max_length=120)
+
+    @field_validator("key")
+    @classmethod
+    def _key(cls, v: Optional[str]) -> Optional[str]:
+        if v is None:
+            return v
+        return _validate_scope_key(v)
+
+
 class DictionaryScopeResponse(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 

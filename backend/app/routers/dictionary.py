@@ -2,7 +2,7 @@ import uuid
 from typing import Optional
 
 from fastapi import APIRouter, Depends, HTTPException, Query, Request, status
-from sqlalchemy import func, or_, select
+from sqlalchemy import func, or_, select, update as sa_update
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -17,6 +17,7 @@ from app.schemas.dictionary import (
     DictionaryEntryUpdate,
     DictionaryScopeCreate,
     DictionaryScopeResponse,
+    DictionaryScopeUpdate,
 )
 from app.services import audit
 
@@ -225,6 +226,70 @@ async def create_scope(
         entity_type="dictionary_scope",
         entity_id=scope.id,
         metadata={"key": scope.key, "name_en": scope.name_en},
+        request=request,
+    )
+    await db.commit()
+    await db.refresh(scope)
+    return DictionaryScopeResponse.model_validate(scope)
+
+
+@admin_router.patch("/scopes/{scope_id}", response_model=DictionaryScopeResponse)
+async def update_scope(
+    scope_id: uuid.UUID,
+    body: DictionaryScopeUpdate,
+    request: Request,
+    db: AsyncSession = Depends(get_db),
+    current_admin: User = Depends(require_admin),
+):
+    """Update a scope. Renaming `key` cascades to every dictionary entry that
+    references the old key in the same transaction so we never orphan entries.
+    """
+    scope = await db.scalar(
+        select(DictionaryScope).where(DictionaryScope.id == scope_id)
+    )
+    if not scope:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="Scope not found"
+        )
+
+    updates = body.model_dump(exclude_unset=True)
+    old_key = scope.key
+    new_key = updates.get("key")
+
+    if new_key and new_key != old_key:
+        existing = await db.scalar(
+            select(DictionaryScope).where(DictionaryScope.key == new_key)
+        )
+        if existing and existing.id != scope.id:
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT,
+                detail=f"Scope '{new_key}' already exists",
+            )
+
+    for field, value in updates.items():
+        setattr(scope, field, value)
+
+    cascaded = 0
+    if new_key and new_key != old_key:
+        result = await db.execute(
+            sa_update(DictionaryEntry)
+            .where(DictionaryEntry.scope == old_key)
+            .values(scope=new_key)
+        )
+        cascaded = result.rowcount or 0
+
+    await audit.log(
+        db,
+        user_id=current_admin.id,
+        action="dictionary.scope.update",
+        entity_type="dictionary_scope",
+        entity_id=scope.id,
+        metadata={
+            "fields": sorted(updates.keys()),
+            "old_key": old_key,
+            "new_key": scope.key,
+            "cascaded_entries": cascaded,
+        },
         request=request,
     )
     await db.commit()

@@ -291,6 +291,11 @@
     "scopeName_ru": "Name (Russian)",
     "scopeError": "Could not save scope.",
     "confirmDeleteScope": "Delete the scope \"{name}\"? Existing entries keep their tag but will show the raw key until you reassign them.",
+    "scopeAll": "All entries",
+    "searchPlaceholder": "Search terms and definitions…",
+    "noResultsFor": "Nothing matches \"{q}\"",
+    "renameScope": "Rename scope",
+    "renameScopeHelp": "Renaming a scope updates the tag on every entry that uses it — no entries are orphaned.",
     "scope": {
       "term": "Term",
       "doc_type": "Doc type",

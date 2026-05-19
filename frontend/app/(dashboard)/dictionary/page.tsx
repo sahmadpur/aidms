@@ -1,12 +1,12 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { Fragment, useMemo, useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import useSWR from "swr";
-import { Search, Loader2 } from "lucide-react";
+import { Loader2, Search } from "lucide-react";
 import api from "@/lib/api";
 import { TopBar, TopBarTitle } from "@/components/TopBar";
-import { FilterBar, FilterChip } from "@/components/FilterBar";
+import { buildSegments } from "@/lib/highlight";
 
 interface DictionaryEntry {
   id: string;
@@ -40,7 +40,10 @@ function pickScopeName(s: Scope, locale: string): string {
   return s.name_en;
 }
 
-function pickLang(e: DictionaryEntry, locale: string): { term: string; definition: string } {
+function pickLang(
+  e: DictionaryEntry,
+  locale: string,
+): { term: string; definition: string } {
   if (locale === "az") return { term: e.term_az, definition: e.definition_az };
   if (locale === "ru") return { term: e.term_ru, definition: e.definition_ru };
   return { term: e.term_en, definition: e.definition_en };
@@ -51,7 +54,6 @@ export default function DictionaryPage() {
   const locale = useLocale();
   const [scope, setScope] = useState<string>("");
   const [search, setSearch] = useState("");
-  const [expanded, setExpanded] = useState<Set<string>>(new Set());
 
   const { data: scopes = [] } = useSWR<Scope[]>("/dictionary/scopes", fetcher);
 
@@ -63,7 +65,25 @@ export default function DictionaryPage() {
     return p.toString();
   }, [scope, search]);
 
-  const { data, isLoading } = useSWR<ListResponse>(`/dictionary?${qs}`, fetcher);
+  const { data, isLoading } = useSWR<ListResponse>(
+    `/dictionary?${qs}`,
+    fetcher,
+  );
+
+  // Counts per scope (computed from a single "all entries" fetch so the
+  // left rail always has the full picture, independent of the current filter).
+  const { data: allEntries } = useSWR<ListResponse>(
+    "/dictionary?limit=500",
+    fetcher,
+  );
+  const scopeCounts = useMemo(() => {
+    const m = new Map<string, number>();
+    (allEntries?.items ?? []).forEach((e) =>
+      m.set(e.scope, (m.get(e.scope) ?? 0) + 1),
+    );
+    return m;
+  }, [allEntries]);
+  const totalCount = allEntries?.items.length ?? 0;
 
   const scopeByKey = useMemo(() => {
     const m = new Map<string, Scope>();
@@ -76,88 +96,167 @@ export default function DictionaryPage() {
     return s ? pickScopeName(s, locale) : key;
   }
 
-  function toggle(id: string) {
-    setExpanded((prev) => {
-      const next = new Set(prev);
-      if (next.has(id)) next.delete(id);
-      else next.add(id);
-      return next;
-    });
-  }
+  const groups = useMemo(() => {
+    const sorted = [...(data?.items ?? [])].sort((a, b) =>
+      pickLang(a, locale).term.localeCompare(pickLang(b, locale).term, locale),
+    );
+    const out = new Map<string, DictionaryEntry[]>();
+    for (const e of sorted) {
+      const term = pickLang(e, locale).term;
+      const letter = (term[0] ?? "").toLocaleUpperCase(locale) || "#";
+      const arr = out.get(letter) ?? [];
+      arr.push(e);
+      out.set(letter, arr);
+    }
+    return Array.from(out.entries());
+  }, [data?.items, locale]);
 
   return (
     <>
       <TopBar>
         <TopBarTitle>{t("dictionary.title")}</TopBarTitle>
-        <div className="flex-1 max-w-[420px] relative">
-          <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-gray-500" />
+        <div className="flex-1 max-w-[480px] relative ml-3">
+          <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-ink-soft" />
           <input
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            placeholder={t("dictionary.search")}
-            className="w-full pl-8 pr-3 py-1.5 border border-edge-chip rounded-[6px] text-[12px] bg-surface-card outline-none focus:border-edge-focus"
+            placeholder={t("dictionary.searchPlaceholder")}
+            className="w-full pl-8 pr-3 py-1.5 border border-edge-chip rounded-[6px] text-[13px] bg-surface-hover outline-none focus:border-edge-focus focus:bg-surface-card"
           />
         </div>
       </TopBar>
 
-      <FilterBar>
-        <FilterChip active={scope === ""} onClick={() => setScope("")}>
-          {t("filters.all")}
-        </FilterChip>
-        {scopes.map((s) => (
-          <FilterChip key={s.id} active={scope === s.key} onClick={() => setScope(s.key)}>
-            {pickScopeName(s, locale)}
-          </FilterChip>
-        ))}
-      </FilterBar>
+      <div className="flex gap-6 px-[22px] py-4 max-w-[1100px]">
+        <aside className="w-[220px] flex-shrink-0 sticky top-[80px] self-start space-y-0.5">
+          <ScopeLink
+            active={scope === ""}
+            onClick={() => setScope("")}
+            label={t("dictionary.scopeAll")}
+            count={totalCount}
+          />
+          {scopes.map((s) => (
+            <ScopeLink
+              key={s.id}
+              active={scope === s.key}
+              onClick={() => setScope(s.key)}
+              label={pickScopeName(s, locale)}
+              count={scopeCounts.get(s.key) ?? 0}
+            />
+          ))}
+        </aside>
 
-      <div className="px-[22px] py-4 max-w-4xl">
-        {isLoading ? (
-          <div className="flex justify-center py-8">
-            <Loader2 className="w-5 h-5 animate-spin text-gray-400" />
-          </div>
-        ) : !data || data.items.length === 0 ? (
-          <p className="text-[12.5px] text-gray-500 italic py-10 text-center">
-            {t("dictionary.empty")}
-          </p>
-        ) : (
-          <ul className="space-y-2">
-            {data.items.map((e) => {
-              const main = pickLang(e, locale);
-              const isOpen = expanded.has(e.id);
-              return (
-                <li
-                  key={e.id}
-                  className="bg-surface-card border border-edge-soft rounded-[10px] px-4 py-3"
-                >
-                  <button
-                    type="button"
-                    onClick={() => toggle(e.id)}
-                    className="w-full text-left"
-                  >
-                    <div className="flex items-center gap-2 flex-wrap">
-                      <span className="text-[13.5px] font-semibold text-gray-900">
-                        {main.term}
-                      </span>
-                      <span className="inline-block px-1.5 py-0.5 rounded bg-surface-chipActive text-brand-deep text-[10px] font-medium">
-                        {scopeLabel(e.scope)}
-                      </span>
-                    </div>
-                    <p
-                      className={
-                        "text-[12.5px] text-gray-700 mt-1 whitespace-pre-wrap " +
-                        (isOpen ? "" : "line-clamp-2")
-                      }
-                    >
-                      {main.definition}
-                    </p>
-                  </button>
-                </li>
-              );
-            })}
-          </ul>
-        )}
+        <div className="flex-1 min-w-0">
+          {isLoading ? (
+            <div className="flex justify-center py-8">
+              <Loader2 className="w-5 h-5 animate-spin text-ink-soft" />
+            </div>
+          ) : !data || data.items.length === 0 ? (
+            <p className="text-[12.5px] text-ink-soft italic py-16 text-center">
+              {search
+                ? t("dictionary.noResultsFor", { q: search })
+                : t("dictionary.empty")}
+            </p>
+          ) : (
+            <div className="space-y-10 pb-12">
+              {groups.map(([letter, entries]) => (
+                <section key={letter}>
+                  <h2 className="font-display text-[28px] leading-none text-brand-deep sticky top-[80px] bg-surface py-2 z-0">
+                    {letter}
+                  </h2>
+                  <ul className="mt-2 divide-y divide-edge-soft">
+                    {entries.map((e) => (
+                      <Entry
+                        key={e.id}
+                        entry={e}
+                        locale={locale}
+                        search={search}
+                        scopeLabel={scopeLabel(e.scope)}
+                      />
+                    ))}
+                  </ul>
+                </section>
+              ))}
+            </div>
+          )}
+        </div>
       </div>
+    </>
+  );
+}
+
+function ScopeLink({
+  active,
+  onClick,
+  label,
+  count,
+}: {
+  active: boolean;
+  onClick: () => void;
+  label: string;
+  count: number;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className={`w-full text-left flex items-center justify-between gap-2 py-1.5 rounded-[6px] text-[13px] transition-colors border-l-[3px] pl-[9px] pr-3 ${
+        active
+          ? "bg-surface-chipActive text-brand-deep border-brand-accent"
+          : "text-ink-soft hover:text-ink hover:bg-surface-hover border-transparent"
+      }`}
+    >
+      <span className="truncate">{label}</span>
+      <span className="text-[11px] tabular-nums text-ink-soft">{count}</span>
+    </button>
+  );
+}
+
+function Entry({
+  entry,
+  locale,
+  search,
+  scopeLabel,
+}: {
+  entry: DictionaryEntry;
+  locale: string;
+  search: string;
+  scopeLabel: string;
+}) {
+  const main = pickLang(entry, locale);
+  return (
+    <li className="py-4">
+      <div className="flex items-baseline justify-between gap-3 flex-wrap">
+        <h3 className="font-display text-[18px] text-ink leading-tight">
+          <Highlighted text={main.term} needle={search} />
+        </h3>
+        <span className="inline-block px-1.5 py-0.5 rounded bg-surface-chipActive text-brand-deep text-[10.5px] font-medium font-mono uppercase tracking-wider">
+          {scopeLabel}
+        </span>
+      </div>
+      <p className="mt-1.5 text-[13.5px] leading-[1.6] text-ink whitespace-pre-wrap">
+        <Highlighted text={main.definition} needle={search} />
+      </p>
+    </li>
+  );
+}
+
+function Highlighted({ text, needle }: { text: string; needle: string }) {
+  if (!needle.trim()) return <>{text}</>;
+  const segs = buildSegments(text, needle);
+  return (
+    <>
+      {segs.map((s, i) =>
+        s.match ? (
+          <mark
+            key={i}
+            className="bg-brand-pale text-brand-deep rounded-[2px] px-0.5"
+          >
+            {s.text}
+          </mark>
+        ) : (
+          <Fragment key={i}>{s.text}</Fragment>
+        ),
+      )}
     </>
   );
 }

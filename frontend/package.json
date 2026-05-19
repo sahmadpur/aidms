@@ -16,6 +16,7 @@
     "axios": "^1.7.2",
     "eventsource-parser": "^1.1.2",
     "react-dropzone": "^14.2.3",
+    "react-easy-crop": "^5.5.0",
     "react-pdf": "^7.7.3",
     "pdfjs-dist": "3.11.174",
     "zustand": "^4.5.2",

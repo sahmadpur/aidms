@@ -282,7 +282,33 @@
     "updateProfile": "Profili yenilə",
     "changePassword": "Şifrəni dəyişdir",
     "profileUpdated": "Profil yeniləndi",
-    "passwordChanged": "Şifrə dəyişdirildi"
+    "passwordChanged": "Şifrə dəyişdirildi",
+    "section": {
+      "language": "Dil",
+      "notifications": "Bildirişlər",
+      "profile": "Profil",
+      "password": "Şifrə",
+      "appearance": "Görünüş"
+    },
+    "unsavedChanges": "Yadda saxlanılmamış dəyişikliklər",
+    "discard": "İmtina et",
+    "save": "Dəyişiklikləri saxla",
+    "savedToast": "Parametrlər yadda saxlanıldı",
+    "avatar": {
+      "title": "Profil şəkli",
+      "change": "Şəkli dəyiş",
+      "remove": "Sil",
+      "dropOrClick": "Şəkli bura sürüşdür və ya seçmək üçün vur",
+      "cropTitle": "Şəkli yerləşdir",
+      "zoom": "Yaxınlaşdırma",
+      "confirm": "Bu şəkli seç",
+      "maxSize": "Maksimum 2 MB · JPG, PNG və ya WEBP"
+    },
+    "appearance": {
+      "lightLabel": "İşıqlı",
+      "darkLabel": "Tünd",
+      "systemLabel": "Sistem"
+    }
   },
   "admin": {
     "users": "İstifadəçilər",
@@ -404,6 +430,18 @@
     "title": "Bildirişlər",
     "empty": "Yeni bildiriş yoxdur.",
     "markAllRead": "Hamısını oxunmuş işarələ",
+    "mentions": {
+      "title": "Qeyd edilənlər",
+      "help": "Kimsə şərhdə sizi @qeyd edəndə."
+    },
+    "docApprovals": {
+      "title": "Sənəd təsdiqi",
+      "help": "Yüklədiyiniz sənəd təsdiq, rədd və ya yenidən baxılma istənilərkən."
+    },
+    "ocrComplete": {
+      "title": "OCR tamamlandı",
+      "help": "Yüklədiyiniz sənədin mətn çıxarılması bitəndə."
+    },
     "msg": {
       "comment_added": "{actor} «{title}» sənədinə şərh yazdı",
       "approval_requested": "{actor} yoxlanılmaq üçün «{title}» yüklədi",

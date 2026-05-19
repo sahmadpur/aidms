@@ -23,7 +23,8 @@ import {
 } from "lucide-react";
 import { clsx } from "clsx";
 import { clearTokens } from "@/lib/auth";
-import { useMe, initials } from "@/lib/useMe";
+import { useMe } from "@/lib/useMe";
+import { Avatar } from "@/components/Avatar";
 
 type NavItem = {
   href: string;
@@ -175,9 +176,8 @@ export default function Sidebar() {
       <div className="px-[18px] py-3.5 border-t border-white/10">
         {me ? (
           <div className="flex items-center gap-2.5">
-            <div className="w-[30px] h-[30px] rounded-full bg-sidebar-chip flex items-center justify-center text-[11px] font-semibold text-sidebar-fg flex-shrink-0">
-              {initials(me.full_name)}
-            </div>
+            <Avatar user={me} size="md" />
+
             <div className="min-w-0">
               <div className="text-[12px] text-sidebar-fgSoft font-medium truncate">{me.full_name}</div>
               <div className="text-[10px] text-brand-accent mt-[1px] truncate">

@@ -282,7 +282,33 @@
     "updateProfile": "Update profile",
     "changePassword": "Change password",
     "profileUpdated": "Profile updated",
-    "passwordChanged": "Password changed"
+    "passwordChanged": "Password changed",
+    "section": {
+      "language": "Language",
+      "notifications": "Notifications",
+      "profile": "Profile",
+      "password": "Password",
+      "appearance": "Appearance"
+    },
+    "unsavedChanges": "You have unsaved changes",
+    "discard": "Discard",
+    "save": "Save changes",
+    "savedToast": "Settings saved",
+    "avatar": {
+      "title": "Profile photo",
+      "change": "Change photo",
+      "remove": "Remove",
+      "dropOrClick": "Drag a photo here or click to choose",
+      "cropTitle": "Position your photo",
+      "zoom": "Zoom",
+      "confirm": "Use this photo",
+      "maxSize": "Max 2 MB · JPG, PNG, or WEBP"
+    },
+    "appearance": {
+      "lightLabel": "Light",
+      "darkLabel": "Dark",
+      "systemLabel": "System"
+    }
   },
   "admin": {
     "users": "Users",
@@ -404,6 +430,18 @@
     "title": "Notifications",
     "empty": "You're all caught up.",
     "markAllRead": "Mark all read",
+    "mentions": {
+      "title": "Mentions",
+      "help": "When someone @mentions you in a comment."
+    },
+    "docApprovals": {
+      "title": "Document approvals",
+      "help": "When a document you uploaded is approved, rejected, or asks for revisions."
+    },
+    "ocrComplete": {
+      "title": "OCR completion",
+      "help": "When text extraction finishes for a document you uploaded."
+    },
     "msg": {
       "comment_added": "{actor} commented on “{title}”",
       "approval_requested": "{actor} uploaded “{title}” for your review",

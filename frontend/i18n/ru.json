@@ -336,7 +336,7 @@
       "cropTitle": "Расположите фото",
       "zoom": "Масштаб",
       "confirm": "Использовать это фото",
-      "maxSize": "Не более 2 МБ · JPG, PNG или WEBP"
+      "maxSize": "Не более 5 МБ · JPG, PNG или WEBP"
     },
     "appearance": {
       "lightLabel": "Светлая",

@@ -145,46 +145,6 @@ export default function SettingsPage() {
         <SectionNav />
 
         <div className="flex-1 max-w-[640px] space-y-4 pb-24">
-          <Section id="language" title={t("settings.section.language")}>
-            <Field label={t("settings.language")}>
-              <select
-                value={draft.language_preference}
-                onChange={(e) =>
-                  setDraft({
-                    ...draft,
-                    language_preference: e.target.value as DraftForm["language_preference"],
-                  })
-                }
-                className="w-full px-2.5 py-1.5 border border-edge-chip rounded-[5px] text-[13px] bg-surface-hover outline-none focus:border-edge-focus"
-              >
-                <option value="en">English</option>
-                <option value="az">Azərbaycan</option>
-                <option value="ru">Русский</option>
-              </select>
-            </Field>
-          </Section>
-
-          <Section id="notifications" title={t("settings.section.notifications")}>
-            <ToggleRow
-              title={t("notifications.mentions.title")}
-              help={t("notifications.mentions.help")}
-              checked={draft.notify_mentions}
-              onChange={(v) => setDraft({ ...draft, notify_mentions: v })}
-            />
-            <ToggleRow
-              title={t("notifications.docApprovals.title")}
-              help={t("notifications.docApprovals.help")}
-              checked={draft.notify_doc_approvals}
-              onChange={(v) => setDraft({ ...draft, notify_doc_approvals: v })}
-            />
-            <ToggleRow
-              title={t("notifications.ocrComplete.title")}
-              help={t("notifications.ocrComplete.help")}
-              checked={draft.notify_ocr_complete}
-              onChange={(v) => setDraft({ ...draft, notify_ocr_complete: v })}
-            />
-          </Section>
-
           <Section id="profile" title={t("settings.section.profile")}>
             <div className="flex items-start gap-5">
               <div className="flex flex-col items-center gap-2">
@@ -235,6 +195,46 @@ export default function SettingsPage() {
                 </Field>
               </div>
             </div>
+          </Section>
+
+          <Section id="language" title={t("settings.section.language")}>
+            <Field label={t("settings.language")}>
+              <select
+                value={draft.language_preference}
+                onChange={(e) =>
+                  setDraft({
+                    ...draft,
+                    language_preference: e.target.value as DraftForm["language_preference"],
+                  })
+                }
+                className="w-full px-2.5 py-1.5 border border-edge-chip rounded-[5px] text-[13px] bg-surface-hover outline-none focus:border-edge-focus"
+              >
+                <option value="en">English</option>
+                <option value="az">Azərbaycan</option>
+                <option value="ru">Русский</option>
+              </select>
+            </Field>
+          </Section>
+
+          <Section id="notifications" title={t("settings.section.notifications")}>
+            <ToggleRow
+              title={t("notifications.mentions.title")}
+              help={t("notifications.mentions.help")}
+              checked={draft.notify_mentions}
+              onChange={(v) => setDraft({ ...draft, notify_mentions: v })}
+            />
+            <ToggleRow
+              title={t("notifications.docApprovals.title")}
+              help={t("notifications.docApprovals.help")}
+              checked={draft.notify_doc_approvals}
+              onChange={(v) => setDraft({ ...draft, notify_doc_approvals: v })}
+            />
+            <ToggleRow
+              title={t("notifications.ocrComplete.title")}
+              help={t("notifications.ocrComplete.help")}
+              checked={draft.notify_ocr_complete}
+              onChange={(v) => setDraft({ ...draft, notify_ocr_complete: v })}
+            />
           </Section>
 
           <Section id="password" title={t("settings.section.password")}>
@@ -321,9 +321,9 @@ export default function SettingsPage() {
 function SectionNav() {
   const t = useTranslations();
   const items: Array<{ id: string; label: string }> = [
+    { id: "profile", label: t("settings.section.profile") },
     { id: "language", label: t("settings.section.language") },
     { id: "notifications", label: t("settings.section.notifications") },
-    { id: "profile", label: t("settings.section.profile") },
     { id: "password", label: t("settings.section.password") },
     { id: "appearance", label: t("settings.section.appearance") },
   ];

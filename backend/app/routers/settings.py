@@ -26,7 +26,7 @@ logger = logging.getLogger(__name__)
 
 router = APIRouter()
 
-AVATAR_MAX_BYTES = 2 * 1024 * 1024  # 2 MB
+AVATAR_MAX_BYTES = 5 * 1024 * 1024  # 5 MB
 AVATAR_ALLOWED_TYPES = {"image/jpeg", "image/png", "image/webp"}
 AVATAR_DIMENSION_CAP = (512, 512)
 
@@ -135,7 +135,7 @@ async def upload_avatar(
     if len(raw) > AVATAR_MAX_BYTES:
         raise HTTPException(
             status_code=status.HTTP_413_REQUEST_ENTITY_TOO_LARGE,
-            detail="Avatar must be 2 MB or smaller",
+            detail="Avatar must be 5 MB or smaller",
         )
     try:
         # First open to verify the bytes parse as an image.

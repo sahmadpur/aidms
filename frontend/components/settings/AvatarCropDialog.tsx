@@ -8,7 +8,11 @@ import Cropper, { Area } from "react-easy-crop";
 import api from "@/lib/api";
 
 const ACCEPT_MIME = "image/jpeg,image/png,image/webp";
-const MAX_BYTES = 2 * 1024 * 1024;
+const MAX_BYTES = 5 * 1024 * 1024;
+// Cap the cropped JPEG dimensions so the upload stays well under MAX_BYTES
+// regardless of source resolution. The backend further thumbnails to 512px
+// anyway, so anything larger is wasted bytes.
+const OUTPUT_MAX_EDGE = 1024;
 
 /**
  * Modal for picking a file, cropping it to a square, and POSTing the
@@ -202,13 +206,19 @@ export function AvatarCropDialog({
 }
 
 /**
- * Render the cropped region to a canvas and export as a JPEG Blob.
+ * Render the cropped region to a canvas and export as a JPEG Blob, downsized
+ * so the longest edge is at most OUTPUT_MAX_EDGE. Keeps uploads tiny.
  */
 async function cropToBlob(src: string, area: Area): Promise<Blob> {
   const img = await loadImage(src);
+  const longest = Math.max(area.width, area.height);
+  const scale = longest > OUTPUT_MAX_EDGE ? OUTPUT_MAX_EDGE / longest : 1;
+  const outW = Math.round(area.width * scale);
+  const outH = Math.round(area.height * scale);
+
   const canvas = document.createElement("canvas");
-  canvas.width = area.width;
-  canvas.height = area.height;
+  canvas.width = outW;
+  canvas.height = outH;
   const ctx = canvas.getContext("2d");
   if (!ctx) throw new Error("Canvas context unavailable");
   ctx.drawImage(
@@ -219,8 +229,8 @@ async function cropToBlob(src: string, area: Area): Promise<Blob> {
     area.height,
     0,
     0,
-    area.width,
-    area.height,
+    outW,
+    outH,
   );
   return new Promise<Blob>((resolve, reject) => {
     canvas.toBlob(

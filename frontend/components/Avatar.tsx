@@ -61,8 +61,11 @@ export function Avatar({
     }
     let cancelled = false;
     let createdUrl: string | null = null;
+    // Cache-bust per updated_at so a new upload bypasses the browser's
+    // 5-minute Cache-Control on the avatar endpoint.
+    const url = `/users/${user.id}/avatar?v=${encodeURIComponent(user.updated_at)}`;
     api
-      .get(`/users/${user.id}/avatar`, { responseType: "blob" })
+      .get(url, { responseType: "blob" })
       .then((res) => {
         if (cancelled) return;
         createdUrl = URL.createObjectURL(res.data);

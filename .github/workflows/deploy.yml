@@ -15,12 +15,13 @@ jobs:
     timeout-minutes: 15
 
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
+      - name: Pull latest code
+        working-directory: /home/docai
+        run: git pull --ff-only
 
       - name: Build and deploy
-        run: |
-          docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d --build migrate api worker frontend
+        working-directory: /home/docai
+        run: docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d --build migrate api worker frontend
 
       - name: Wait for services to start
         run: sleep 10
@@ -36,7 +37,7 @@ jobs:
             sleep 5
           done
           echo "API health check failed"
-          docker compose -f docker-compose.yml -f docker-compose.prod.yml logs --tail 50 api
+          docker compose -f docker-compose.yml -f docker-compose.prod.yml --project-directory /home/docai logs --tail 50 api
           exit 1
 
       - name: Health check - Frontend
@@ -50,11 +51,12 @@ jobs:
             sleep 5
           done
           echo "Frontend health check failed"
-          docker compose -f docker-compose.yml -f docker-compose.prod.yml logs --tail 50 frontend
+          docker compose -f docker-compose.yml -f docker-compose.prod.yml --project-directory /home/docai logs --tail 50 frontend
           exit 1
 
       - name: Show running services
         if: always()
+        working-directory: /home/docai
         run: docker compose -f docker-compose.yml -f docker-compose.prod.yml ps
 
       - name: Clean up old images

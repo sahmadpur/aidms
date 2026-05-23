@@ -86,65 +86,81 @@ docker compose exec postgres psql -U aidms -d aidms \
   -c "UPDATE users SET role = 'admin' WHERE email = 'your@email.com';"
 ```
 
-## Production Deployment (server: `ahmadpur.org`)
+## Production Deployment (Contabo VM)
 
-The server at `173.249.38.125` fronts every service with Traefik + Cloudflare Tunnel (`/home/n8n-compose/`). The tunnel has two public hostnames pointing at this box:
+The app runs on a Contabo VM (`173.249.38.125`) with Cloudflare Tunnel + Traefik for routing. TLS is terminated at Cloudflare; Traefik handles host-based routing on port 80.
 
-- `dms.ahmadpur.org` → frontend
-- `dms-api.ahmadpur.org` → backend
+| URL | Service |
+|-----|---------|
+| `https://docai.az` | Frontend |
+| `https://api.docai.az` | Backend API + Swagger |
+| `https://portainer.ahmadpur.org` | Portainer (container management) |
+| `https://ssh.ahmadpur.org` | Browser SSH (Cloudflare Access) |
 
-> The backend lives at `dms-api.ahmadpur.org`, not `api.dms.ahmadpur.org`, because Cloudflare's Universal SSL cert only covers one level of wildcard (`*.ahmadpur.org`). Multi-level subdomains like `api.dms.ahmadpur.org` would require a paid Advanced Certificate or Total TLS.
+### Server layout
 
-Traefik joins the services on the existing `n8n-compose_default` Docker network; TLS is terminated at Cloudflare, so Traefik only does host-based routing inside the box. The override file `docker-compose.prod.yml` wires this up.
+```
+/home/traefik/     # Traefik reverse proxy
+/home/portainer/   # Portainer container management
+/home/docai/       # DocAI app (this repo)
+/home/actions-runner/  # GitHub Actions self-hosted runner
+```
+
+### CI/CD
+
+Pushes to `main` trigger a GitHub Actions workflow (`.github/workflows/deploy.yml`) that runs on a self-hosted runner on the VM. It rebuilds and redeploys automatically.
 
 ### First-time setup
 
 ```bash
 ssh root@173.249.38.125
-cd /home
-git clone https://github.com/sahmadpur/aidms.git dms-compose
-cd dms-compose
+cd /home/docai
+git clone https://github.com/sahmadpur/aidms.git .
 
-# GCP service account JSON (copy from your laptop):
-#   scp "alert-parsec-413511-e8c5dac46694.json" root@173.249.38.125:/home/dms-compose/
+# Copy GCP service account JSON:
+#   scp "alert-parsec-413511-e8c5dac46694.json" root@173.249.38.125:/home/docai/
 
-# Create .env (see Environment Variables Reference below). Key values for prod:
-#   CORS_ORIGINS=["https://dms.ahmadpur.org"]
-#   JWT_SECRET=<64 random bytes, e.g. openssl rand -hex 32>
+# Create .env with production values:
+#   CORS_ORIGINS=["https://docai.az"]
+#   JWT_SECRET=<openssl rand -hex 32>
 #   POSTGRES_PASSWORD=<random>
 #   MINIO_SECRET_KEY=<random>
-#   GOOGLE_CLOUD_CREDENTIALS=/run/secrets/gcp.json
+#   ENVIRONMENT=production
 
 docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d --build
-docker compose -f docker-compose.yml -f docker-compose.prod.yml exec api python -m scripts.seed_phase2
+docker compose -f docker-compose.yml -f docker-compose.prod.yml exec api python3 -m scripts.seed_phase2
 ```
 
-Then register your first user via `https://dms-api.ahmadpur.org/docs` → `POST /auth/register`, and promote to admin:
+Register your first user via `https://api.docai.az/docs` → `POST /auth/register`, then promote to admin:
 
 ```bash
 docker compose -f docker-compose.yml -f docker-compose.prod.yml exec postgres \
   psql -U aidms -d aidms -c "UPDATE users SET role = 'admin' WHERE email = 'you@example.com';"
 ```
 
-### Future deploys
+### Manual deploys
 
 ```bash
-ssh root@173.249.38.125
-cd /home/dms-compose
-git pull
+cd /home/docai
+git pull --ff-only
 docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d --build
 ```
 
-`migrate` runs `alembic upgrade head` before `api` comes up, so schema changes apply automatically.
+Or use the deploy script: `./deploy.sh` (all services) or `./deploy.sh api worker` (specific services).
 
-**Tail logs** while deploying:
+`migrate` runs `alembic upgrade head` before `api` starts, so schema changes apply automatically.
+
+### Useful commands
+
 ```bash
+# Tail logs
 docker compose -f docker-compose.yml -f docker-compose.prod.yml logs -f api worker frontend
-```
 
-**Rebuilding just one service** (faster than the full stack):
-```bash
-docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d --build api worker
+# Rebuild a single service
+docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d --build api
+
+# DB shell
+docker compose -f docker-compose.yml -f docker-compose.prod.yml exec postgres psql -U aidms -d aidms
 ```
 
 > The base `docker-compose.yml` publishes host ports (5432, 6379, 9000, 8000, 3000). The prod override clears those with `!reset` so nothing is exposed outside the Docker network — all traffic goes through Traefik.

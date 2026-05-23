@@ -1,0 +1,62 @@
+name: Deploy to Production
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: deploy-production
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: self-hosted
+    timeout-minutes: 15
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Build and deploy
+        run: |
+          docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d --build migrate api worker frontend
+
+      - name: Wait for services to start
+        run: sleep 10
+
+      - name: Health check - API
+        run: |
+          for i in $(seq 1 12); do
+            if curl -sf http://localhost:8000/docs > /dev/null 2>&1; then
+              echo "API is healthy"
+              exit 0
+            fi
+            echo "Waiting for API... ($i/12)"
+            sleep 5
+          done
+          echo "API health check failed"
+          docker compose -f docker-compose.yml -f docker-compose.prod.yml logs --tail 50 api
+          exit 1
+
+      - name: Health check - Frontend
+        run: |
+          for i in $(seq 1 12); do
+            if curl -sf http://localhost:3000 > /dev/null 2>&1; then
+              echo "Frontend is healthy"
+              exit 0
+            fi
+            echo "Waiting for Frontend... ($i/12)"
+            sleep 5
+          done
+          echo "Frontend health check failed"
+          docker compose -f docker-compose.yml -f docker-compose.prod.yml logs --tail 50 frontend
+          exit 1
+
+      - name: Show running services
+        if: always()
+        run: docker compose -f docker-compose.yml -f docker-compose.prod.yml ps
+
+      - name: Clean up old images
+        if: success()
+        run: docker image prune -f

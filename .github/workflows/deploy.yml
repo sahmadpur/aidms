@@ -29,7 +29,7 @@ jobs:
       - name: Health check - API
         run: |
           for i in $(seq 1 12); do
-            if curl -sf http://localhost:8000/docs > /dev/null 2>&1; then
+            if curl -sf -H "Host: api.docai.az" http://localhost:80/docs > /dev/null 2>&1; then
               echo "API is healthy"
               exit 0
             fi
@@ -43,7 +43,7 @@ jobs:
       - name: Health check - Frontend
         run: |
           for i in $(seq 1 12); do
-            if curl -sf http://localhost:3000 > /dev/null 2>&1; then
+            if curl -sf -H "Host: docai.az" http://localhost:80 > /dev/null 2>&1; then
               echo "Frontend is healthy"
               exit 0
             fi

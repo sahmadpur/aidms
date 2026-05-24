@@ -9,7 +9,7 @@ from sqlalchemy import func, select
 from app.core.config import settings
 from app.core.database import get_db
 from app.core.security import hash_password
-from app.dependencies import require_admin
+from app.dependencies import get_current_user, require_admin
 from app.models.department import Department, department_members
 from app.models.document import Category, Document
 from app.models.user import User
@@ -390,7 +390,7 @@ async def admin_reset_password(
 @router.get("/categories", response_model=list[CategoryResponse])
 async def list_categories(
     db: AsyncSession = Depends(get_db),
-    _: User = Depends(require_admin),
+    _: User = Depends(get_current_user),
 ):
     stmt = (
         select(Category, func.count(Document.id).label("usage_count"))

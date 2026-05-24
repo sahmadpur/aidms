@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
-import useSWR from "swr";
+import useSWR, { useSWRConfig } from "swr";
 import { Bell, Check } from "lucide-react";
 import api from "@/lib/api";
 import type { Notification, NotificationList, NotificationType } from "@/lib/types";
@@ -25,6 +25,7 @@ export default function NotificationsBell() {
   const t = useTranslations();
   const locale = useLocale();
   const router = useRouter();
+  const { mutate: globalMutate } = useSWRConfig();
   const [open, setOpen] = useState(false);
   const wrapRef = useRef<HTMLDivElement>(null);
 
@@ -56,6 +57,8 @@ export default function NotificationsBell() {
       const commentTab =
         n.type === "comment_added" || n.type === "comment_mention";
       const tab = commentTab ? "?tab=comments" : "";
+      globalMutate(`/documents/${n.document_id}`);
+      globalMutate(`/documents/${n.document_id}/comments`);
       router.push(`/documents/${n.document_id}${tab}`);
     }
   }

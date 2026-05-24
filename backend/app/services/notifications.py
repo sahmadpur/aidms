@@ -6,6 +6,18 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models.department import department_members
 from app.models.notification import Notification
+from app.models.user import User
+
+INAPP_PREF_MAP: dict[str, str] = {
+    "comment_added": "notify_mentions",
+    "comment_mention": "notify_mentions",
+    "approval_requested": "notify_doc_approvals",
+    "document_approved": "notify_doc_approvals",
+    "document_rejected": "notify_doc_approvals",
+    "revision_requested": "notify_doc_approvals",
+    "document_resubmitted": "notify_doc_approvals",
+    "validation_failed": "notify_doc_approvals",
+}
 
 
 async def notify(
@@ -19,8 +31,12 @@ async def notify(
 ) -> None:
     """Insert one notification row. Caller commits."""
     if actor_id is not None and actor_id == user_id:
-        # don't notify someone about their own action
         return
+    pref_attr = INAPP_PREF_MAP.get(type_)
+    if pref_attr:
+        user = await db.get(User, user_id)
+        if user and not getattr(user, pref_attr, True):
+            return
     db.add(
         Notification(
             id=uuid.uuid4(),

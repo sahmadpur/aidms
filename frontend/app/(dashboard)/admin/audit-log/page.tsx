@@ -81,20 +81,21 @@ export default function AuditLogPage() {
 
   const { data } = useSWR<AuditList>(`/admin/audit-logs?${qs}`, fetcher, { refreshInterval: 15000 });
 
-  async function downloadXlsx() {
+  async function downloadExport(format: "xlsx" | "csv") {
     setDownloading(true);
     try {
       const params = buildFilterParams({ action, entityType, from: fromDate, to: toDate });
-      const resp = await api.get(`/admin/audit-logs/export.xlsx?${params.toString()}`, {
+      const mimeType = format === "xlsx"
+        ? "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+        : "text/csv";
+      const resp = await api.get(`/admin/audit-logs/export.${format}?${params.toString()}`, {
         responseType: "blob",
       });
-      const blob = new Blob([resp.data], {
-        type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-      });
+      const blob = new Blob([resp.data], { type: mimeType });
       const url = URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.href = url;
-      a.download = `audit-log-${new Date().toISOString().slice(0, 10)}.xlsx`;
+      a.download = `audit-log-${new Date().toISOString().slice(0, 10)}.${format}`;
       a.click();
       URL.revokeObjectURL(url);
     } finally {
@@ -157,8 +158,11 @@ export default function AuditLogPage() {
       <TopBar>
         <TopBarTitle>{t("auditLog.title")}</TopBarTitle>
         <div className="flex-1" />
-        <TopBarButton onClick={downloadXlsx} disabled={downloading}>
-          {downloading ? t("common.loading") : t("common.download")}
+        <TopBarButton onClick={() => downloadExport("csv")} disabled={downloading}>
+          {downloading ? t("common.loading") : "CSV"}
+        </TopBarButton>
+        <TopBarButton onClick={() => downloadExport("xlsx")} disabled={downloading}>
+          {downloading ? t("common.loading") : "XLSX"}
         </TopBarButton>
       </TopBar>
       <FilterBar>

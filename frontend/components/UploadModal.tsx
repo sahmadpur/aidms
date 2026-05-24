@@ -10,7 +10,7 @@ import { API_URL } from "@/lib/api";
 import api from "@/lib/api";
 import { DOC_TYPES } from "@/lib/types";
 import { FolderPicker } from "./FolderPicker";
-import type { Department } from "@/lib/types";
+import type { Category, Department } from "@/lib/types";
 import { localizedName } from "@/lib/types";
 
 interface Upload {
@@ -38,12 +38,19 @@ export default function UploadModal({
   const [files, setFiles] = useState<Upload[]>([]);
   const [folderId, setFolderId] = useState<string | null>(null);
   const [departmentId, setDepartmentId] = useState<string | null>(null);
+  const [categoryId, setCategoryId] = useState<string | null>(null);
   const [docType, setDocType] = useState<string>("");
+  const [title, setTitle] = useState("");
   const [physicalLocation, setPhysicalLocation] = useState("");
 
   const { data: departments = [] } = useSWR<Department[]>(
     open ? "/admin/departments" : null,
     deptFetcher,
+    { revalidateOnFocus: false }
+  );
+  const { data: categories = [] } = useSWR<Category[]>(
+    open ? "/admin/categories" : null,
+    (url: string) => api.get<Category[]>(url).then((r) => r.data),
     { revalidateOnFocus: false }
   );
 
@@ -76,7 +83,9 @@ export default function UploadModal({
       fd.append("files", files[i].file);
       if (folderId) fd.append("folder_id", folderId);
       if (departmentId) fd.append("department_id", departmentId);
+      if (categoryId) fd.append("category_id", categoryId);
       if (docType) fd.append("doc_type", docType);
+      if (title.trim() && files.length === 1) fd.append("title", title.trim());
       if (physicalLocation.trim()) fd.append("physical_location", physicalLocation.trim());
 
       try {
@@ -108,7 +117,9 @@ export default function UploadModal({
     setFiles([]);
     setFolderId(null);
     setDepartmentId(null);
+    setCategoryId(null);
     setDocType("");
+    setTitle("");
     setPhysicalLocation("");
     onClose();
   }
@@ -151,6 +162,16 @@ export default function UploadModal({
           </div>
 
           {/* Metadata fields */}
+          {files.length === 1 && (
+            <Field label={t("upload.documentTitle")}>
+              <input
+                value={title}
+                onChange={(e) => setTitle(e.target.value)}
+                placeholder={files[0]?.file.name.replace(/\.pdf$/i, "") ?? ""}
+                className="w-full px-2 py-1.5 border border-edge-chip rounded-[5px] text-[12px] bg-surface-hover outline-none focus:border-edge-focus"
+              />
+            </Field>
+          )}
           <div className="grid grid-cols-2 gap-3">
             <Field label={t("documents.type")}>
               <select
@@ -176,6 +197,20 @@ export default function UploadModal({
                 {departments.map((d) => (
                   <option key={d.id} value={d.id}>
                     {localizedName(d, locale)}
+                  </option>
+                ))}
+              </select>
+            </Field>
+            <Field label={t("documents.category")}>
+              <select
+                value={categoryId ?? ""}
+                onChange={(e) => setCategoryId(e.target.value || null)}
+                className="w-full px-2 py-1.5 border border-edge-chip rounded-[5px] text-[12px] bg-surface-hover outline-none focus:border-edge-focus"
+              >
+                <option value="">—</option>
+                {categories.map((c) => (
+                  <option key={c.id} value={c.id}>
+                    {localizedName(c, locale)}
                   </option>
                 ))}
               </select>

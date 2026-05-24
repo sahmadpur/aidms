@@ -1,3 +1,5 @@
+import csv
+import io
 import json
 import uuid
 from datetime import datetime, timezone
@@ -149,5 +151,61 @@ async def export_audit_logs_xlsx(
     return StreamingResponse(
         iter([workbook_bytes]),
         media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        headers={"Content-Disposition": f'attachment; filename="{filename}"'},
+    )
+
+
+@router.get("/export.csv")
+async def export_audit_logs_csv(
+    user_id: Optional[uuid.UUID] = None,
+    action: Optional[str] = None,
+    entity_type: Optional[str] = None,
+    created_from: Optional[datetime] = Query(None, alias="from"),
+    created_to: Optional[datetime] = Query(None, alias="to"),
+    db: AsyncSession = Depends(get_db),
+    _: User = Depends(require_admin),
+):
+    conditions = _build_conditions(user_id, action, entity_type, created_from, created_to)
+
+    count_q = select(func.count(AuditLog.id))
+    for c in conditions:
+        count_q = count_q.where(c)
+    total = await db.scalar(count_q) or 0
+    if total > EXPORT_ROW_LIMIT:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=(
+                f"Export would include {total} rows (limit {EXPORT_ROW_LIMIT}). "
+                "Narrow the filters and try again."
+            ),
+        )
+
+    stmt = select(AuditLog, User).outerjoin(User, User.id == AuditLog.user_id)
+    for c in conditions:
+        stmt = stmt.where(c)
+    stmt = stmt.order_by(AuditLog.created_at.desc())
+
+    rows = (await db.execute(stmt)).all()
+
+    buf = io.StringIO()
+    writer = csv.writer(buf)
+    writer.writerow(["When", "User name", "User email", "Action", "Entity type", "Entity ID", "Metadata"])
+    for log, user in rows:
+        writer.writerow([
+            log.created_at.astimezone(timezone.utc).strftime("%Y-%m-%d %H:%M:%S UTC")
+            if log.created_at
+            else "",
+            user.full_name if user else "",
+            user.email if user else "",
+            log.action,
+            log.entity_type,
+            str(log.entity_id) if log.entity_id else "",
+            json.dumps(log.extra_data, ensure_ascii=False) if log.extra_data else "",
+        ])
+
+    filename = f"audit-log-{datetime.now(timezone.utc).strftime('%Y-%m-%d')}.csv"
+    return StreamingResponse(
+        iter([buf.getvalue()]),
+        media_type="text/csv",
         headers={"Content-Disposition": f'attachment; filename="{filename}"'},
     )

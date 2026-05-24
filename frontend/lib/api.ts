@@ -1,4 +1,5 @@
-import axios, { AxiosError } from "axios";
+import axios, { AxiosError, InternalAxiosRequestConfig } from "axios";
+import { setTokens, clearTokens } from "@/lib/auth";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
 
@@ -18,13 +19,27 @@ api.interceptors.request.use((config) => {
   return config;
 });
 
-// Transparently refresh the access token on 401 — but skip the /auth/*
-// endpoints: a 401 there is "wrong credentials", not "token expired",
-// and we want the caller to surface it in the form instead of bouncing.
+let isRefreshing = false;
+let failedQueue: Array<{
+  resolve: (token: string) => void;
+  reject: (err: unknown) => void;
+}> = [];
+
+function processQueue(error: unknown, token: string | null) {
+  failedQueue.forEach((p) => {
+    if (token) {
+      p.resolve(token);
+    } else {
+      p.reject(error);
+    }
+  });
+  failedQueue = [];
+}
+
 api.interceptors.response.use(
   (response) => response,
   async (error: AxiosError) => {
-    const originalRequest = error.config as typeof error.config & { _retry?: boolean };
+    const originalRequest = error.config as InternalAxiosRequestConfig & { _retry?: boolean };
     const url = originalRequest?.url ?? "";
     const isAuthEndpoint = url.startsWith("/auth/") || url.includes("/auth/");
 
@@ -35,31 +50,45 @@ api.interceptors.response.use(
     ) {
       originalRequest._retry = true;
 
+      if (isRefreshing) {
+        return new Promise<string>((resolve, reject) => {
+          failedQueue.push({ resolve, reject });
+        }).then((token) => {
+          originalRequest.headers.Authorization = `Bearer ${token}`;
+          return api(originalRequest);
+        });
+      }
+
       const refreshToken =
         typeof window !== "undefined" ? localStorage.getItem("refresh_token") : null;
 
       if (!refreshToken) {
+        clearTokens();
         if (typeof window !== "undefined") {
           window.location.href = "/login";
         }
         return Promise.reject(error);
       }
 
+      isRefreshing = true;
+
       try {
         const { data } = await axios.post(`${API_URL}/auth/refresh`, {
           refresh_token: refreshToken,
         });
-        localStorage.setItem("access_token", data.access_token);
-        localStorage.setItem("refresh_token", data.refresh_token);
-        originalRequest!.headers!.Authorization = `Bearer ${data.access_token}`;
-        return api(originalRequest!);
-      } catch {
-        localStorage.removeItem("access_token");
-        localStorage.removeItem("refresh_token");
+        setTokens(data.access_token, data.refresh_token);
+        originalRequest.headers.Authorization = `Bearer ${data.access_token}`;
+        processQueue(null, data.access_token);
+        return api(originalRequest);
+      } catch (refreshError) {
+        processQueue(refreshError, null);
+        clearTokens();
         if (typeof window !== "undefined") {
           window.location.href = "/login";
         }
-        return Promise.reject(error);
+        return Promise.reject(refreshError);
+      } finally {
+        isRefreshing = false;
       }
     }
 

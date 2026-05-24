@@ -25,7 +25,7 @@
     "validationRules": "Validation Rules",
     "aiSettings": "AI Settings",
     "dictionary": "Dictionary",
-    "dictionaryManage": "Dictionary",
+    "dictionaryManage": "Edit Dictionary",
     "settings": "Settings",
     "logout": "Log Out",
     "documents": "Documents",
@@ -116,7 +116,8 @@
     "pdfOnly": "PDF files only",
     "uploading": "Uploading...",
     "fileTooLarge": "File exceeds 50 MB limit",
-    "notPdf": "Only PDF files are accepted"
+    "notPdf": "Only PDF files are accepted",
+    "documentTitle": "Document title"
   },
   "ocr": {
     "status": "OCR Status",
@@ -135,6 +136,7 @@
   },
   "documents": {
     "title": "All Documents",
+    "documentName": "Document name",
     "noDocuments": "No documents yet. Upload your first PDF.",
     "uploadDate": "Created",
     "category": "Category",
@@ -172,6 +174,8 @@
     "allYears": "All years",
     "department": "Department",
     "allDepartments": "All departments",
+    "category": "Category",
+    "allCategories": "All categories",
     "ocrStatus": "OCR status",
     "all": "All",
     "folder": "Folder",
@@ -433,7 +437,15 @@
     "kbdHint": "@ to mention · ⌘/Ctrl + Enter to send",
     "mentionPickerTitle": "Mention a teammate",
     "emptyHeading": "Start the discussion",
-    "emptyBody": "Share context, raise questions, or @-mention a colleague. Comments are visible to everyone with access to this document."
+    "emptyBody": "Share context, raise questions, or @-mention a colleague. Comments are visible to everyone with access to this document.",
+    "reply": "Reply",
+    "replyingTo": "Replying to {name}",
+    "replies": "{count} replies",
+    "resolve": "Resolve",
+    "unresolve": "Reopen",
+    "resolved": "Resolved",
+    "showResolved": "Show resolved",
+    "formattingHint": "**bold** *italic* __underline__"
   },
   "ocrPanel": {
     "title": "Recognised Text",
@@ -464,6 +476,8 @@
     "title": "Notifications",
     "empty": "You're all caught up.",
     "markAllRead": "Mark all read",
+    "inApp": "In-app",
+    "email": "Email",
     "mentions": {
       "title": "Mentions",
       "help": "When someone @mentions you in a comment."
@@ -566,6 +580,10 @@
     "title": "Inbox",
     "filterHint": "Showing documents that need your action."
   },
+  "annotation": {
+    "addComment": "Add comment",
+    "page": "p. {page}"
+  },
   "errors": {
     "unauthorized": "Please sign in to continue.",
     "forbidden": "You don't have permission to do that.",
@@ -576,6 +594,19 @@
     "invalidCode": "That code is incorrect or has expired. Please try again or request a new one.",
     "emailNotVerified": "Please verify your email before signing in.",
     "tooManyAttempts": "Too many attempts. Please request a new code."
+  },
+  "margin": {
+    "reply": "Reply...",
+    "resolved": "Resolved",
+    "resolve": "Resolve",
+    "unresolve": "Reopen",
+    "showResolved": "Show resolved",
+    "hideResolved": "Hide resolved",
+    "generalDiscussion": "General Discussion",
+    "expand": "Expand",
+    "collapse": "Collapse",
+    "newComment": "Add your comment...",
+    "ocrText": "OCR Text"
   },
   "common": {
     "loading": "Loading...",
@@ -597,5 +628,18 @@
     "yes": "Yes",
     "no": "No",
     "someone": "Someone"
+  },
+  "margin": {
+    "reply": "Reply...",
+    "resolved": "Resolved",
+    "resolve": "Resolve",
+    "unresolve": "Reopen",
+    "showResolved": "Show resolved",
+    "hideResolved": "Hide resolved",
+    "generalDiscussion": "General Discussion",
+    "expand": "Expand",
+    "collapse": "Collapse",
+    "newComment": "Add your comment...",
+    "ocrText": "OCR Text"
   }
 }

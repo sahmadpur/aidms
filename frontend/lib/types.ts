@@ -142,6 +142,15 @@ export interface DocumentList {
   page_size: number;
 }
 
+export interface Category {
+  id: string;
+  name_az: string;
+  name_ru: string;
+  name_en: string;
+  usage_count: number;
+  created_at: string;
+}
+
 export interface DepartmentManager {
   id: string;
   full_name: string;
@@ -161,13 +170,19 @@ export interface CommentAuthor {
   id: string;
   full_name: string;
   email: string;
+  avatar_url: string | null;
+  updated_at: string;
 }
 
 export interface Comment {
   id: string;
   document_id: string;
   user_id: string;
+  parent_id: string | null;
   body: string;
+  is_resolved: boolean;
+  resolved_by: string | null;
+  resolved_at: string | null;
   created_at: string;
   author: CommentAuthor;
 }
@@ -191,6 +206,26 @@ export interface Notification {
 export interface NotificationList {
   items: Notification[];
   unread_count: number;
+}
+
+export interface AnnotationRect {
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+  pageWidth: number;
+  pageHeight: number;
+}
+
+export interface Annotation {
+  id: string;
+  document_id: string;
+  comment_id: string;
+  page_number: number;
+  highlight_rects: AnnotationRect[];
+  selected_text: string | null;
+  color: string;
+  created_at: string;
 }
 
 export function localizedName(

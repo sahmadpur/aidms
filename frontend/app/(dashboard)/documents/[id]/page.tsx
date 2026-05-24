@@ -2,30 +2,30 @@
 
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
-import { useParams, useRouter, useSearchParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
 import useSWR from "swr";
 import {
   ArrowLeft,
   Loader2,
-  MessageSquare,
-  PanelRightClose,
-  PanelRightOpen,
   RefreshCw,
-  ScanText,
   Trash2,
+  X,
 } from "lucide-react";
-import type { Comment } from "@/lib/types";
+import type { Annotation, Comment } from "@/lib/types";
+import { buildThreads } from "@/lib/commentThreads";
 import DocumentViewer from "@/components/DocumentViewer";
 import OCRTextPanel from "@/components/OCRTextPanel";
-import CommentsPanel from "@/components/CommentsPanel";
+import DiscussionPanel from "@/components/DiscussionPanel";
+import CommentBottomSheet from "@/components/CommentBottomSheet";
 import { DocTypeBadge, OcrStatusDot, ValidationStatusDot } from "@/components/Badge";
 import { ApprovalBadge } from "@/components/ApprovalBadge";
 import { ApprovalActions } from "@/components/ApprovalActions";
 import { FolderPicker, FolderBreadcrumb, useFolders } from "@/components/FolderPicker";
+import { AnnotationProvider, useAnnotation } from "@/components/AnnotationContext";
 import api, { API_URL } from "@/lib/api";
 import { useMe } from "@/lib/useMe";
-import type { Department, Document } from "@/lib/types";
+import type { Category, Department, Document } from "@/lib/types";
 import { DOC_TYPES, localizedName, formatBytes } from "@/lib/types";
 
 const fetcher = (url: string) => api.get(url).then((r) => r.data);
@@ -35,69 +35,71 @@ interface EditForm {
   description: string | null;
   language: string | null;
   doc_type: string | null;
+  category_id: string | null;
   physical_location: string | null;
   folder_id: string | null;
   department_id: string | null;
 }
 
 export default function DocumentDetailPage() {
+  return (
+    <AnnotationProvider>
+      <DocumentDetailPageInner />
+    </AnnotationProvider>
+  );
+}
+
+function DocumentDetailPageInner() {
   const t = useTranslations();
   const locale = useLocale();
   const params = useParams();
   const router = useRouter();
   const id = params.id as string;
 
-  const searchParams = useSearchParams();
-  const tabParam = searchParams.get("tab");
-  const [railTab, setRailTab] = useState<"comments" | "ocr">(
-    tabParam === "ocr" ? "ocr" : "comments"
-  );
-  const [railMode, setRailMode] = useState<"expanded" | "collapsed">(
-    tabParam === "pdf" ? "collapsed" : "expanded"
-  );
+  const { activeAnnotationId, setActiveAnnotationId, creatingBubble, setCreatingBubble } = useAnnotation();
+
+  const [ocrModalOpen, setOcrModalOpen] = useState(false);
+
+  // Mobile detection
+  const [isMobile, setIsMobile] = useState(false);
   useEffect(() => {
-    const t = searchParams.get("tab");
-    if (t === "ocr") {
-      setRailTab("ocr");
-      setRailMode("expanded");
-    } else if (t === "comments") {
-      setRailTab("comments");
-      setRailMode("expanded");
-    } else if (t === "pdf") {
-      setRailMode("collapsed");
-    }
-  }, [searchParams]);
+    const mq = window.matchMedia("(max-width: 768px)");
+    setIsMobile(mq.matches);
+    const handler = (e: MediaQueryListEvent) => setIsMobile(e.matches);
+    mq.addEventListener("change", handler);
+    return () => mq.removeEventListener("change", handler);
+  }, []);
+
   const [editing, setEditing] = useState(false);
   const [form, setForm] = useState<EditForm | null>(null);
   const [deleting, setDeleting] = useState(false);
 
   const { data: me } = useMe();
-  const { data: doc, isLoading, mutate } = useSWR<Document>(`/documents/${id}`, fetcher);
+  const { data: doc, isLoading, mutate } = useSWR<Document>(`/documents/${id}`, fetcher, {
+    revalidateOnFocus: true,
+    refreshInterval: 15000,
+  });
   const { data: ocrData } = useSWR(
     doc?.ocr_status === "completed" ? `/documents/${id}/ocr-text` : null,
     fetcher
   );
-  // Dedupe: CommentsPanel keys off the same URL, SWR shares the response.
-  const { data: comments = [] } = useSWR<Comment[]>(
+  const { data: comments = [], mutate: mutateComments } = useSWR<Comment[]>(
     `/documents/${id}/comments`,
     fetcher,
   );
-
-  const commentCount = comments.length;
-  const mentionsMeCount = useMemo(() => {
-    if (!me) return 0;
-    const needle = `(${me.id})`;
-    return comments.reduce(
-      (n, c) => (c.body.includes(needle) ? n + 1 : n),
-      0,
-    );
-  }, [comments, me]);
-  const ocrWordCount = useMemo(() => {
-    const text = ocrData?.ocr_text?.trim() ?? "";
-    return text ? text.split(/\s+/).length : 0;
-  }, [ocrData?.ocr_text]);
+  const { data: annotations = [] } = useSWR<Annotation[]>(
+    `/documents/${id}/annotations`,
+    fetcher,
+  );
+  const annotationCommentIds = useMemo(
+    () => new Set(annotations.map((a) => a.comment_id)),
+    [annotations],
+  );
   const { data: folders } = useFolders();
   const { data: departments = [] } = useSWR<Department[]>("/admin/departments", fetcher, {
+    revalidateOnFocus: false,
+  });
+  const { data: categories = [] } = useSWR<Category[]>("/admin/categories", fetcher, {
     revalidateOnFocus: false,
   });
 
@@ -231,6 +233,7 @@ export default function DocumentDetailPage() {
                       description: doc.description,
                       language: doc.language,
                       doc_type: doc.doc_type,
+                      category_id: doc.category_id,
                       physical_location: doc.physical_location,
                       folder_id: doc.folder_id,
                       department_id: doc.department_id,
@@ -255,7 +258,7 @@ export default function DocumentDetailPage() {
         </div>
 
         {/* Metadata grid */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mt-4 pt-4 border-t border-edge-soft">
+        <div className="grid grid-cols-2 md:grid-cols-5 gap-3 mt-4 pt-4 border-t border-edge-soft">
           <MetaField label={t("documents.type")}>
             {editing && form ? (
               <select
@@ -272,6 +275,28 @@ export default function DocumentDetailPage() {
               </select>
             ) : (
               <DocTypeBadge type={doc.doc_type} label={doc.doc_type ? t(`docType.${doc.doc_type}`) : undefined} />
+            )}
+          </MetaField>
+          <MetaField label={t("documents.category")}>
+            {editing && form ? (
+              <select
+                value={form.category_id ?? ""}
+                onChange={(e) => setForm({ ...form, category_id: e.target.value || null })}
+                className="w-full px-2 py-1.5 border border-edge-chip rounded-[5px] text-[12px] bg-surface-hover outline-none focus:border-edge-focus"
+              >
+                <option value="">—</option>
+                {categories.map((c) => (
+                  <option key={c.id} value={c.id}>
+                    {localizedName(c, locale)}
+                  </option>
+                ))}
+              </select>
+            ) : (
+              <span className="text-[12px] text-gray-800">
+                {doc.category_id
+                  ? localizedName(categories.find((c) => c.id === doc.category_id) ?? { name_az: "—", name_ru: "—", name_en: "—" }, locale)
+                  : "—"}
+              </span>
             )}
           </MetaField>
           <MetaField label={t("documents.department")}>
@@ -321,207 +346,79 @@ export default function DocumentDetailPage() {
         <ValidationFailedBanner doc={doc} />
       )}
 
-      {/* Workspace: PDF on the left, collapsible side rail on the right. */}
-      <div className="flex gap-3 flex-1 min-h-[520px]">
-        <div className="flex-1 min-w-0 bg-surface-card border border-edge-soft rounded-[10px] overflow-hidden">
-          <DocumentViewer fileUrl={fileUrl} />
+      {/* Workspace: PDF viewer with margin comments + discussion below */}
+      <div className="flex-1 flex flex-col gap-0 min-h-[520px]">
+        {/* Document viewer with integrated margin comments */}
+        <div className="flex-1 bg-surface-card border border-edge-soft rounded-t-[10px] overflow-hidden">
+          <DocumentViewer
+            fileUrl={fileUrl}
+            documentId={id}
+            onOcrClick={() => setOcrModalOpen(true)}
+          />
         </div>
+        {/* General discussion panel (non-annotated comments) */}
+        <DiscussionPanel
+          documentId={id}
+          comments={comments}
+          annotationCommentIds={annotationCommentIds}
+          onMutate={() => { mutate(); mutateComments(); }}
+        />
+      </div>
 
-        {railMode === "expanded" ? (
-          <aside className="w-[420px] flex-shrink-0 bg-surface-card border border-edge-soft rounded-[10px] overflow-hidden flex flex-col">
-            <div className="flex items-stretch border-b border-edge-soft">
-              <RailTab
-                active={railTab === "comments"}
-                onClick={() => setRailTab("comments")}
-                icon={<MessageSquare className="w-[18px] h-[18px]" />}
-                label={t("documents.rail.discussionTab")}
-                badge={
-                  mentionsMeCount > 0
-                    ? {
-                        kind: "accent",
-                        text: t("documents.rail.mentionsCount", {
-                          count: mentionsMeCount,
-                        }),
-                      }
-                    : commentCount > 0
-                    ? { kind: "neutral", text: String(commentCount) }
-                    : null
-                }
-              />
-              <RailTab
-                active={railTab === "ocr"}
-                onClick={() => setRailTab("ocr")}
-                icon={<ScanText className="w-[18px] h-[18px]" />}
-                label={t("documents.rail.ocrTab")}
-                badge={
-                  doc.ocr_status === "completed" && ocrWordCount > 0
-                    ? {
-                        kind: "neutral",
-                        text: formatCount(ocrWordCount) + " w",
-                      }
-                    : null
-                }
-              />
-              <div className="flex-1" />
-              <button
-                onClick={() => setRailMode("collapsed")}
-                className="px-3 text-ink-soft hover:text-brand hover:bg-surface-hover transition-colors"
-                title={t("documents.rail.collapse")}
-                aria-label={t("documents.rail.collapse")}
-              >
-                <PanelRightClose className="w-4 h-4" />
+      {/* OCR slide-over modal */}
+      {ocrModalOpen && (
+        <div className="fixed inset-0 z-50 flex justify-end">
+          <div className="fixed inset-0 bg-black/30" onClick={() => setOcrModalOpen(false)} />
+          <div className="relative w-[480px] max-w-full h-full bg-surface-card border-l border-edge-soft shadow-xl flex flex-col">
+            <div className="flex items-center justify-between px-4 py-3 border-b border-edge-soft">
+              <h3 className="text-[13px] font-semibold text-ink">{t("margin.ocrText")}</h3>
+              <button onClick={() => setOcrModalOpen(false)} className="p-1 text-ink-soft hover:text-ink rounded">
+                <X className="w-4 h-4" />
               </button>
             </div>
-            <div className="flex-1 min-h-0">
-              {railTab === "comments" ? (
-                <CommentsPanel documentId={id} />
-              ) : (
-                <OCRTextPanel
-                  ocrText={ocrData?.ocr_text || ""}
-                  ocrStatus={doc.ocr_status}
-                  language={doc.language}
-                  documentTitle={doc.title}
-                />
-              )}
+            <div className="flex-1 overflow-hidden">
+              <OCRTextPanel
+                ocrText={ocrData?.ocr_text ?? ""}
+                ocrStatus={doc.ocr_status}
+                language={doc.language}
+                documentTitle={doc.title}
+              />
             </div>
-          </aside>
-        ) : (
-          <aside className="w-[64px] flex-shrink-0 bg-surface-card border border-edge-soft rounded-[10px] flex flex-col items-stretch p-1.5 gap-1.5">
-            <RailTile
-              active={false}
-              icon={<MessageSquare className="w-[20px] h-[20px]" />}
-              label={t("documents.rail.discussionTab")}
-              badge={
-                mentionsMeCount > 0
-                  ? {
-                      kind: "accent",
-                      text: String(mentionsMeCount),
-                    }
-                  : commentCount > 0
-                  ? { kind: "neutral", text: String(commentCount) }
-                  : null
-              }
-              onClick={() => {
-                setRailTab("comments");
-                setRailMode("expanded");
-              }}
-            />
-            <RailTile
-              active={false}
-              icon={<ScanText className="w-[20px] h-[20px]" />}
-              label={t("documents.rail.ocrTab")}
-              badge={
-                doc.ocr_status === "completed" && ocrWordCount > 0
-                  ? { kind: "neutral", text: formatCount(ocrWordCount) }
-                  : null
-              }
-              onClick={() => {
-                setRailTab("ocr");
-                setRailMode("expanded");
-              }}
-            />
-            <div className="flex-1" />
-            <button
-              onClick={() => setRailMode("expanded")}
-              title={t("documents.rail.expand")}
-              aria-label={t("documents.rail.expand")}
-              className="w-full h-9 rounded-[6px] inline-flex items-center justify-center text-ink-soft hover:text-brand hover:bg-surface-hover transition-colors"
-            >
-              <PanelRightOpen className="w-4 h-4" />
-            </button>
-          </aside>
-        )}
-      </div>
+          </div>
+        </div>
+      )}
+
+      {/* Mobile bottom sheet for annotation threads */}
+      {isMobile && activeAnnotationId && (() => {
+        const ann = annotations.find(a => a.comment_id === activeAnnotationId);
+        if (!ann) return null;
+        const thread = buildThreads(comments).find(t => t.root.id === ann.comment_id);
+        return (
+          <CommentBottomSheet
+            documentId={id}
+            thread={thread ?? null}
+            isCreating={false}
+            onClose={() => setActiveAnnotationId(null)}
+            onMutate={() => { mutate(); mutateComments(); }}
+          />
+        );
+      })()}
+      {isMobile && creatingBubble && (
+        <CommentBottomSheet
+          documentId={id}
+          thread={null}
+          isCreating={true}
+          creatingData={{
+            pageNumber: creatingBubble.pageNumber,
+            rects: creatingBubble.rects,
+            selectedText: creatingBubble.selectedText,
+          }}
+          onClose={() => setCreatingBubble(null)}
+          onMutate={() => { mutate(); mutateComments(); setCreatingBubble(null); }}
+        />
+      )}
     </div>
   );
-}
-
-type RailBadge = { kind: "accent" | "neutral"; text: string } | null;
-
-function RailTab({
-  active,
-  onClick,
-  icon,
-  label,
-  badge,
-}: {
-  active: boolean;
-  onClick: () => void;
-  icon: React.ReactNode;
-  label: string;
-  badge: RailBadge;
-}) {
-  return (
-    <button
-      onClick={onClick}
-      className={`h-[44px] px-4 text-[14px] font-semibold inline-flex items-center gap-2 border-b-[3px] -mb-px transition-colors ${
-        active
-          ? "border-brand-accent text-brand-deep"
-          : "border-transparent text-ink-soft hover:text-ink"
-      }`}
-    >
-      <span className={active ? "text-brand" : "text-ink-soft"}>{icon}</span>
-      {label}
-      {badge && (
-        <span
-          className={`ml-1 px-1.5 py-[1px] rounded-full text-[10.5px] font-medium tabular-nums ${
-            badge.kind === "accent"
-              ? "bg-brand-accent text-brand-pale"
-              : "bg-surface-chipActive text-brand-deep"
-          }`}
-        >
-          {badge.text}
-        </span>
-      )}
-    </button>
-  );
-}
-
-function RailTile({
-  active,
-  icon,
-  label,
-  onClick,
-  badge,
-}: {
-  active: boolean;
-  icon: React.ReactNode;
-  label: string;
-  onClick: () => void;
-  badge: RailBadge;
-}) {
-  return (
-    <button
-      onClick={onClick}
-      title={label}
-      className={`group relative w-full aspect-square rounded-[8px] inline-flex flex-col items-center justify-center gap-1 transition-colors ${
-        active
-          ? "bg-surface-chipActive text-brand-deep"
-          : "text-ink-soft hover:text-brand hover:bg-surface-hover"
-      }`}
-    >
-      {icon}
-      <span className="text-[9px] font-medium uppercase tracking-[0.05em]">
-        {label.split(" ")[0]}
-      </span>
-      {badge && (
-        <span
-          className={`absolute top-1 right-1 min-w-[16px] h-[16px] px-1 rounded-full text-[9px] font-semibold inline-flex items-center justify-center tabular-nums ${
-            badge.kind === "accent"
-              ? "bg-brand-accent text-brand-pale"
-              : "bg-edge-chip text-ink"
-          }`}
-        >
-          {badge.text}
-        </span>
-      )}
-    </button>
-  );
-}
-
-function formatCount(n: number): string {
-  if (n >= 1000) return (n / 1000).toFixed(n >= 10000 ? 0 : 1) + "k";
-  return String(n);
 }
 
 function MetaField({ label, children }: { label: string; children: React.ReactNode }) {

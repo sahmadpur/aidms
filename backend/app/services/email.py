@@ -808,6 +808,25 @@ async def send_event_email(
         logger.exception("send_event_email failed event=%s to=%s", event, to_email)
 
 
+EMAIL_PREF_MAP: dict[str, str] = {
+    "comment_added": "email_notify_mentions",
+    "comment_mention": "email_notify_mentions",
+    "approval_requested": "email_notify_doc_approvals",
+    "document_approved": "email_notify_doc_approvals",
+    "document_rejected": "email_notify_doc_approvals",
+    "revision_requested": "email_notify_doc_approvals",
+    "document_resubmitted": "email_notify_doc_approvals",
+    "validation_failed": "email_notify_doc_approvals",
+}
+
+
+def _user_wants_email(user: User, event: str) -> bool:
+    pref_attr = EMAIL_PREF_MAP.get(event)
+    if pref_attr is None:
+        return True
+    return getattr(user, pref_attr, True)
+
+
 async def email_users(
     db: AsyncSession,
     *,
@@ -826,6 +845,8 @@ async def email_users(
         )
     )
     for u in users:
+        if not _user_wants_email(u, event):
+            continue
         await send_event_email(
             to_email=u.email,
             full_name=u.full_name,
@@ -847,6 +868,8 @@ async def email_user(
         select(User).where(User.id == user_id, User.is_active.is_(True))
     )
     if user is None:
+        return
+    if not _user_wants_email(user, event):
         return
     await send_event_email(
         to_email=user.email,

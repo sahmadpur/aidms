@@ -14,6 +14,9 @@ export interface Me {
   notify_mentions: boolean;
   notify_doc_approvals: boolean;
   notify_ocr_complete: boolean;
+  email_notify_mentions: boolean;
+  email_notify_doc_approvals: boolean;
+  email_notify_ocr_complete: boolean;
   managed_department_ids: string[];
   created_at: string;
   updated_at: string;

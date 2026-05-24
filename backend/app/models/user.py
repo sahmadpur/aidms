@@ -50,6 +50,15 @@ class User(Base):
     notify_ocr_complete: Mapped[bool] = mapped_column(
         Boolean, default=True, server_default="true"
     )
+    email_notify_mentions: Mapped[bool] = mapped_column(
+        Boolean, default=True, server_default="true"
+    )
+    email_notify_doc_approvals: Mapped[bool] = mapped_column(
+        Boolean, default=True, server_default="true"
+    )
+    email_notify_ocr_complete: Mapped[bool] = mapped_column(
+        Boolean, default=True, server_default="true"
+    )
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), server_default=func.now()
     )

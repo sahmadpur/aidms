@@ -229,24 +229,6 @@ export default function AdminDictionaryPage() {
       </TopBar>
 
       <div className="flex gap-6 px-[22px] py-4 max-w-[1100px]">
-        <aside className="w-[220px] flex-shrink-0 sticky top-[80px] self-start space-y-0.5">
-          <ScopeLink
-            active={scope === ""}
-            onClick={() => setScope("")}
-            label={t("dictionary.scopeAll")}
-            count={totalCount}
-          />
-          {scopes.map((s) => (
-            <ScopeLink
-              key={s.id}
-              active={scope === s.key}
-              onClick={() => setScope(s.key)}
-              label={pickScopeName(s, locale)}
-              count={scopeCounts.get(s.key) ?? 0}
-            />
-          ))}
-        </aside>
-
         <div className="flex-1 min-w-0">
           {isLoading ? (
             <div className="flex justify-center py-8">
@@ -308,6 +290,24 @@ export default function AdminDictionaryPage() {
             </div>
           )}
         </div>
+
+        <aside className="w-[220px] flex-shrink-0 sticky top-[80px] self-start space-y-0.5">
+          <ScopeLink
+            active={scope === ""}
+            onClick={() => setScope("")}
+            label={t("dictionary.scopeAll")}
+            count={totalCount}
+          />
+          {scopes.map((s) => (
+            <ScopeLink
+              key={s.id}
+              active={scope === s.key}
+              onClick={() => setScope(s.key)}
+              label={pickScopeName(s, locale)}
+              count={scopeCounts.get(s.key) ?? 0}
+            />
+          ))}
+        </aside>
       </div>
 
       {showEntryModal && (

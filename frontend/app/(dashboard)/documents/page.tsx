@@ -15,6 +15,7 @@ import { TopBar, TopBarButton, TopBarTitle } from "@/components/TopBar";
 import UploadModal from "@/components/UploadModal";
 import api from "@/lib/api";
 import type {
+  Category,
   Document,
   DocumentList,
   Department,
@@ -48,6 +49,7 @@ export default function DocumentsPage() {
   const [typeFilter, setTypeFilter] = useState<string>(""); // "" = all
   const [yearFilter, setYearFilter] = useState<string>("");
   const [departmentFilter, setDepartmentFilter] = useState<string>("");
+  const [categoryFilter, setCategoryFilter] = useState<string>("");
   const [ocrFilter, setOcrFilter] = useState<string>("");
   const [approvalFilter, setApprovalFilter] = useState<ApprovalStatus | "">("");
   const [validationFilter, setValidationFilter] = useState<ValidationStatus | "">("");
@@ -71,6 +73,7 @@ export default function DocumentsPage() {
     if (typeFilter) p.set("doc_type", typeFilter);
     if (yearFilter) p.set("year", yearFilter);
     if (departmentFilter) p.set("department_id", departmentFilter);
+    if (categoryFilter) p.set("category_id", categoryFilter);
     if (ocrFilter) p.set("ocr_status", ocrFilter);
     if (validationFilter) p.set("validation_status", validationFilter);
     if (inboxMode) {
@@ -79,7 +82,7 @@ export default function DocumentsPage() {
       p.set("approval_status", approvalFilter);
     }
     return p.toString();
-  }, [page, debouncedQuery, typeFilter, yearFilter, departmentFilter, ocrFilter, validationFilter, approvalFilter, inboxMode]);
+  }, [page, debouncedQuery, typeFilter, yearFilter, departmentFilter, categoryFilter, ocrFilter, validationFilter, approvalFilter, inboxMode]);
 
   const { data, mutate } = useSWR<DocumentList>(
     `/documents?${queryString}`,
@@ -95,6 +98,9 @@ export default function DocumentsPage() {
   const { data: departments = [] } = useSWR<Department[]>("/admin/departments", fetcher, {
     revalidateOnFocus: false,
   });
+  const { data: categories = [] } = useSWR<Category[]>("/admin/categories", fetcher, {
+    revalidateOnFocus: false,
+  });
 
   const years = useMemo(() => {
     const now = new Date().getFullYear();
@@ -106,12 +112,13 @@ export default function DocumentsPage() {
       {
         key: "display_id",
         header: t("documents.docId"),
-        width: "95px",
+        width: "80px",
         render: (d) => <span className="font-mono text-[11px] text-gray-500">{d.display_id ?? "—"}</span>,
       },
       {
         key: "title",
-        header: t("documents.title"),
+        header: t("documents.documentName"),
+        width: "180px",
         render: (d) => (
           <Link href={`/documents/${d.id}`} className="text-brand font-medium hover:underline block truncate">
             {d.title}
@@ -121,13 +128,27 @@ export default function DocumentsPage() {
       {
         key: "doc_type",
         header: t("documents.type"),
-        width: "105px",
+        width: "90px",
         render: (d) => <DocTypeBadge type={d.doc_type} label={d.doc_type ? t(`docType.${d.doc_type}`) : undefined} />,
+      },
+      {
+        key: "category",
+        header: t("documents.category"),
+        width: "110px",
+        hiddenOnMobile: true,
+        render: (d) => {
+          const cat = d.category_id ? categories.find((c) => c.id === d.category_id) : null;
+          return (
+            <span className="text-[12px] text-gray-700 truncate block">
+              {cat ? localizedName(cat, locale) : "—"}
+            </span>
+          );
+        },
       },
       {
         key: "created_at",
         header: t("documents.uploadDate"),
-        width: "110px",
+        width: "95px",
         render: (d) => (
           <span className="text-[12px] text-gray-700">
             {new Date(d.created_at).toLocaleDateString(locale)}
@@ -137,7 +158,8 @@ export default function DocumentsPage() {
       {
         key: "physical",
         header: t("documents.physicalLocation"),
-        width: "160px",
+        width: "130px",
+        hiddenOnMobile: true,
         render: (d) =>
           d.physical_location ? (
             <span className="text-[11.5px] text-gray-600">📦 {d.physical_location}</span>
@@ -148,7 +170,8 @@ export default function DocumentsPage() {
       {
         key: "folder",
         header: t("documents.folder"),
-        width: "170px",
+        width: "140px",
+        hiddenOnMobile: true,
         render: (d) => <FolderBreadcrumb folderId={d.folder_id} folders={folders} locale={locale} />,
       },
       {
@@ -172,6 +195,7 @@ export default function DocumentsPage() {
         key: "validation",
         header: t("validation.column"),
         width: "110px",
+        hiddenOnMobile: true,
         render: (d) => (
           <ValidationStatusDot
             status={d.validation_status}
@@ -194,7 +218,7 @@ export default function DocumentsPage() {
         ),
       },
     ],
-    [t, locale, folders]
+    [t, locale, folders, categories]
   );
 
   const totalPages = data ? Math.max(1, Math.ceil(data.total / PAGE_SIZE)) : 1;
@@ -295,6 +319,15 @@ export default function DocumentsPage() {
             </option>
           ))}
         </FilterSelect>
+        <FilterLabel>{t("filters.category")}:</FilterLabel>
+        <FilterSelect value={categoryFilter} onChange={setCategoryFilter}>
+          <option value="">{t("filters.allCategories")}</option>
+          {categories.map((c) => (
+            <option key={c.id} value={c.id}>
+              {localizedName(c, locale)}
+            </option>
+          ))}
+        </FilterSelect>
         <FilterLabel>{t("filters.ocrStatus")}:</FilterLabel>
         <FilterSelect value={ocrFilter} onChange={setOcrFilter}>
           <option value="">{t("filters.all")}</option>
@@ -348,6 +381,7 @@ export default function DocumentsPage() {
           rows={data?.items ?? []}
           rowKey={(r) => r.id}
           empty={t("documents.noDocuments")}
+          storageKey="documents-list"
         />
       </div>
 

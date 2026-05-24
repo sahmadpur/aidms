@@ -25,7 +25,7 @@
     "validationRules": "Validasiya qaydaları",
     "aiSettings": "AI parametrləri",
     "dictionary": "Lüğət",
-    "dictionaryManage": "Lüğət",
+    "dictionaryManage": "Lüğəti redaktə et",
     "settings": "Parametrlər",
     "logout": "Çıxış",
     "documents": "Sənədlər",
@@ -116,7 +116,8 @@
     "pdfOnly": "Yalnız PDF fayllar",
     "uploading": "Yüklənir...",
     "fileTooLarge": "Fayl 50 MB limitini aşır",
-    "notPdf": "Yalnız PDF fayllar qəbul edilir"
+    "notPdf": "Yalnız PDF fayllar qəbul edilir",
+    "documentTitle": "Sənədin başlığı"
   },
   "ocr": {
     "status": "OCR statusu",
@@ -135,6 +136,7 @@
   },
   "documents": {
     "title": "Bütün sənədlər",
+    "documentName": "Sənədin adı",
     "noDocuments": "Hələ sənəd yoxdur. İlk PDF-inizi yükləyin.",
     "uploadDate": "Yaradılıb",
     "category": "Kateqoriya",
@@ -172,6 +174,8 @@
     "allYears": "Bütün illər",
     "department": "Şöbə",
     "allDepartments": "Bütün şöbələr",
+    "category": "Kateqoriya",
+    "allCategories": "Bütün kateqoriyalar",
     "ocrStatus": "OCR statusu",
     "all": "Hamısı",
     "folder": "Qovluq",
@@ -433,7 +437,15 @@
     "kbdHint": "@ ilə qeyd · ⌘/Ctrl + Enter ilə göndər",
     "mentionPickerTitle": "Həmkarınızı qeyd edin",
     "emptyHeading": "Müzakirəni başladın",
-    "emptyBody": "Konteksti bölüşün, sual verin və ya həmkarınızı @ ilə qeyd edin. Şərhlər sənədə girişi olan hər kəs üçün görünür."
+    "emptyBody": "Konteksti bölüşün, sual verin və ya həmkarınızı @ ilə qeyd edin. Şərhlər sənədə girişi olan hər kəs üçün görünür.",
+    "reply": "Cavab",
+    "replyingTo": "Cavab: {name}",
+    "replies": "{count} cavab",
+    "resolve": "Həll et",
+    "unresolve": "Yenidən aç",
+    "resolved": "Həll edildi",
+    "showResolved": "Həll edilənləri göstər",
+    "formattingHint": "**bold** *italic* __underline__"
   },
   "ocrPanel": {
     "title": "Tanınan mətn",
@@ -464,6 +476,8 @@
     "title": "Bildirişlər",
     "empty": "Yeni bildiriş yoxdur.",
     "markAllRead": "Hamısını oxunmuş işarələ",
+    "inApp": "Tətbiqdə",
+    "email": "E-poçt",
     "mentions": {
       "title": "Qeyd edilənlər",
       "help": "Kimsə şərhdə sizi @qeyd edəndə."
@@ -566,6 +580,10 @@
     "title": "Gələnlər qutusu",
     "filterHint": "Sizdən əməliyyat tələb edən sənədlər göstərilir."
   },
+  "annotation": {
+    "addComment": "Şərh əlavə et",
+    "page": "s. {page}"
+  },
   "errors": {
     "unauthorized": "Davam etmək üçün daxil olun.",
     "forbidden": "Bunu etmək üçün icazəniz yoxdur.",
@@ -576,6 +594,19 @@
     "invalidCode": "Kod yanlışdır və ya müddəti bitib. Yenidən cəhd edin və ya yeni kod tələb edin.",
     "emailNotVerified": "Daxil olmadan əvvəl e-poçtunuzu təsdiq edin.",
     "tooManyAttempts": "Çox sayda cəhd. Yeni kod tələb edin."
+  },
+  "margin": {
+    "reply": "Cavab...",
+    "resolved": "Həll edildi",
+    "resolve": "Həll et",
+    "unresolve": "Yenidən aç",
+    "showResolved": "Həll edilənləri göstər",
+    "hideResolved": "Həll edilənləri gizlət",
+    "generalDiscussion": "Ümumi müzakirə",
+    "expand": "Aç",
+    "collapse": "Yığ",
+    "newComment": "Şərhinizi yazın...",
+    "ocrText": "OCR mətni"
   },
   "common": {
     "loading": "Yüklənir...",
@@ -597,5 +628,18 @@
     "yes": "Bəli",
     "no": "Xeyr",
     "someone": "Kimsə"
+  },
+  "margin": {
+    "reply": "Cavab...",
+    "resolved": "Həll edildi",
+    "resolve": "Həll et",
+    "unresolve": "Yenidən aç",
+    "showResolved": "Həll edilənləri göstər",
+    "hideResolved": "Həll edilənləri gizlət",
+    "generalDiscussion": "Ümumi müzakirə",
+    "expand": "Aç",
+    "collapse": "Yığ",
+    "newComment": "Şərhinizi yazın...",
+    "ocrText": "OCR mətni"
   }
 }

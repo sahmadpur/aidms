@@ -16,6 +16,9 @@ type DraftForm = {
   notify_mentions: boolean;
   notify_doc_approvals: boolean;
   notify_ocr_complete: boolean;
+  email_notify_mentions: boolean;
+  email_notify_doc_approvals: boolean;
+  email_notify_ocr_complete: boolean;
 };
 
 function snapshot(me: Me): DraftForm {
@@ -25,6 +28,9 @@ function snapshot(me: Me): DraftForm {
     notify_mentions: me.notify_mentions,
     notify_doc_approvals: me.notify_doc_approvals,
     notify_ocr_complete: me.notify_ocr_complete,
+    email_notify_mentions: me.email_notify_mentions,
+    email_notify_doc_approvals: me.email_notify_doc_approvals,
+    email_notify_ocr_complete: me.email_notify_ocr_complete,
   };
 }
 
@@ -217,24 +223,34 @@ export default function SettingsPage() {
           </Section>
 
           <Section id="notifications" title={t("settings.section.notifications")}>
-            <ToggleRow
-              title={t("notifications.mentions.title")}
-              help={t("notifications.mentions.help")}
-              checked={draft.notify_mentions}
-              onChange={(v) => setDraft({ ...draft, notify_mentions: v })}
-            />
-            <ToggleRow
-              title={t("notifications.docApprovals.title")}
-              help={t("notifications.docApprovals.help")}
-              checked={draft.notify_doc_approvals}
-              onChange={(v) => setDraft({ ...draft, notify_doc_approvals: v })}
-            />
-            <ToggleRow
-              title={t("notifications.ocrComplete.title")}
-              help={t("notifications.ocrComplete.help")}
-              checked={draft.notify_ocr_complete}
-              onChange={(v) => setDraft({ ...draft, notify_ocr_complete: v })}
-            />
+            <div className="space-y-3">
+              <div className="grid grid-cols-[1fr_auto_auto] gap-x-6 gap-y-0 items-center">
+                <div />
+                <span className="text-[11px] font-medium text-ink-soft text-center">{t("notifications.inApp")}</span>
+                <span className="text-[11px] font-medium text-ink-soft text-center">{t("notifications.email")}</span>
+
+                <div>
+                  <p className="text-[13px] text-ink font-medium">{t("notifications.mentions.title")}</p>
+                  <p className="text-[11px] text-ink-soft">{t("notifications.mentions.help")}</p>
+                </div>
+                <div className="flex justify-center"><Toggle checked={draft.notify_mentions} onChange={(v) => setDraft({ ...draft, notify_mentions: v })} /></div>
+                <div className="flex justify-center"><Toggle checked={draft.email_notify_mentions} onChange={(v) => setDraft({ ...draft, email_notify_mentions: v })} /></div>
+
+                <div>
+                  <p className="text-[13px] text-ink font-medium">{t("notifications.docApprovals.title")}</p>
+                  <p className="text-[11px] text-ink-soft">{t("notifications.docApprovals.help")}</p>
+                </div>
+                <div className="flex justify-center"><Toggle checked={draft.notify_doc_approvals} onChange={(v) => setDraft({ ...draft, notify_doc_approvals: v })} /></div>
+                <div className="flex justify-center"><Toggle checked={draft.email_notify_doc_approvals} onChange={(v) => setDraft({ ...draft, email_notify_doc_approvals: v })} /></div>
+
+                <div>
+                  <p className="text-[13px] text-ink font-medium">{t("notifications.ocrComplete.title")}</p>
+                  <p className="text-[11px] text-ink-soft">{t("notifications.ocrComplete.help")}</p>
+                </div>
+                <div className="flex justify-center"><Toggle checked={draft.notify_ocr_complete} onChange={(v) => setDraft({ ...draft, notify_ocr_complete: v })} /></div>
+                <div className="flex justify-center"><Toggle checked={draft.email_notify_ocr_complete} onChange={(v) => setDraft({ ...draft, email_notify_ocr_complete: v })} /></div>
+              </div>
+            </div>
           </Section>
 
           <Section id="password" title={t("settings.section.password")}>
@@ -414,6 +430,28 @@ function ToggleRow({
         <div className="text-[11.5px] text-ink-soft mt-0.5">{help}</div>
       </div>
     </label>
+  );
+}
+
+function Toggle({ checked, onChange }: { checked: boolean; onChange: (v: boolean) => void }) {
+  return (
+    <button
+      type="button"
+      role="switch"
+      aria-checked={checked}
+      onClick={() => onChange(!checked)}
+      className={`relative inline-flex h-[20px] w-[36px] flex-shrink-0 rounded-full border transition-colors ${
+        checked
+          ? "bg-brand border-brand"
+          : "bg-surface-hover border-edge-chip"
+      }`}
+    >
+      <span
+        className={`absolute top-[1.5px] h-[15px] w-[15px] rounded-full bg-surface-card shadow transition-transform ${
+          checked ? "translate-x-[18px]" : "translate-x-[1.5px]"
+        }`}
+      />
+    </button>
   );
 }
 

@@ -88,7 +88,9 @@ async def upload_documents(
     files: list[UploadFile] = File(...),
     folder_id: Optional[str] = Form(None),
     department_id: Optional[str] = Form(None),
+    category_id: Optional[str] = Form(None),
     doc_type: Optional[str] = Form(None),
+    title: Optional[str] = Form(None),
     physical_location: Optional[str] = Form(None),
     db: AsyncSession = Depends(get_db),
     current_user: User = Depends(get_current_user),
@@ -96,6 +98,7 @@ async def upload_documents(
     max_bytes = settings.max_upload_size_mb * 1024 * 1024
     folder_uuid = _parse_uuid(folder_id, "folder_id")
     department_uuid = _parse_uuid(department_id, "department_id")
+    category_uuid = _parse_uuid(category_id, "category_id")
     if doc_type is not None and doc_type not in DOC_TYPES:
         raise HTTPException(
             status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
@@ -124,13 +127,14 @@ async def upload_documents(
         doc = Document(
             id=uuid.uuid4(),
             user_id=current_user.id,
-            title=(file.filename or "Untitled").rsplit(".", 1)[0],
+            title=title.strip() if title and title.strip() else (file.filename or "Untitled").rsplit(".", 1)[0],
             original_filename=file.filename,
             file_path=object_key,
             file_size_bytes=len(data),
             ocr_status="pending",
             folder_id=folder_uuid,
             department_id=department_uuid,
+            category_id=category_uuid,
             doc_type=doc_type,
             physical_location=physical_location,
         )
@@ -193,6 +197,7 @@ async def list_documents(
     doc_type: Optional[str] = None,
     folder_id: Optional[uuid.UUID] = None,
     department_id: Optional[uuid.UUID] = None,
+    category_id: Optional[uuid.UUID] = None,
     year: Optional[int] = None,
     created_from: Optional[date] = None,
     created_to: Optional[date] = None,
@@ -243,6 +248,8 @@ async def list_documents(
         base_query = base_query.where(Document.folder_id == folder_id)
     if department_id:
         base_query = base_query.where(Document.department_id == department_id)
+    if category_id:
+        base_query = base_query.where(Document.category_id == category_id)
     if year:
         base_query = base_query.where(extract("year", Document.created_at) == year)
     if created_from:

@@ -24,6 +24,9 @@ class UserSelfResponse(BaseModel):
     notify_mentions: bool = True
     notify_doc_approvals: bool = True
     notify_ocr_complete: bool = True
+    email_notify_mentions: bool = True
+    email_notify_doc_approvals: bool = True
+    email_notify_ocr_complete: bool = True
     managed_department_ids: list[uuid.UUID] = []
     created_at: datetime
     updated_at: datetime
@@ -37,6 +40,9 @@ class UserSelfUpdate(BaseModel):
     notify_mentions: Optional[bool] = None
     notify_doc_approvals: Optional[bool] = None
     notify_ocr_complete: Optional[bool] = None
+    email_notify_mentions: Optional[bool] = None
+    email_notify_doc_approvals: Optional[bool] = None
+    email_notify_ocr_complete: Optional[bool] = None
 
     @field_validator("language_preference")
     @classmethod

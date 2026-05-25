@@ -49,3 +49,4 @@ docs/
 *.md
 *.xlsx
 *.docx.superpowers/
+.superpowers/

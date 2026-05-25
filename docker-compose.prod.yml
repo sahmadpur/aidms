@@ -13,6 +13,7 @@ services:
     ports: !reset []
     environment:
       CORS_ORIGINS: '["https://docai.az"]'
+      FRONTEND_BASE_URL: https://docai.az
     networks:
       - default
       - proxy

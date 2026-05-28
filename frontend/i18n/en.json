@@ -15,7 +15,7 @@
     "folders": "Folders",
     "fullTextSearch": "Full-text Search",
     "recentUploads": "Recent Uploads",
-    "aiChat": "AI Chat",
+    "aiChat": "AI",
     "usersRoles": "Users & Roles",
     "editFolders": "Edit Folders",
     "categories": "Categories",
@@ -30,7 +30,7 @@
     "logout": "Log Out",
     "documents": "Documents",
     "search": "Search",
-    "chat": "AI Chat",
+    "chat": "AI",
     "admin": "Admin"
   },
   "roles": {
@@ -201,12 +201,12 @@
       "Aliyev",
       "invoice October"
     ],
-    "chatHint": "For natural questions, try AI Chat instead",
+    "chatHint": "For natural questions, try the AI instead",
     "noMatchHeading": "Nothing in the archive matches.",
     "noMatchBody": "We couldn’t find <q></q> in any indexed document. Try a different phrasing or remove a filter."
   },
   "chat": {
-    "title": "AI Chat",
+    "title": "AI",
     "newChat": "New Chat",
     "placeholder": "Ask the archive — citations included",
     "sessions": "Chat History",
@@ -217,6 +217,29 @@
     "kbdHint": "Enter to send · Shift Enter for new line",
     "errorOverloaded": "The AI service is busy. Please try again in a moment.",
     "errorApi": "Something went wrong with the AI service.",
+    "welcome": {
+      "heading": "Ask the archive.",
+      "subhead": "Every answer cites the document and the page it came from.",
+      "stepsLabel": "How it works",
+      "steps": [
+        { "title": "Ask in your own words", "body": "English, Azerbaijani, or Russian — full sentences are welcome." },
+        { "title": "We read every document", "body": "The AI searches across the whole archive, not just titles." },
+        { "title": "You get the answer with sources", "body": "Each claim links back to the exact document and page." }
+      ],
+      "tryLabel": "Try asking",
+      "examples": [
+        "Which contracts mention Aliyev?",
+        "Summarise the 2024 procurement reports",
+        "What permits expire this year?",
+        "Find invoices from Acme Corp over $10,000"
+      ],
+      "benefitsLabel": "Why use it",
+      "benefits": [
+        "Skim ten years of PDFs in seconds — no opening files one by one.",
+        "Every answer is grounded in a real document — no made-up facts.",
+        "Ask the way you'd ask a colleague — no keyword syntax to learn."
+      ]
+    },
     "transcript": {
       "youLabel": "You",
       "archiveLabel": "Archive"

@@ -15,7 +15,7 @@
     "folders": "Qovluqlar",
     "fullTextSearch": "Sənədlərdə mətn axtarışı",
     "recentUploads": "Son yüklənənlər",
-    "aiChat": "AI söhbəti",
+    "aiChat": "AI",
     "usersRoles": "İstifadəçilər və rollar",
     "editFolders": "Qovluqları redaktə et",
     "categories": "Kateqoriyalar",
@@ -30,7 +30,7 @@
     "logout": "Çıxış",
     "documents": "Sənədlər",
     "search": "Axtarış",
-    "chat": "AI chat",
+    "chat": "AI",
     "admin": "Admin"
   },
   "roles": {
@@ -201,22 +201,45 @@
       "Əliyev",
       "oktyabr hesab-faktura"
     ],
-    "chatHint": "Təbii dildə suallar üçün AI chatdan istifadə edin",
+    "chatHint": "Təbii dildə suallar üçün AI-dan istifadə edin",
     "noMatchHeading": "Arxivdə uyğun nəticə yoxdur.",
     "noMatchBody": "Heç bir indeksli sənəddə <q></q> tapılmadı. Başqa ifadə yazın və ya filtri silin."
   },
   "chat": {
-    "title": "AI chat",
-    "newChat": "Yeni chat",
+    "title": "AI",
+    "newChat": "Yeni söhbət",
     "placeholder": "Arxivə sual ver — istinadlar daxil",
-    "sessions": "Chat tarixçəsi",
-    "noSessions": "Hələ chat yoxdur.",
+    "sessions": "Söhbət tarixçəsi",
+    "noSessions": "Hələ söhbət yoxdur.",
     "thinking": "Düşünür...",
     "sources": "Mənbələr",
-    "deleteSession": "Chatı sil",
+    "deleteSession": "Söhbəti sil",
     "kbdHint": "Enter göndər · Shift Enter yeni sətir",
     "errorOverloaded": "AI xidməti yüklənib. Bir az sonra yenidən cəhd edin.",
     "errorApi": "AI xidmətində xəta baş verdi.",
+    "welcome": {
+      "heading": "Arxivdən soruş.",
+      "subhead": "Hər cavab istinad olunan sənədə və səhifəyə işarə edir.",
+      "stepsLabel": "Necə işləyir",
+      "steps": [
+        { "title": "Öz sözlərinizlə soruşun", "body": "Azərbaycanca, ingiliscə və ya rusca — tam cümlələr olar." },
+        { "title": "Bütün sənədləri oxuyuruq", "body": "AI yalnız başlıqları deyil, bütün arxivin daxilini axtarır." },
+        { "title": "Mənbələrlə cavab alın", "body": "Hər iddia dəqiq sənəd və səhifəyə keçidlə təsdiqlənir." }
+      ],
+      "tryLabel": "Soruşmağa cəhd edin",
+      "examples": [
+        "Hansı müqavilələrdə Əliyev adı çəkilir?",
+        "2024 satınalma hesabatlarını qısaca xülasə et",
+        "Bu il hansı icazələrin müddəti bitir?",
+        "Acme Corp-dan 10 000 AZN-dən çox fakturaları tap"
+      ],
+      "benefitsLabel": "Niyə istifadə etmək lazımdır",
+      "benefits": [
+        "On illik PDF-ləri saniyələrə baxın — faylları bir-bir açmağa ehtiyac yoxdur.",
+        "Hər cavab real sənədə əsaslanır — uydurma faktlar yoxdur.",
+        "Həmkarınızdan soruşduğunuz kimi soruşun — açar söz qaydası yoxdur."
+      ]
+    },
     "transcript": {
       "youLabel": "Siz",
       "archiveLabel": "Arxiv"

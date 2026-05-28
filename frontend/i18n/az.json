@@ -13,7 +13,7 @@
     "allDocuments": "Bütün sənədlər",
     "inbox": "Daxil olanlar",
     "folders": "Qovluqlar",
-    "fullTextSearch": "Mətn axtarışı",
+    "fullTextSearch": "Sənədlərdə mətn axtarışı",
     "recentUploads": "Son yüklənənlər",
     "aiChat": "AI söhbəti",
     "usersRoles": "İstifadəçilər və rollar",
@@ -47,7 +47,7 @@
     "registerPrompt": "Artıq hesabınız var?",
     "signInLink": "Daxil olun",
     "createLink": "Yaradın",
-    "heroLine1": "Hər səhifə.",
+    "heroLine1": "Hər sənəd.",
     "heroLine2": "Hər il.",
     "heroLine3": "Arxivdə.",
     "heroSubtitle": "Təşkilatınızın axtarıla bilən, çoxdilli arxivi — indekslənmiş, istinadlı və heç vaxt itməyən.",
@@ -55,7 +55,7 @@
     "loginSubtitle": "Davam etmək üçün daxil olun.",
     "registerHeading": "Giriş yarat.",
     "registerSubtitle": "Arxivə töhfə vermək üçün hesab yaradın.",
-    "emailPlaceholder": "siz@test.az",
+    "emailPlaceholder": "siz@docai.az",
     "continue": "Davam et",
     "enter": "Arxivə daxil ol",
     "tagline": "DocAI",
@@ -80,8 +80,8 @@
     "verifyDifferentEmailPrompt": "Səhv e-poçt?",
     "verifyDifferentEmail": "Başqa e-poçt istifadə et",
     "forgotPassword": {
-      "link": "Şifrəni unutmusunuz?",
-      "heading": "Şifrəni unutmusunuz?",
+      "link": "Şifrəni unutmusunuzmu?",
+      "heading": "Şifrəni unutmusunuzmu?",
       "subtitle": "E-poçtunuzu daxil edin — sıfırlamaq üçün 6 rəqəmli kod göndərəcəyik.",
       "submit": "Sıfırlama kodu göndər",
       "backPrompt": "Yadınıza düşdü?",
@@ -182,20 +182,28 @@
     "allFolders": "Bütün qovluqlar"
   },
   "search": {
-    "title": "Mətn axtarışı",
-    "placeholder": "Məna və ya açar söz ilə axtarın...",
+    "title": "Sənədlərdə mətn axtarışı",
+    "heading": "Axtarış Vəsaiti",
+    "subheading": "Arxivdəki istənilən sənədin içinə baxın.",
+    "placeholder": "Ad, ifadə, yarımca xatırladığınız tarix…",
     "filters": "Filtrlər",
     "noResults": "Nəticə tapılmadı.",
     "relevance": "Uyğunluq",
-    "page": "Səhifə",
-    "instructionsTitle": "Necə axtarmaq olar",
-    "tips": {
-      "keywords": "Sənəddən xatırladığınız sözləri yazın — başlıq, adlar, tarixlər və ya gördüyünüz ifadə.",
-      "phrasing": "Tam cümlə də yaza bilərsiniz. Axtarış mənanı başa düşür, sadəcə hərfi uyğunluqları yox.",
-      "filters": "Yuxarıdakı filtrlərdən şöbə, növ və ya ilə görə daraltmaq üçün istifadə edin.",
-      "open": "Sənədi açmaq və vurğulanmış səhifəni görmək üçün nəticələrdən birini seçin.",
-      "aiChat": "Təbii dildə suallar üçün («X müqaviləsini kim imzalayıb?») AI chatdan istifadə edin."
-    }
+    "page": "səh.",
+    "focusHint": "fokuslamaq üçün",
+    "summary": "{count, plural, one {1 nəticə} other {# nəticə}} · {ms} ms",
+    "summaryNone": "Heç nə tapılmadı",
+    "emptyHeading": "Axtarışa başlayın.",
+    "emptyBody": "Ad, tarix, şəxs və ya sənəddən xatırladığınız ifadə ilə axtarın. Uyğunluqlar vurğulanır və mənbə səhifəsinə keçid verir.",
+    "tryLabel": "Sınayın",
+    "examples": [
+      "xidmət müqaviləsi 2024",
+      "Əliyev",
+      "oktyabr hesab-faktura"
+    ],
+    "chatHint": "Təbii dildə suallar üçün AI chatdan istifadə edin",
+    "noMatchHeading": "Arxivdə uyğun nəticə yoxdur.",
+    "noMatchBody": "Heç bir indeksli sənəddə <q></q> tapılmadı. Başqa ifadə yazın və ya filtri silin."
   },
   "chat": {
     "title": "AI chat",

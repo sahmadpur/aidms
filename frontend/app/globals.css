@@ -219,6 +219,30 @@
   [data-theme="dark"] .bg-red-100 { background-color: rgb(70 26 28 / var(--tw-bg-opacity, 1)); }
   [data-theme="dark"] .hover\:text-red-500:hover { color: rgb(232 134 130); }
   [data-theme="dark"] .hover\:bg-red-50:hover { background-color: rgb(64 22 22); }
+
+  /* --------------------------------------------------------------------
+   * Chrome / WebKit autofill — by default the browser paints its own
+   * background and text color, which clashes with our cream auth paper
+   * and dark-theme surfaces (text rendered white-on-cream is invisible).
+   * Use a long inset box-shadow to mask the yellow background and force
+   * the fill color back to our ink token. Transition delay keeps the
+   * override sticky as Chrome re-applies on focus changes.
+   * ------------------------------------------------------------------ */
+  input:-webkit-autofill,
+  input:-webkit-autofill:hover,
+  input:-webkit-autofill:focus,
+  input:-webkit-autofill:active,
+  textarea:-webkit-autofill,
+  textarea:-webkit-autofill:hover,
+  textarea:-webkit-autofill:focus,
+  select:-webkit-autofill,
+  select:-webkit-autofill:hover,
+  select:-webkit-autofill:focus {
+    -webkit-text-fill-color: rgb(var(--ink));
+    -webkit-box-shadow: 0 0 0 1000px rgb(var(--paper)) inset;
+    caret-color: rgb(var(--ink));
+    transition: background-color 5000s ease-in-out 0s;
+  }
 }
 
 @layer utilities {

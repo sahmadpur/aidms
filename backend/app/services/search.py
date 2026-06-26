@@ -19,7 +19,14 @@ RRF_K = 60  # RRF constant — controls how steeply top ranks are rewarded
 # hit. Without this floor the semantic leg always returns its 20 nearest
 # chunks regardless of distance, so a query whose words appear in no document
 # (FTS returns nothing) would still surface unrelated chunks via RRF.
-MIN_SEMANTIC_SIMILARITY = 0.3
+#
+# Calibrated for text-embedding-3-small (see embeddings.EMBED_MODEL), where
+# truly relevant passages score ~0.40+, loosely-related ~0.30-0.42, and
+# unrelated <0.30. 0.4 leans toward precision: it drops the "loosely related"
+# band that was padding result lists with off-topic hits. Lower it toward 0.30
+# if searches start missing documents you expect (recall); raise it for stricter
+# matching.
+MIN_SEMANTIC_SIMILARITY = 0.4
 
 
 async def hybrid_search(

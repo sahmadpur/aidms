@@ -15,6 +15,12 @@ from app.services.embeddings import embed_texts
 
 RRF_K = 60  # RRF constant — controls how steeply top ranks are rewarded
 
+# Minimum cosine similarity (1 - distance) for a chunk to count as a semantic
+# hit. Without this floor the semantic leg always returns its 20 nearest
+# chunks regardless of distance, so a query whose words appear in no document
+# (FTS returns nothing) would still surface unrelated chunks via RRF.
+MIN_SEMANTIC_SIMILARITY = 0.3
+
 
 async def hybrid_search(
     db: AsyncSession,
@@ -88,6 +94,7 @@ async def hybrid_search(
         FROM document_chunks dc
         JOIN documents d ON d.id = dc.document_id
         WHERE {filter_sql} {tag_clause}
+          AND (1 - (dc.embedding <=> '{embedding_str}'::vector)) >= {MIN_SEMANTIC_SIMILARITY}
         ORDER BY dc.embedding <=> '{embedding_str}'::vector
         LIMIT 20
     """)

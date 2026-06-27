@@ -13,7 +13,7 @@ import { useSearch, type SearchFilters } from "@/lib/useSearch";
 
 const fetcher = (url: string) => api.get(url).then((r) => r.data);
 
-const LANGUAGES = ["az", "ru", "en"] as const;
+const LANGUAGES = ["az", "ru", "en", "uz"] as const;
 
 export default function SearchPage() {
   const t = useTranslations();

@@ -12,7 +12,7 @@ import { useTheme, type ThemePref } from "@/components/theme/ThemeProvider";
 
 type DraftForm = {
   full_name: string;
-  language_preference: "az" | "ru" | "en";
+  language_preference: "az" | "ru" | "en" | "uz";
   notify_mentions: boolean;
   notify_doc_approvals: boolean;
   notify_ocr_complete: boolean;
@@ -218,6 +218,7 @@ export default function SettingsPage() {
                 <option value="en">English</option>
                 <option value="az">Azərbaycan</option>
                 <option value="ru">Русский</option>
+                <option value="uz">O‘zbekcha</option>
               </select>
             </Field>
           </Section>

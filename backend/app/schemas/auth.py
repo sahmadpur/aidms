@@ -21,8 +21,8 @@ class RegisterRequest(BaseModel):
     @field_validator("language_preference")
     @classmethod
     def valid_language(cls, v: str) -> str:
-        if v not in ("az", "ru", "en"):
-            raise ValueError("Language must be one of: az, ru, en")
+        if v not in ("az", "ru", "en", "uz"):
+            raise ValueError("Language must be one of: az, ru, en, uz")
         return v
 
 

@@ -8,7 +8,7 @@ export interface Me {
   email: string;
   full_name: string;
   role: "admin" | "user";
-  language_preference: "az" | "ru" | "en";
+  language_preference: "az" | "ru" | "en" | "uz";
   is_active: boolean;
   avatar_url: string | null;
   notify_mentions: boolean;

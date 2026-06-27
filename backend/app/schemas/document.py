@@ -124,8 +124,8 @@ class DocumentUpdateRequest(BaseModel):
     @field_validator("language")
     @classmethod
     def valid_language(cls, v: Optional[str]) -> Optional[str]:
-        if v is not None and v not in ("az", "ru", "en"):
-            raise ValueError("Language must be one of: az, ru, en")
+        if v is not None and v not in ("az", "ru", "en", "uz"):
+            raise ValueError("Language must be one of: az, ru, en, uz")
         return v
 
     @field_validator("doc_type")

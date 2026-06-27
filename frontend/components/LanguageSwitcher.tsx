@@ -7,6 +7,7 @@ const LOCALES = [
   { value: "en", label: "EN" },
   { value: "az", label: "AZ" },
   { value: "ru", label: "RU" },
+  { value: "uz", label: "UZ" },
 ];
 
 export default function LanguageSwitcher() {

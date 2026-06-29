@@ -320,6 +320,7 @@ function AuthLanguageSwitcher() {
     { v: "en", label: "EN" },
     { v: "az", label: "AZ" },
     { v: "ru", label: "RU" },
+    { v: "uz", label: "UZ" },
   ];
 
   function switchLocale(v: string) {

@@ -1,0 +1,60 @@
+# Overlay for the second, independent instance served at uz.docai.az
+# Run with a distinct project name so its containers/volumes never collide
+# with the docai.az instance:
+#
+#   docker compose -p docai-uz -f docker-compose.yml -f docker-compose.uz.yml up -d --build
+#
+# (deploy-uz.sh wraps this.) Ports are reset — routing is host-based via Traefik
+# on the external `proxy` network, exactly like docker-compose.prod.yml.
+services:
+
+  postgres:
+    ports: !reset []
+
+  redis:
+    ports: !reset []
+
+  minio:
+    ports: !reset []
+
+  api:
+    ports: !reset []
+    environment:
+      CORS_ORIGINS: '["https://uz.docai.az"]'
+      FRONTEND_BASE_URL: https://uz.docai.az
+    networks:
+      - default
+      - proxy
+    labels:
+      - traefik.enable=true
+      - traefik.docker.network=proxy
+      - traefik.http.routers.dms-uz-api.rule=Host(`uz-api.docai.az`)
+      - traefik.http.routers.dms-uz-api.entrypoints=web
+      - traefik.http.services.dms-uz-api.loadbalancer.server.port=8000
+
+  worker:
+    networks:
+      - default
+
+  frontend:
+    build:
+      args:
+        NEXT_PUBLIC_API_URL: https://uz-api.docai.az
+    environment:
+      NEXT_PUBLIC_API_URL: https://uz-api.docai.az
+      DEFAULT_LOCALE: uz
+      HOSTNAME: 0.0.0.0
+    ports: !reset []
+    networks:
+      - default
+      - proxy
+    labels:
+      - traefik.enable=true
+      - traefik.docker.network=proxy
+      - traefik.http.routers.dms-uz.rule=Host(`uz.docai.az`)
+      - traefik.http.routers.dms-uz.entrypoints=web
+      - traefik.http.services.dms-uz.loadbalancer.server.port=3000
+
+networks:
+  proxy:
+    external: true

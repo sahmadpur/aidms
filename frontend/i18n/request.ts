@@ -3,9 +3,12 @@ import { cookies } from "next/headers";
 
 export default getRequestConfig(async () => {
   const cookieStore = cookies();
-  const locale = cookieStore.get("locale")?.value ?? "en";
   const validLocales = ["en", "az", "ru", "uz"];
-  const resolvedLocale = validLocales.includes(locale) ? locale : "en";
+  const fallbackLocale = validLocales.includes(process.env.DEFAULT_LOCALE ?? "")
+    ? (process.env.DEFAULT_LOCALE as string)
+    : "en";
+  const locale = cookieStore.get("locale")?.value ?? fallbackLocale;
+  const resolvedLocale = validLocales.includes(locale) ? locale : fallbackLocale;
 
   return {
     locale: resolvedLocale,
